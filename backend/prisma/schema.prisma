@@ -1,0 +1,303 @@
+// Generador y DataSource
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- MODELOS DE GESTIÓN ---
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  password      String
+  name          String
+  role          Role           @default(USER)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  
+  sales         Sale[]
+  purchases     Purchase[]
+  cashRegisters CashRegister[]
+  expenses      Expense[]
+  isActive Boolean @default(true)
+}
+
+model Category {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  products  Product[]
+  createdAt DateTime  @default(now())
+  isActive Boolean @default(true)
+}
+
+model Brand {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  products  Product[]
+  createdAt DateTime  @default(now())
+  isActive Boolean @default(true)
+}
+
+model Size {
+  id        String           @id @default(uuid())
+  name      String           @unique
+  variants  ProductVariant[]
+}
+
+model Color {
+  id        String           @id @default(uuid())
+  name      String           @unique
+  hex       String           @unique
+  variants  ProductVariant[]
+}
+
+// --- ENTIDAD PRINCIPAL ---
+
+model Product {
+  id          String           @id @default(uuid())
+  name        String
+  description String?
+  sku         String           @unique
+  price       Float
+  imageUrl    String?
+  isActive    Boolean          @default(true)
+  
+  categoryId  String
+  category    Category         @relation(fields: [categoryId], references: [id])
+  
+  brandId     String
+  brand       Brand            @relation(fields: [brandId], references: [id])
+  
+  variants    ProductVariant[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([categoryId, brandId])
+}
+
+model ProductVariant {
+  id         String   @id @default(uuid())
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  sizeId     String
+  size       Size     @relation(fields: [sizeId], references: [id])
+  
+  colorId    String
+  color      Color    @relation(fields: [colorId], references: [id])
+  
+  stock      Int      @default(0)
+  minStock   Int      @default(1)
+  
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relaciones para ventas y compras
+  saleItems     SaleItem[]
+  purchaseItems PurchaseItem[]
+
+  @@unique([productId, sizeId, colorId])
+}
+
+// --- ENTIDADES FINANCIERAS Y OPERATIVAS ---
+
+model Client {
+  id        String   @id @default(uuid())
+  name      String
+  email     String?  @unique
+  phone     String?
+  document  String?  // Cédula o RIF
+  address   String?
+   balance   Float    @default(0)
+  createdAt DateTime @default(now())
+  sales     Sale[]
+}
+
+model Vendor {
+  id        String    @id @default(uuid())
+  name      String
+  contact   String?
+  phone     String?
+  email     String?   @unique
+  createdAt DateTime  @default(now())
+  purchases Purchase[]
+}
+
+model CashRegister {
+  id            String     @id @default(uuid())
+  openingAmount Float      @default(0)
+  closingAmount Float?
+  depositAmount Float?
+  manualInflows  Float    @default(0)
+  manualOutflows Float    @default(0)
+  status        CashStatus @default(OPEN)
+  openedAt      DateTime   @default(now())
+  closedAt      DateTime?
+  
+  userId        String
+  user          User       @relation(fields: [userId], references: [id])
+  
+  depositAccountId String?
+  depositAccount   Account? @relation("TransfersFromAccount", fields: [depositAccountId], references: [id])
+  
+  sales         Sale[]
+  purchases     Purchase[]
+}
+
+model Sale {
+  id            String   @id @default(uuid())
+  totalAmount   Float
+  receivedAmount Float?
+  change        Float?
+  reference     String?
+  paymentMethod PaymentMethod
+  createdAt     DateTime @default(now())
+  
+  clientId      String?  
+  client        Client?  @relation(fields: [clientId], references: [id])
+  
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  
+  cashRegisterId String
+  cashRegister   CashRegister @relation(fields: [cashRegisterId], references: [id])
+  
+  items         SaleItem[]
+}
+
+model SaleItem {
+  id              String   @id @default(uuid())
+  saleId          String
+  sale            Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  
+  productVariantId String
+  productVariant  ProductVariant @relation(fields: [productVariantId], references: [id])
+  
+  quantity        Int
+  unitPrice       Float
+  subtotal        Float
+}
+
+model Purchase {
+  id            String   @id @default(uuid())
+  totalAmount   Float
+  createdAt     DateTime @default(now())
+  
+  vendorId      String
+  vendor        Vendor   @relation(fields: [vendorId], references: [id])
+  
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  
+  cashRegisterId String?
+  cashRegister   CashRegister? @relation(fields: [cashRegisterId], references: [id])
+  
+  accountId     String?  // <-- NUEVO
+  account       Account? @relation(fields: [accountId], references: [id]) // <-- NUEVO
+  
+  items         PurchaseItem[]
+}
+
+model PurchaseItem {
+  id              String   @id @default(uuid())
+  purchaseId      String
+  purchase        Purchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  
+  productVariantId String
+  productVariant  ProductVariant @relation(fields: [productVariantId], references: [id])
+  
+  quantity        Int
+  unitCost        Float
+  subtotal        Float
+}
+
+// --- MÓDULO DE TESORERÍA Y GASTOS ---
+
+model Account {
+  id        String      @id @default(uuid())
+  name      String      @unique
+  type      AccountType
+  balance   Float       @default(0)
+  createdAt DateTime    @default(now())
+  
+  expenses      Expense[]
+  cashDeposits  CashRegister[] @relation("TransfersFromAccount")
+  transactions  Transaction[]
+  purchases     Purchase[]      // <-- AÑADE ESTA LÍNEA
+}
+
+model ExpenseCategory {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  expenses  Expense[]
+}
+
+model Expense {
+  id         String   @id @default(uuid())
+  amount     Float
+  concept    String
+  date       DateTime @default(now())
+  
+  accountId  String?
+  account    Account?  @relation(fields: [accountId], references: [id])
+  
+  categoryId String?
+  category   ExpenseCategory? @relation(fields: [categoryId], references: [id])
+  
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+}
+model Transaction {
+  id        String   @id @default(uuid())
+  amount    Float
+  type      String   // "DEPOSIT", "EXPENSE", etc.
+  concept   String
+  date      DateTime @default(now())
+  
+  accountId String
+  account   Account  @relation(fields: [accountId], references: [id])
+}
+
+model Setting {
+  id            Int      @id @default(1)
+  companyName   String   @default("Modexastock")
+  taxId         String   @default("NIT: 0000000-0")
+  address       String   @default("Dirección de la tienda")
+  phone         String   @default("+00 000 000 0000")
+  currencySymbol String  @default("$")
+  ticketFooter  String   @default("¡Gracias por su compra! Vuelva pronto.")
+  quoteFooter   String   @default("Cotización válida por 3 días. Precios sujetos a cambios.")
+  retailMargin    Float  @default(50)
+  wholesaleMargin Float  @default(20)
+  updatedAt     DateTime @updatedAt
+}
+
+// --- ENUMS ---
+
+enum Role {
+  ADMIN
+  MANAGER
+  USER
+}
+
+enum CashStatus {
+  OPEN
+  CLOSED
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  TRANSFER
+  CREDIT
+}
+
+enum AccountType {
+  CASH_SAFE
+  BANK
+  CASH_REGISTER
+}
