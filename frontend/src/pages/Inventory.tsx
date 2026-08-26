@@ -42,19 +42,21 @@ export default function Inventory() {
 
       let matchesStock = true;
       if (stockFilter === 'in') {
-        // En stock: Total > 0 y ninguna variante está baja
         matchesStock = totalStock > 0 && !hasLowStock;
       } else if (stockFilter === 'low') {
-        // Bajo Stock (Alertas): Cualquier variante que esté baja o agotada (stock <= minStock)
         matchesStock = hasLowStock;
       } else if (stockFilter === 'out') {
-        // Agotado: Todas las variantes en 0
         matchesStock = totalStock === 0;
       }
 
       return matchesSearch && matchesCategory && matchesBrand && matchesStock;
     });
   }, [products, searchQuery, categoryFilter, brandFilter, stockFilter]);
+
+  // NUEVO: Calcular total de variantes de los productos filtrados
+  const totalVariants = useMemo(() => {
+    return filteredProducts.reduce((acc, p) => acc + p.variants.length, 0);
+  }, [filteredProducts]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -89,7 +91,6 @@ export default function Inventory() {
           </p>
         </div>
         <div className="flex items-center gap-4">
-          {/* Selector de Vista (Segmented Control) */}
           <div className="flex bg-slate-100 dark:bg-slate-800 rounded-lg p-1 border border-slate-200 dark:border-slate-700">
             <button
               onClick={() => setViewMode('general')}
@@ -122,7 +123,6 @@ export default function Inventory() {
         </div>
       </div>
 
-      {/* Filtros */}
       <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 grid grid-cols-1 md:grid-cols-5 gap-4">
         <input
           type="text"
@@ -176,7 +176,6 @@ export default function Inventory() {
         </div>
       </div>
 
-      {/* --- VISTA TARJETAS --- */}
       {viewMode === 'cards' && (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           {loading ? (
@@ -232,7 +231,6 @@ export default function Inventory() {
         </div>
       )}
 
-      {/* --- VISTAS DE TABLA (GENERAL Y DETALLADA) --- */}
       {(viewMode === 'general' || viewMode === 'detailed') && (
         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden">
           <div className="overflow-x-auto">
@@ -329,7 +327,6 @@ export default function Inventory() {
                           </td>
                         </tr>
 
-                        {/* Filas expandibles (Solo vista detallada) */}
                         {viewMode === 'detailed' &&
                           isExpanded &&
                           product.variants.map((v: Variant) => (
@@ -366,13 +363,14 @@ export default function Inventory() {
             </table>
           </div>
 
-          {/* Paginación solo para tablas */}
+          {/* Enviamos el extraInfo con el total de variantes */}
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
             totalItems={filteredProducts.length}
             itemsPerPage={itemsPerPage}
             onPageChange={setCurrentPage}
+            extraInfo={`${totalVariants} variantes`}
           />
         </div>
       )}

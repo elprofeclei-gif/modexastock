@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   Bell,
   Menu as MenuIcon,
+  X,
 } from 'lucide-react';
 import Clock from './Clock';
 
@@ -23,13 +24,20 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [isDark, setIsDark] = useState(false);
-  const { logout, user } = useAuth(); // user ya está tipado y parseado
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // NUEVO: Estado para menú móvil
+  const { logout, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
     setIsDark(document.documentElement.classList.contains('dark'));
   }, []);
+
+  // Cerrar menú móvil al cambiar de ruta
+  useEffect(() => {
+    setMobileMenuOpen(false);
+    setOpenDropdown(null);
+  }, [location.pathname]);
 
   const toggleTheme = () => {
     const newIsDark = !isDark;
@@ -48,6 +56,7 @@ export default function Layout({ children }: LayoutProps) {
     navigate('/login');
   };
 
+  const isActive = (path: string) => location.pathname === path;
   const getInitials = (name?: string) =>
     name
       ?.split(' ')
@@ -87,12 +96,28 @@ export default function Layout({ children }: LayoutProps) {
         : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'
     }`;
 
+  // Filtrar menú para móvil (aplanar submenús para que sea más fácil navegar)
+  const mobileMenu = [
+    ...menu.filter((m) => !m.children && user?.role && m.roles.includes(user.role)),
+    ...menu.flatMap((m) =>
+      m.children ? m.children.filter((c) => user?.role && c.roles.includes(user.role)) : []
+    ),
+  ];
+
   return (
-    <div className="h-screen flex flex-col bg-slate-50 dark:bg-slate-900 overflow-hidden">
-      <nav className="bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700 z-40 shrink-0">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col">
+      <nav className="bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700 sticky top-0 z-40">
         <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
-            <div className="flex items-center space-x-8">
+            <div className="flex items-center space-x-4 md:space-x-8">
+              {/* Botón Hamburguesa para Móvil */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden text-slate-600 dark:text-slate-300"
+              >
+                {mobileMenuOpen ? <X size={24} /> : <MenuIcon size={24} />}
+              </button>
+
               <Link
                 to="/"
                 className="flex items-center space-x-2 text-slate-900 dark:text-white font-bold text-lg"
@@ -100,9 +125,10 @@ export default function Layout({ children }: LayoutProps) {
                 <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white text-sm">
                   M
                 </div>
-                <span>Modexastock</span>
+                <span className="hidden sm:inline">Modexastock</span>
               </Link>
 
+              {/* Menú Escritorio */}
               <div className="hidden md:flex items-center space-x-1">
                 {user &&
                   menu.map((item) => {
@@ -157,18 +183,16 @@ export default function Layout({ children }: LayoutProps) {
               </div>
             </div>
 
-            <div className="flex items-center space-x-6">
+            <div className="flex items-center space-x-4 md:space-x-6">
               <Clock />
 
-              {/* --- AVATAR PREMIUM --- */}
               <div className="relative">
                 <button
                   onClick={() => setOpenDropdown(openDropdown === 'userPanel' ? null : 'userPanel')}
                   className="flex items-center space-x-3 p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
                 >
-                  <div className="relative w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold text-sm">
+                  <div className="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold text-sm">
                     {getInitials(user?.name)}
-                    <span className="absolute bottom-0 right-0 block h-2.5 w-2.5 rounded-full bg-green-500 ring-2 ring-white dark:ring-slate-800"></span>
                   </div>
                   <div className="hidden sm:block text-left">
                     <p className="text-sm font-medium text-slate-900 dark:text-white leading-none">
@@ -187,7 +211,6 @@ export default function Layout({ children }: LayoutProps) {
                   <>
                     <div className="fixed inset-0 z-10" onClick={() => setOpenDropdown(null)}></div>
                     <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 z-20 py-2 overflow-hidden">
-                      {/* Cabecera */}
                       <div className="px-4 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center space-x-3">
                         <div className="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-lg ring-4 ring-indigo-50 dark:ring-indigo-500/10">
                           {getInitials(user?.name)}
@@ -206,7 +229,6 @@ export default function Layout({ children }: LayoutProps) {
                         </div>
                       </div>
 
-                      {/* Cuenta */}
                       <div className="py-2">
                         <NavLink
                           to="/profile"
@@ -217,7 +239,6 @@ export default function Layout({ children }: LayoutProps) {
                         </NavLink>
                       </div>
 
-                      {/* Administración */}
                       {user && (user.role === 'ADMIN' || user.role === 'MANAGER') && (
                         <div className="py-2 border-t border-slate-100 dark:border-slate-700">
                           <p className="px-4 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
@@ -241,7 +262,6 @@ export default function Layout({ children }: LayoutProps) {
                         </div>
                       )}
 
-                      {/* Sistema (Admin) */}
                       {user && user.role === 'ADMIN' && (
                         <div className="py-2 border-t border-slate-100 dark:border-slate-700">
                           <NavLink
@@ -254,7 +274,6 @@ export default function Layout({ children }: LayoutProps) {
                         </div>
                       )}
 
-                      {/* Apariencia */}
                       <div className="py-2 border-t border-slate-100 dark:border-slate-700">
                         <button
                           onClick={toggleTheme}
@@ -278,7 +297,6 @@ export default function Layout({ children }: LayoutProps) {
                         </button>
                       </div>
 
-                      {/* Logout */}
                       <div className="py-2 border-t border-slate-100 dark:border-slate-700">
                         <button
                           onClick={handleLogout}
@@ -294,9 +312,32 @@ export default function Layout({ children }: LayoutProps) {
             </div>
           </div>
         </div>
+
+        {/* Menú Móvil Desplegable */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800">
+            <div className="px-2 pt-2 pb-3 space-y-1">
+              {mobileMenu.map((item) => (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  className={({ isActive }) =>
+                    `block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                      isActive
+                        ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400'
+                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'
+                    }`
+                  }
+                >
+                  {item.name}
+                </NavLink>
+              ))}
+            </div>
+          </div>
+        )}
       </nav>
 
-      <main className="flex-1 w-full max-w-screen-2xl mx-auto overflow-y-auto py-8 px-4 sm:px-6 lg:px-8">
+      <main className="flex-1 w-full max-w-screen-2xl mx-auto py-8 px-4 sm:px-6 lg:px-8 overflow-y-auto">
         {children}
       </main>
     </div>

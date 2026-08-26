@@ -5,22 +5,46 @@ export interface CashierData {
   name: string;
   totalSales: number;
   cashInDrawer: number;
+  startTime: string;
+}
+
+export interface TopProduct {
+  name: string;
+  imageUrl: string | null;
+  quantity: number;
+}
+
+export interface LowStockVariant {
+  id: string;
+  name: string;
+  size: string;
+  color: string;
+  stock: number;
+  severity: 'critical' | 'low';
 }
 
 export interface DashboardStats {
   todaySalesTotal: number;
   todaySalesCount: number;
+  salesVariation: number;
+  avgTicket: number;
   openCashRegister: number;
   bankBalance: number;
-  inventoryValue: number;
-  lowStockVariants: number;
-  cashiersData: CashierData[];
-  totalProducts: number;
-  totalClients: number;
-  accountsReceivable: number;
   todayExpenses: number;
-  activeCashiers: number; // AÑADIDO
-  totalUsers: number;     // AÑADIDO
+
+  totalProducts: number;
+  totalVariants: number;
+  inventoryValue: number;
+  accountsReceivable: number;
+  totalClients: number;
+  totalUsers: number;
+  activeCashiers: number;
+
+  cashiersData: CashierData[];
+  topProducts: TopProduct[];
+  lowStockVariants: LowStockVariant[];
+  criticalCount: number;
+  lowCount: number;
 }
 
 export const useReports = () => {
