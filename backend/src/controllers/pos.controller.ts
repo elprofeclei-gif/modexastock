@@ -6,24 +6,36 @@ import bcrypt from 'bcryptjs';
 // 1. Abrir Caja (Forzando el saldo del último cierre)
 export const openCashRegister = async (req: CustomRequest, res: Response) => {
   try {
+    const { physicalBoxId, openingAmount } = req.body;
     const userId = req.user?.id!;
+
+    const box = await prisma.physicalBox.findUnique({ where: { id: physicalBoxId } });
+    if (!box)
+      return res.status(404).json({ status: 'error', message: 'Caja física no encontrada' });
 
     const openRegister = await prisma.cashRegister.findFirst({ where: { userId, status: 'OPEN' } });
     if (openRegister)
       return res.status(400).json({ status: 'error', message: 'Ya tienes una caja abierta' });
 
-    const lastClosedRegister = await prisma.cashRegister.findFirst({
-      where: { userId, status: 'CLOSED' },
-      orderBy: { closedAt: 'desc' },
-    });
+    // El monto inicial SIEMPRE será el que el cajero cuente físicamente
+    const realOpeningAmount = parseFloat(openingAmount) || 0;
 
-    const forcedOpeningAmount =
-      lastClosedRegister && lastClosedRegister.closingAmount !== null
-        ? lastClosedRegister.closingAmount
-        : parseFloat(req.body.openingAmount) || 0;
+    // Si el monto contado es diferente al saldo del sistema, actualizamos la caja física
+    if (realOpeningAmount !== box.balance) {
+      await prisma.physicalBox.update({
+        where: { id: physicalBoxId },
+        data: { balance: realOpeningAmount },
+      });
+      // Opcional: Aquí podrías crear un registro de "Ajuste de Caja" si quieres auditoría extrema,
+      // pero actualizar el saldo es suficiente para que el cajero no herede el faltante.
+    }
 
     const newRegister = await prisma.cashRegister.create({
-      data: { openingAmount: forcedOpeningAmount, userId },
+      data: {
+        openingAmount: realOpeningAmount,
+        userId,
+        physicalBoxId: box.id,
+      },
     });
 
     return res.status(201).json({ status: 'success', data: newRegister });
@@ -81,7 +93,7 @@ export const getCurrentCashRegister = async (req: CustomRequest, res: Response) 
   }
 };
 
-// 3. Cerrar Caja (Arqueo)
+//3. Cerrar Caja (Arqueo con Caja Física y Descuadre al Usuario)
 export const closeCashRegister = async (req: CustomRequest, res: Response) => {
   try {
     const { countedAmount, depositAmount, depositAccountId } = req.body;
@@ -95,8 +107,9 @@ export const closeCashRegister = async (req: CustomRequest, res: Response) => {
       },
     });
 
-    if (!cashRegister)
+    if (!cashRegister) {
       return res.status(400).json({ status: 'error', message: 'No hay caja abierta para cerrar' });
+    }
 
     const cashSalesTotal = cashRegister.sales.reduce((acc, sale) => acc + sale.totalAmount, 0);
     const cashPurchasesTotal = cashRegister.purchases.reduce(
@@ -111,20 +124,16 @@ export const closeCashRegister = async (req: CustomRequest, res: Response) => {
       (cashRegister.manualInflows || 0) -
       (cashRegister.manualOutflows || 0);
     const realAmount = parseFloat(countedAmount) || 0;
+
+    // EL DESCUADRE (Faltante o Sobrante)
     const difference = realAmount - expectedAmount;
 
     const requestedDeposit = parseFloat(depositAmount) || 0;
-    let actualDeposit = requestedDeposit;
-    let amountPaidToCoverShortage = 0;
-
-    if (difference < 0) {
-      amountPaidToCoverShortage = Math.min(requestedDeposit, Math.abs(difference));
-      actualDeposit = requestedDeposit - amountPaidToCoverShortage;
-    }
-
-    const finalClosingAmount = realAmount - requestedDeposit;
+    const actualDeposit = requestedDeposit;
+    const finalClosingAmount = realAmount - actualDeposit;
 
     const result = await prisma.$transaction(async (tx) => {
+      // 1. Cerrar el turno
       const closedRegister = await tx.cashRegister.update({
         where: { id: cashRegister.id },
         data: {
@@ -136,11 +145,29 @@ export const closeCashRegister = async (req: CustomRequest, res: Response) => {
         },
       });
 
+      // 2. Actualizar el saldo de la Caja Física con lo que quedó en el cajón
+      if (cashRegister.physicalBoxId) {
+        await tx.physicalBox.update({
+          where: { id: cashRegister.physicalBoxId },
+          data: { balance: finalClosingAmount },
+        });
+      }
+
+      // 3. APLICAR DESCUADRE AL USUARIO
+      // Si la diferencia es negativa (faltante), se resta de su balance (queda debiendo).
+      // Si es positiva (sobrante), se suma a su balance.
+      await tx.user.update({
+        where: { id: userId },
+        data: { balance: { increment: difference } },
+      });
+
+      // 4. Depositar en Caja Fuerte si aplica
       if (actualDeposit > 0 && depositAccountId) {
         await tx.account.update({
           where: { id: depositAccountId },
           data: { balance: { increment: actualDeposit } },
         });
+
         await tx.transaction.create({
           data: {
             amount: actualDeposit,
@@ -166,8 +193,6 @@ export const closeCashRegister = async (req: CustomRequest, res: Response) => {
           realAmount,
           difference,
           deposit: actualDeposit,
-          requestedDeposit,
-          amountPaidToCoverShortage,
           finalClosingAmount,
         },
       },
@@ -473,6 +498,87 @@ export const getCashRegisterHistory = async (req: CustomRequest, res: Response) 
     return res.status(200).json({ status: 'success', data: formattedHistory });
   } catch (error) {
     console.error('Error getting cash register history:', error);
+    return res.status(500).json({ status: 'error', message: 'Error interno del servidor' });
+  }
+};
+
+// Cierre Forzoso por Administrador/Gerente
+export const forceCloseCashRegister = async (req: CustomRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { countedAmount } = req.body;
+    const adminRole = req.user?.role;
+
+    // Solo ADMIN y MANAGER pueden forzar cierres
+    if (adminRole !== 'ADMIN' && adminRole !== 'MANAGER') {
+      return res
+        .status(403)
+        .json({ status: 'error', message: 'No autorizado para forzar cierres' });
+    }
+
+    const cashRegister = await prisma.cashRegister.findUnique({
+      where: { id },
+      include: {
+        sales: { where: { paymentMethod: 'CASH' } },
+        purchases: { where: { accountId: null } },
+      },
+    });
+
+    if (!cashRegister || cashRegister.status === 'CLOSED') {
+      return res
+        .status(400)
+        .json({ status: 'error', message: 'Caja no encontrada o ya está cerrada' });
+    }
+
+    const cashSalesTotal = cashRegister.sales.reduce((acc, s) => acc + s.totalAmount, 0);
+    const cashPurchasesTotal = cashRegister.purchases.reduce((acc, p) => acc + p.totalAmount, 0);
+    const expectedAmount =
+      cashRegister.openingAmount +
+      cashSalesTotal -
+      cashPurchasesTotal +
+      (cashRegister.manualInflows || 0) -
+      (cashRegister.manualOutflows || 0);
+
+    const realAmount = parseFloat(countedAmount) || 0;
+    const difference = realAmount - expectedAmount;
+
+    // En el cierre forzoso, asumimos que el admin no hace depósito a caja fuerte en este momento,
+    // simplemente deja el dinero contado en el cajón para el siguiente turno.
+    const finalClosingAmount = realAmount;
+
+    await prisma.$transaction(async (tx) => {
+      // 1. Cerrar el turno
+      await tx.cashRegister.update({
+        where: { id: cashRegister.id },
+        data: {
+          status: 'CLOSED',
+          closingAmount: finalClosingAmount,
+          depositAmount: 0,
+          closedAt: new Date(),
+        },
+      });
+
+      // 2. Actualizar el saldo de la Caja Física
+      if (cashRegister.physicalBoxId) {
+        await tx.physicalBox.update({
+          where: { id: cashRegister.physicalBoxId },
+          data: { balance: finalClosingAmount },
+        });
+      }
+
+      // 3. APLICAR DESCUADRE AL USUARIO ORIGINAL (no al admin)
+      await tx.user.update({
+        where: { id: cashRegister.userId },
+        data: { balance: { increment: difference } },
+      });
+    });
+
+    return res.status(200).json({
+      status: 'success',
+      message: `Caja cerrada forzosamente. Descuadre de $${difference.toLocaleString('es-CO')} aplicado a la cuenta del cajero.`,
+    });
+  } catch (error) {
+    console.error('Error force closing cash register:', error);
     return res.status(500).json({ status: 'error', message: 'Error interno del servidor' });
   }
 };

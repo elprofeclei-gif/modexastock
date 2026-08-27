@@ -15,6 +15,7 @@ import treasuryRoutes from './treasury.routes';
 import clientRoutes from './client.routes';
 import dataRoutes from './data.routes';
 import settingRoutes from './setting.routes';
+import boxRoutes from './box.routes';
 
 const router = Router();
 
@@ -34,5 +35,6 @@ router.use('/treasury', treasuryRoutes);
 router.use('/clients', clientRoutes);
 router.use('/data', dataRoutes);
 router.use('/settings', settingRoutes);
+router.use('/boxes', boxRoutes);
 
 export default router;

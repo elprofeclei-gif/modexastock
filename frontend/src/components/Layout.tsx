@@ -11,7 +11,6 @@ import {
   Sun,
   ChevronDown,
   ShieldCheck,
-  Bell,
   Menu as MenuIcon,
   X,
 } from 'lucide-react';
@@ -21,10 +20,18 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
+// Definimos explícitamente el tipo para evitar el error de "undefined" en el path
+interface MenuItem {
+  name: string;
+  path?: string;
+  roles: string[];
+  children?: MenuItem[];
+}
+
 export default function Layout({ children }: LayoutProps) {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [isDark, setIsDark] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // NUEVO: Estado para menú móvil
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { logout, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -33,7 +40,7 @@ export default function Layout({ children }: LayoutProps) {
     setIsDark(document.documentElement.classList.contains('dark'));
   }, []);
 
-  // Cerrar menú móvil al cambiar de ruta
+  // Cerrar menú móvil y dropdowns al cambiar de ruta
   useEffect(() => {
     setMobileMenuOpen(false);
     setOpenDropdown(null);
@@ -65,7 +72,7 @@ export default function Layout({ children }: LayoutProps) {
       .substring(0, 2)
       .toUpperCase() || '?';
 
-  const menu = [
+  const menu: MenuItem[] = [
     { name: 'Dashboard', path: '/', roles: ['ADMIN', 'MANAGER'] },
     { name: 'POS', path: '/pos', roles: ['ADMIN', 'MANAGER', 'USER'] },
     {
@@ -96,9 +103,9 @@ export default function Layout({ children }: LayoutProps) {
         : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'
     }`;
 
-  // Filtrar menú para móvil (aplanar submenús para que sea más fácil navegar)
-  const mobileMenu = [
-    ...menu.filter((m) => !m.children && user?.role && m.roles.includes(user.role)),
+  // Aplanar el menú para móvil
+  const mobileMenu: MenuItem[] = [
+    ...menu.filter((m) => m.path && user?.role && m.roles.includes(user.role)),
     ...menu.flatMap((m) =>
       m.children ? m.children.filter((c) => user?.role && c.roles.includes(user.role)) : []
     ),
@@ -158,7 +165,7 @@ export default function Layout({ children }: LayoutProps) {
                                   .map((child) => (
                                     <NavLink
                                       key={child.path}
-                                      to={child.path}
+                                      to={child.path!}
                                       onClick={() => setOpenDropdown(null)}
                                       className={({ isActive }) =>
                                         `block px-4 py-2 text-sm ${isActive ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'}`
@@ -175,7 +182,7 @@ export default function Layout({ children }: LayoutProps) {
                     }
 
                     return (
-                      <NavLink key={item.path} to={item.path} className={linkClass}>
+                      <NavLink key={item.path} to={item.path!} className={linkClass}>
                         {item.name}
                       </NavLink>
                     );
@@ -320,7 +327,7 @@ export default function Layout({ children }: LayoutProps) {
               {mobileMenu.map((item) => (
                 <NavLink
                   key={item.path}
-                  to={item.path}
+                  to={item.path!}
                   className={({ isActive }) =>
                     `block px-3 py-2 rounded-md text-base font-medium transition-colors ${
                       isActive

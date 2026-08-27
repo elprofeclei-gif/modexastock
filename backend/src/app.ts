@@ -5,13 +5,28 @@ import routes from './routes';
 
 const app = express();
 
+// Lista de URLs permitidas (localhost y tu red local)
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://192.168.1.7:5173', // Añade aquí tu IP local si cambia en el futuro
+];
+
 // Middlewares
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
-    credentials: true,
+    origin: (origin, callback) => {
+      // Permite peticiones sin origen (como Postman) o si el origen está en la lista
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('No permitido por CORS'));
+      }
+    },
+    credentials: true, // ¡Crítico para las cookies!
   })
 );
+
 app.use(express.json());
 app.use(cookieParser());
 

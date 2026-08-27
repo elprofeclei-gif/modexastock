@@ -27,7 +27,6 @@ export const getDashboardStats = async (req: CustomRequest, res: Response) => {
     bankBalance = accounts.reduce((acc, accData) => acc + accData.balance, 0);
 
     if (role === 'ADMIN' || role === 'MANAGER') {
-      // Ventas de Hoy
       const todaySales = await prisma.sale.aggregate({
         _sum: { totalAmount: true },
         _count: true,
@@ -36,21 +35,18 @@ export const getDashboardStats = async (req: CustomRequest, res: Response) => {
       todaySalesTotal = todaySales._sum.totalAmount || 0;
       todaySalesCount = todaySales._count || 0;
 
-      // Ventas de Ayer (para variación)
       const yesterdaySales = await prisma.sale.aggregate({
         _sum: { totalAmount: true },
         where: { createdAt: { gte: yesterday, lt: today } },
       });
       yesterdaySalesTotal = yesterdaySales._sum.totalAmount || 0;
 
-      // Cálculos de variación y ticket promedio
       salesVariation =
         yesterdaySalesTotal > 0
           ? ((todaySalesTotal - yesterdaySalesTotal) / yesterdaySalesTotal) * 100
           : 0;
       avgTicket = todaySalesCount > 0 ? todaySalesTotal / todaySalesCount : 0;
 
-      // Cajeros en Turno
       const allOpenRegisters = await prisma.cashRegister.findMany({
         where: { status: 'OPEN' },
         include: {
@@ -82,7 +78,6 @@ export const getDashboardStats = async (req: CustomRequest, res: Response) => {
         });
       });
 
-      // Top 5 Productos Más Vendidos (Hoy)
       const topItems = await prisma.saleItem.groupBy({
         by: ['productVariantId'],
         _sum: { quantity: true },
@@ -106,7 +101,6 @@ export const getDashboardStats = async (req: CustomRequest, res: Response) => {
         };
       });
     } else {
-      // Lógica para USER (Cajero)
       const todaySales = await prisma.sale.aggregate({
         _sum: { totalAmount: true },
         _count: true,
@@ -135,11 +129,14 @@ export const getDashboardStats = async (req: CustomRequest, res: Response) => {
       }
     }
 
-    // Inventario y Alertas Detalladas
     const totalProducts = await prisma.product.count();
     const totalVariants = await prisma.productVariant.count();
 
-    // Alertas Críticas (<=2) y Bajas (<=10)
+    // NUEVO: Calcular total de unidades físicas y valor
+    const inventory = await prisma.productVariant.findMany({ include: { product: true } });
+    const totalStockUnits = inventory.reduce((acc, v) => acc + v.stock, 0); // NUEVO
+    const inventoryValue = inventory.reduce((acc, v) => acc + v.stock * v.product.price, 0);
+
     const lowStockVariantsRaw = await prisma.productVariant.findMany({
       where: { stock: { lte: 10 } },
       include: { product: true, size: true, color: true },
@@ -159,9 +156,6 @@ export const getDashboardStats = async (req: CustomRequest, res: Response) => {
     const criticalCount = lowStockVariantsRaw.filter((v) => v.stock <= 2).length;
     const lowCount = lowStockVariantsRaw.filter((v) => v.stock > 2 && v.stock <= 10).length;
 
-    const inventory = await prisma.productVariant.findMany({ include: { product: true } });
-    const inventoryValue = inventory.reduce((acc, v) => acc + v.stock * v.product.price, 0);
-
     const activeCashiers = await prisma.cashRegister.count({ where: { status: 'OPEN' } });
     const totalUsers = await prisma.user.count({ where: { isActive: true } });
     const clientsData = await prisma.client.aggregate({ _sum: { balance: true }, _count: true });
@@ -173,32 +167,29 @@ export const getDashboardStats = async (req: CustomRequest, res: Response) => {
     return res.status(200).json({
       status: 'success',
       data: {
-        // KPIs Financieros
         todaySalesTotal,
         todaySalesCount,
-        salesVariation, // NUEVO
-        avgTicket, // NUEVO
+        salesVariation,
+        avgTicket,
         openCashRegister,
         bankBalance,
         todayExpenses: todayExpenses._sum.amount || 0,
 
-        // KPIs Operativos
         totalProducts,
         totalVariants,
+        totalStockUnits, // NUEVO
         inventoryValue,
         accountsReceivable: clientsData._sum.balance || 0,
         totalClients: clientsData._count,
         totalUsers,
         activeCashiers,
 
-        // Tablas del Dashboard
         cashiersData,
-        topProducts, // NUEVO
+        topProducts,
 
-        // Alertas
-        lowStockVariants, // NUEVO (Array de objetos)
-        criticalCount, // NUEVO
-        lowCount, // NUEVO
+        lowStockVariants,
+        criticalCount,
+        lowCount,
       },
     });
   } catch (error) {

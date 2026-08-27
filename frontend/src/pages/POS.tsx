@@ -18,10 +18,13 @@ import {
   XCircle,
   Plus,
   ShieldCheck,
-  Lock,
   ArrowDownToLine,
   FileText,
   Ban,
+  UserPlus,
+  Loader2,
+  User,
+  Phone,
 } from 'lucide-react';
 
 export default function POS() {
@@ -55,6 +58,15 @@ export default function POS() {
   const [reference, setReference] = useState('');
   const [selectedBankAccount, setSelectedBankAccount] = useState('');
   const [bankAccounts, setBankAccounts] = useState<any[]>([]);
+
+  // NUEVOS ESTADOS PARA BÚSQUEDA PREDICTIVA
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+
+  // NUEVO: Estado para el modal de crear cliente
+  const [isClientModalOpen, setIsClientModalOpen] = useState(false);
+  const [newClientData, setNewClientData] = useState({ name: '', phone: '', document: '' });
 
   const inputRef = useRef<HTMLInputElement>(null);
   const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
@@ -92,10 +104,52 @@ export default function POS() {
       .catch((err) => console.error(err));
   }, []);
 
-  const handleScan = (e: React.FormEvent) => {
+  // NUEVO: Efecto para búsqueda con debouncer (espera 300ms después de teclear)
+  useEffect(() => {
+    if (scannerInput.trim() === '') {
+      setSearchResults([]);
+      setShowDropdown(false);
+      return;
+    }
+
+    setIsSearching(true);
+    const timer = setTimeout(async () => {
+      try {
+        const response = await axios.get(`/pos/products/search?query=${scannerInput}`);
+        setSearchResults(response.data.data);
+        setShowDropdown(true);
+      } catch (error) {
+        console.error('Error searching products', error);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300); // 300ms de espera
+
+    return () => clearTimeout(timer);
+  }, [scannerInput]);
+
+  const handleScanSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    searchAndAddProduct(scannerInput);
+    // Si presiona Enter y hay resultados, toma el primero. Sino busca el texto exacto.
+    if (searchResults.length > 0) {
+      handleSelectProduct(searchResults[0]);
+    } else {
+      searchAndAddProduct(scannerInput);
+    }
     setScannerInput('');
+  };
+
+  // NUEVO: Función al hacer clic en un resultado de búsqueda
+  const handleSelectProduct = (product: any) => {
+    if (product.variants.length === 1) {
+      addToCart(product, product.variants[0]);
+    } else {
+      setProductForVariant(product);
+    }
+    setScannerInput('');
+    setSearchResults([]);
+    setShowDropdown(false);
+    inputRef.current?.focus();
   };
 
   const handleCloseCash = async (data: {
@@ -121,8 +175,6 @@ export default function POS() {
       }
       msg += `\nQuedó en caja: ${formatCurrency(summary.finalClosingAmount)}`;
       toast.success(msg, { duration: 10000 });
-    } else {
-      playSound('error');
     }
   };
 
@@ -173,7 +225,8 @@ export default function POS() {
     paymentMethod === 'CASH' ? received >= total && cart.length > 0 : cart.length > 0;
 
   const handleProcess = async () => {
-    if (paymentMethod === 'CREDIT' && !selectedClient) return toast.error('Selecciona un cliente');
+    if (paymentMethod === 'CREDIT' && !selectedClient)
+      return toast.error('Selecciona o crea un cliente para venta a crédito');
     if ((paymentMethod === 'CARD' || paymentMethod === 'TRANSFER') && !selectedBankAccount)
       return toast.error('Selecciona la cuenta bancaria');
 
@@ -204,50 +257,118 @@ export default function POS() {
     }
   };
 
+  const handleCreateClient = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newClientData.name) return toast.error('El nombre es obligatorio');
+    try {
+      const res = await axios.post('/clients', newClientData);
+      setClients([...clients, res.data.data].sort((a, b) => a.name.localeCompare(b.name)));
+      setSelectedClient(res.data.data.id);
+      setIsClientModalOpen(false);
+      setNewClientData({ name: '', phone: '', document: '' });
+      playSound('success');
+      toast.success('Cliente creado y seleccionado');
+    } catch (error: any) {
+      playSound('error');
+      toast.error(error.response?.data?.message || 'Error al crear cliente');
+    }
+  };
+
+  // Añade estos estados arriba en el componente POS si no los tienes:
+  const [physicalBoxes, setPhysicalBoxes] = useState<any[]>([]);
+  const [selectedBox, setSelectedBox] = useState('');
+  const [countedOpening, setCountedOpening] = useState('0');
+
+  // Añade esto al useEffect general para cargar las cajas:
+  useEffect(() => {
+    axios
+      .get('/boxes')
+      .then((res) => setPhysicalBoxes(res.data.data))
+      .catch((err) => console.error(err));
+  }, []);
+
+  // Reemplaza el bloque if (!cashRegister) { ... } por este:
   if (!cashRegister) {
+    const selectedBoxData = physicalBoxes.find((b) => b.id === selectedBox);
+
     return (
       <div className="flex items-center justify-center py-20">
         <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 w-full max-w-md">
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Abrir Caja</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">
-            {suggestedOpening > 0
-              ? `Saldo base heredado del último cierre. No es modificable.`
-              : 'Ingresa el monto inicial en efectivo.'}
-          </p>
-          <form
-            onSubmit={async (e) => {
-              e.preventDefault();
-              const success = await openCashRegister(
-                parseFormattedNumber(openingAmount) || suggestedOpening
-              );
-              if (success) playSound('success');
-            }}
-          >
-            <div className="relative mb-6">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-2xl font-bold">
-                $
-              </span>
-              <input
-                type="text"
-                value={openingAmount}
-                onChange={(e) => setOpeningAmount(formatInputNumber(e.target.value))}
-                readOnly={suggestedOpening > 0}
-                className={`w-full pl-12 pr-4 py-4 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none text-3xl font-bold ${suggestedOpening > 0 ? 'cursor-not-allowed bg-slate-100 dark:bg-slate-700' : ''}`}
-                autoFocus
-              />
-              {suggestedOpening > 0 && (
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
-                  <Lock size={20} />
-                </div>
-              )}
-            </div>
-            <button
-              type="submit"
-              className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
+            <Wallet size={24} className="text-indigo-600" /> Abrir Turno
+          </h2>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              1. Selecciona la Caja Física
+            </label>
+            <select
+              value={selectedBox}
+              onChange={(e) => {
+                setSelectedBox(e.target.value);
+                const box = physicalBoxes.find((b) => b.id === e.target.value);
+                setCountedOpening(box ? formatInputNumber(String(box.balance)) : '0');
+              }}
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none text-lg font-semibold"
             >
-              <Wallet size={20} /> Iniciar Turno
-            </button>
-          </form>
+              <option value="">Selecciona una caja...</option>
+              {physicalBoxes.map((box) => (
+                <option key={box.id} value={box.id}>
+                  {box.name} (Saldo Sistema: ${box.balance.toLocaleString('es-CO')})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {selectedBox && (
+            <div className="mb-6 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-700">
+              <p className="text-xs text-slate-500 mb-2">
+                Saldo según el sistema:{' '}
+                <span className="font-bold">
+                  ${selectedBoxData?.balance.toLocaleString('es-CO')}
+                </span>
+              </p>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                2. Cuenta el dinero físico en el cajón
+              </label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-2xl font-bold">
+                  $
+                </span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={countedOpening}
+                  onChange={(e) => setCountedOpening(formatInputNumber(e.target.value))}
+                  className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none text-2xl font-bold"
+                  autoFocus
+                />
+              </div>
+              <p className="text-xs text-amber-600 dark:text-amber-400 mt-2">
+                ⚠️ El monto que escribas será tu fondo inicial. Si es diferente al saldo del
+                sistema, el saldo de la caja física se ajustará a esta cifra real.
+              </p>
+            </div>
+          )}
+
+          <button
+            onClick={async () => {
+              if (!selectedBox) return toast.error('Selecciona una caja física');
+              const amount = parseFormattedNumber(countedOpening);
+              if (amount < 0) return toast.error('El monto no puede ser negativo');
+
+              const success = await openCashRegister(selectedBox, amount);
+              if (success) {
+                playSound('success');
+                setCountedOpening('0');
+                setSelectedBox('');
+              }
+            }}
+            disabled={!selectedBox}
+            className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-400 text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
+          >
+            <Wallet size={20} /> Iniciar Turno
+          </button>
         </div>
       </div>
     );
@@ -264,17 +385,61 @@ export default function POS() {
     <div className="h-full flex flex-col lg:flex-row gap-6">
       <div className="flex-1 flex flex-col bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden">
         <div className="p-4 border-b border-slate-100 dark:border-slate-700 flex items-center gap-4">
-          <form onSubmit={handleScan} className="relative flex-1">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-            <input
-              ref={inputRef}
-              type="text"
-              value={scannerInput}
-              onChange={(e) => setScannerInput(e.target.value)}
-              placeholder="Escanear o buscar producto..."
-              className="w-full pl-12 pr-4 py-3 text-lg rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-            />
-          </form>
+          {/* CONTENEDOR RELATIVO PARA EL DROPDOWN */}
+          <div className="relative flex-1">
+            <form onSubmit={handleScanSubmit}>
+              <Search
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                size={20}
+              />
+              <input
+                ref={inputRef}
+                type="text"
+                value={scannerInput}
+                onChange={(e) => setScannerInput(e.target.value)}
+                onFocus={() => searchResults.length > 0 && setShowDropdown(true)}
+                onBlur={() => setTimeout(() => setShowDropdown(false), 200)} // Retraso para permitir el clic
+                placeholder="Escanear o buscar producto..."
+                className="w-full pl-12 pr-4 py-3 text-lg rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              />
+            </form>
+
+            {/* DROPDOWN DE RESULTADOS DE BÚSQUEDA */}
+            {showDropdown && (
+              <div className="absolute z-30 mt-1 w-full bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-100 dark:border-slate-700 max-h-60 overflow-y-auto">
+                {isSearching ? (
+                  <div className="p-4 flex justify-center items-center text-slate-400">
+                    <Loader2 className="animate-spin mr-2" size={18} /> Buscando...
+                  </div>
+                ) : searchResults.length === 0 ? (
+                  <div className="p-4 text-center text-slate-400 text-sm">
+                    No se encontraron productos.
+                  </div>
+                ) : (
+                  searchResults.map((p) => (
+                    <div
+                      key={p.id}
+                      onMouseDown={() => handleSelectProduct(p)}
+                      className="p-3 hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer border-b border-slate-100 dark:border-slate-700 last:border-0 flex justify-between items-center"
+                    >
+                      <div>
+                        <p className="text-sm font-medium text-slate-900 dark:text-white">
+                          {p.name}
+                        </p>
+                        <p className="text-xs text-slate-500">
+                          {p.sku} - {p.brand?.name}
+                        </p>
+                      </div>
+                      <span className="text-sm font-semibold text-indigo-600 dark:text-indigo-400">
+                        {formatCurrency(p.price)}
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+
           <button
             onClick={handleClearCart}
             disabled={cart.length === 0}
@@ -289,7 +454,7 @@ export default function POS() {
             <div className="h-full flex flex-col items-center justify-center text-slate-300 dark:text-slate-600">
               <Search size={64} className="mb-4" />
               <p className="text-lg font-medium">Carrito vacío</p>
-              <p className="text-sm">Escanea un producto para empezar.</p>
+              <p className="text-sm">Escanea o busca un producto para empezar.</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -451,18 +616,32 @@ export default function POS() {
           )}
 
           {paymentMethod === 'CREDIT' && (
-            <select
-              value={selectedClient}
-              onChange={(e) => setSelectedClient(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm"
-            >
-              <option value="">Selecciona cliente...</option>
-              {clients.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+            <div>
+              <div className="flex justify-between items-center mb-1">
+                <label className="block text-xs font-semibold text-slate-500 uppercase">
+                  Cliente (Crédito)
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setIsClientModalOpen(true)}
+                  className="text-xs text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1"
+                >
+                  <UserPlus size={12} /> Nuevo
+                </button>
+              </div>
+              <select
+                value={selectedClient}
+                onChange={(e) => setSelectedClient(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm"
+              >
+                <option value="">Selecciona cliente...</option>
+                {clients.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name} (Deuda: {formatCurrency(c.balance)})
+                  </option>
+                ))}
+              </select>
+            </div>
           )}
         </div>
 
@@ -516,6 +695,93 @@ export default function POS() {
         cart={cart}
         total={total}
       />
+
+      {/* NUEVO: Modal Crear Cliente desde POS */}
+      {isClientModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md p-6 border border-slate-100 dark:border-slate-700">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+              <UserPlus size={20} className="text-indigo-600" /> Crear Nuevo Cliente
+            </h2>
+            <form onSubmit={handleCreateClient} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5">
+                  Nombre Completo *
+                </label>
+                <div className="relative">
+                  <User
+                    size={18}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+                  <input
+                    type="text"
+                    required
+                    value={newClientData.name}
+                    onChange={(e) => setNewClientData({ ...newClientData, name: e.target.value })}
+                    className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm"
+                    autoFocus
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5">
+                    Teléfono
+                  </label>
+                  <div className="relative">
+                    <Phone
+                      size={18}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                    />
+                    <input
+                      type="text"
+                      value={newClientData.phone}
+                      onChange={(e) =>
+                        setNewClientData({ ...newClientData, phone: e.target.value })
+                      }
+                      className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5">
+                    Cédula / RIF
+                  </label>
+                  <div className="relative">
+                    <CreditCard
+                      size={18}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                    />
+                    <input
+                      type="text"
+                      value={newClientData.document}
+                      onChange={(e) =>
+                        setNewClientData({ ...newClientData, document: e.target.value })
+                      }
+                      className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setIsClientModalOpen(false)}
+                  className="px-4 py-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-sm font-medium"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition-colors flex items-center gap-2"
+                >
+                  <UserPlus size={16} /> Guardar y Seleccionar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Modal Añadir Fondo */}
       {isTransferModalOpen && (

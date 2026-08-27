@@ -31,15 +31,16 @@ export interface DashboardStats {
   openCashRegister: number;
   bankBalance: number;
   todayExpenses: number;
-
+  
   totalProducts: number;
   totalVariants: number;
+  totalStockUnits: number; // NUEVO
   inventoryValue: number;
   accountsReceivable: number;
   totalClients: number;
   totalUsers: number;
   activeCashiers: number;
-
+  
   cashiersData: CashierData[];
   topProducts: TopProduct[];
   lowStockVariants: LowStockVariant[];

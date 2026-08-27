@@ -50,9 +50,9 @@ export const usePOS = () => {
     checkOpenCashRegister();
   }, []);
 
-  const openCashRegister = async (openingAmount: number) => {
+  const openCashRegister = async (physicalBoxId: string, openingAmount: number) => {
     try {
-      await axios.post('/pos/cash-register/open', { openingAmount });
+      await axios.post('/pos/cash-register/open', { physicalBoxId, openingAmount });
       await checkOpenCashRegister();
       toast.success('Caja abierta correctamente');
       return true;

@@ -30,12 +30,12 @@ export const login = async (req: Request, res: Response) => {
       { expiresIn: '8h' }
     );
 
-    // GUARDAR TOKEN EN COOKIE HTTPONLY
+    // Configuración de cookie para red local (HTTP)
     res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // true en producción (Render)
-      sameSite: 'strict', // Previene CSRF
-      maxAge: 8 * 60 * 60 * 1000, // 8 horas en milisegundos
+      secure: false, // Debe ser false porque estamos en HTTP local, no HTTPS
+      sameSite: 'lax', // 'lax' permite que la cookie viaje en la red local
+      maxAge: 8 * 60 * 60 * 1000, // 8 horas
     });
 
     return res.status(200).json({

@@ -331,31 +331,31 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* Fila 2: KPIs Operativos */}
+           {/* Fila 2: KPIs Operativos */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-        <KpiCard
-          icon={Package}
-          label="Inventario Registrado"
-          value={`${stats?.totalProducts || 0} / ${stats?.totalVariants || 0}`}
-          sublabel="Modelos / Variantes"
+        <KpiCard 
+          icon={Package} 
+          label="Modelos y Variantes" 
+          value={`${stats?.totalProducts || 0} / ${stats?.totalVariants || 0}`} 
+          sublabel="Modelos (SKUs) / Variantes" 
         />
-        <KpiCard
-          icon={Package}
-          label="Valor Inventario"
-          value={formatCurrency(stats?.inventoryValue)}
-          sublabel="Precio de venta"
+        <KpiCard 
+          icon={Package} 
+          label="Unidades en Stock" 
+          value={`${stats?.totalStockUnits || 0}`} 
+          sublabel="Total de prendas físicas" 
         />
-        <KpiCard
-          icon={Users}
-          label="Cuentas por Cobrar"
-          value={formatCurrency(stats?.accountsReceivable)}
-          sublabel="Créditos a clientes"
+        <KpiCard 
+          icon={Landmark} 
+          label="Valor Inventario" 
+          value={formatCurrency(stats?.inventoryValue)} 
+          sublabel="Precio de venta total" 
         />
-        <KpiCard
-          icon={Users}
-          label="Comunidad"
-          value={`${stats?.totalUsers || 0} / ${stats?.totalClients || 0}`}
-          sublabel="Usuarios / Clientes"
+        <KpiCard 
+          icon={Users} 
+          label="Cuentas por Cobrar" 
+          value={formatCurrency(stats?.accountsReceivable)} 
+          sublabel="Créditos a clientes" 
         />
       </div>
 

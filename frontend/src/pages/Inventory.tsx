@@ -53,10 +53,19 @@ export default function Inventory() {
     });
   }, [products, searchQuery, categoryFilter, brandFilter, stockFilter]);
 
-  // NUEVO: Calcular total de variantes de los productos filtrados
-  const totalVariants = useMemo(() => {
-    return filteredProducts.reduce((acc, p) => acc + p.variants.length, 0);
-  }, [filteredProducts]);
+  // Calcular total de variantes y total de unidades físicas (Global/Filtrado)
+  const totalVariants = useMemo(
+    () => filteredProducts.reduce((acc, p) => acc + p.variants.length, 0),
+    [filteredProducts]
+  );
+  const globalTotalStock = useMemo(
+    () =>
+      filteredProducts.reduce(
+        (acc, p) => acc + p.variants.reduce((vAcc, v) => vAcc + v.stock, 0),
+        0
+      ),
+    [filteredProducts]
+  );
 
   useEffect(() => {
     setCurrentPage(1);
@@ -66,6 +75,16 @@ export default function Inventory() {
   const currentProducts = filteredProducts.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
+  );
+
+  // Calcular total de unidades físicas de la página actual
+  const pageTotalStock = useMemo(
+    () =>
+      currentProducts.reduce(
+        (acc, p) => acc + p.variants.reduce((vAcc, v) => vAcc + v.stock, 0),
+        0
+      ),
+    [currentProducts]
   );
 
   const clearFilters = () => {
@@ -123,6 +142,7 @@ export default function Inventory() {
         </div>
       </div>
 
+      {/* Filtros */}
       <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 grid grid-cols-1 md:grid-cols-5 gap-4">
         <input
           type="text"
@@ -360,17 +380,35 @@ export default function Inventory() {
                   })
                 )}
               </tbody>
+
+              {/* Pie de tabla con Totales */}
+              {!loading && currentProducts.length > 0 && (
+                <tfoot className="bg-slate-50 dark:bg-slate-800/50 border-t-2 border-slate-200 dark:border-slate-700">
+                  <tr>
+                    <td
+                      colSpan={viewMode === 'detailed' ? 6 : 5}
+                      className="px-6 py-4 text-right text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider"
+                    >
+                      Total Unidades (Página):
+                    </td>
+                    <td className="px-6 py-4 text-left">
+                      <span className="px-2.5 py-1 inline-flex text-sm font-bold rounded-md bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300">
+                        {pageTotalStock} unidades
+                      </span>
+                    </td>
+                  </tr>
+                </tfoot>
+              )}
             </table>
           </div>
 
-          {/* Enviamos el extraInfo con el total de variantes */}
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
             totalItems={filteredProducts.length}
             itemsPerPage={itemsPerPage}
             onPageChange={setCurrentPage}
-            extraInfo={`${totalVariants} variantes`}
+            extraInfo={`${totalVariants} variantes | ${globalTotalStock} unidades en total`}
           />
         </div>
       )}
