@@ -44,15 +44,15 @@ export interface DashboardStats {
   inventoryValue: number;
   accountsReceivable: number;
   totalClients: number;
-  totalUsers: number;
   activeCashiers: number;
 
   cashiersData: CashierData[];
   topProducts: TopProduct[];
+  salesByDay: SalesByDay[];
+
   lowStockVariants: LowStockVariant[];
   criticalCount: number;
   lowCount: number;
-  salesByDay: SalesByDay[]; // ✅ AGREGADO AQUÍ
 }
 
 export const useReports = () => {

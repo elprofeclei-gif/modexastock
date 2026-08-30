@@ -30,14 +30,14 @@ export const getDashboardStats = async (req: CustomRequest, res: Response) => {
       const todaySales = await prisma.sale.aggregate({
         _sum: { totalAmount: true },
         _count: true,
-        where: { createdAt: { gte: today } },
+        where: { createdAt: { gte: today }, isVoided: false },
       });
       todaySalesTotal = todaySales._sum.totalAmount || 0;
       todaySalesCount = todaySales._count || 0;
 
       const yesterdaySales = await prisma.sale.aggregate({
         _sum: { totalAmount: true },
-        where: { createdAt: { gte: yesterday, lt: today } },
+        where: { createdAt: { gte: yesterday, lt: today }, isVoided: false },
       });
       yesterdaySalesTotal = yesterdaySales._sum.totalAmount || 0;
 
@@ -53,13 +53,13 @@ export const getDashboardStats = async (req: CustomRequest, res: Response) => {
           user: { select: { name: true } },
           sales: {
             select: { totalAmount: true, paymentMethod: true, receivedAmount: true, change: true },
-          }, // ✅ AGREGAR received y change
+          },
           purchases: { where: { accountId: null }, select: { totalAmount: true } },
         },
       });
 
       allOpenRegisters.forEach((reg) => {
-        // ✅ Usamos la fórmula exacta: Efectivo recibido menos cambio entregado
+        // ✅ FÓRMULA MIXTA: Sumar recibido menos cambio solo si incluye CASH
         const salesTotal = reg.sales
           .filter((s) => s.paymentMethod.includes('CASH'))
           .reduce((acc, s) => acc + ((s.receivedAmount || 0) - (s.change || 0)), 0);
@@ -107,21 +107,27 @@ export const getDashboardStats = async (req: CustomRequest, res: Response) => {
       const todaySales = await prisma.sale.aggregate({
         _sum: { totalAmount: true },
         _count: true,
-        where: { createdAt: { gte: today }, userId: userId },
+        where: { createdAt: { gte: today }, userId, isVoided: false },
       });
       todaySalesTotal = todaySales._sum.totalAmount || 0;
       todaySalesCount = todaySales._count || 0;
 
       const myOpenRegister = await prisma.cashRegister.findFirst({
-        where: { status: 'OPEN', userId: userId },
+        where: { status: 'OPEN', userId },
         include: {
-          sales: { where: { paymentMethod: 'CASH' }, select: { totalAmount: true } },
+          sales: {
+            where: { paymentMethod: { contains: 'CASH' } },
+            select: { receivedAmount: true, change: true },
+          },
           purchases: { where: { accountId: null }, select: { totalAmount: true } },
         },
       });
 
       if (myOpenRegister) {
-        const salesTotal = myOpenRegister.sales.reduce((acc, s) => acc + s.totalAmount, 0);
+        const salesTotal = myOpenRegister.sales.reduce(
+          (acc, s) => acc + ((s.receivedAmount || 0) - (s.change || 0)),
+          0
+        );
         const purchasesTotal = myOpenRegister.purchases.reduce((acc, p) => acc + p.totalAmount, 0);
         openCashRegister =
           myOpenRegister.openingAmount +
@@ -132,38 +138,7 @@ export const getDashboardStats = async (req: CustomRequest, res: Response) => {
       }
     }
 
-    // ✅ LÓGICA PARA LA GRÁFICA DE LOS ÚLTIMOS 7 DÍAS
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6); // 6 días atrás + hoy = 7 días
-    sevenDaysAgo.setHours(0, 0, 0, 0);
-
-    const last7DaysSales = await prisma.sale.findMany({
-      where: {
-        createdAt: { gte: sevenDaysAgo },
-        isVoided: false,
-      },
-      select: { totalAmount: true, createdAt: true },
-    });
-
-    const salesByDay = [];
-    for (let i = 0; i < 7; i++) {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      date.setHours(0, 0, 0, 0);
-      const nextDate = new Date(date);
-      nextDate.setDate(nextDate.getDate() + 1);
-
-      const dayTotal = last7DaysSales
-        .filter((s) => s.createdAt >= date && s.createdAt < nextDate)
-        .reduce((acc, s) => acc + s.totalAmount, 0);
-
-      salesByDay.push({
-        date: date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }),
-        total: dayTotal,
-      });
-    }
-    salesByDay.reverse(); // Para que la gráfica vaya de izquierda a derecha
-
+    // Inventario
     const totalProducts = await prisma.product.count();
     const totalVariants = await prisma.productVariant.count();
 
@@ -191,12 +166,40 @@ export const getDashboardStats = async (req: CustomRequest, res: Response) => {
     const lowCount = lowStockVariantsRaw.filter((v) => v.stock > 2 && v.stock <= 10).length;
 
     const activeCashiers = await prisma.cashRegister.count({ where: { status: 'OPEN' } });
-    const totalUsers = await prisma.user.count({ where: { isActive: true } });
     const clientsData = await prisma.client.aggregate({ _sum: { balance: true }, _count: true });
     const todayExpenses = await prisma.expense.aggregate({
       _sum: { amount: true },
       where: { date: { gte: today } },
     });
+
+    // Gráfica de Ventas
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+    sevenDaysAgo.setHours(0, 0, 0, 0);
+
+    const last7DaysSales = await prisma.sale.findMany({
+      where: { createdAt: { gte: sevenDaysAgo }, isVoided: false },
+      select: { totalAmount: true, createdAt: true },
+    });
+
+    const salesByDay = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      date.setHours(0, 0, 0, 0);
+      const nextDate = new Date(date);
+      nextDate.setDate(nextDate.getDate() + 1);
+
+      const dayTotal = last7DaysSales
+        .filter((s) => s.createdAt >= date && s.createdAt < nextDate)
+        .reduce((acc, s) => acc + s.totalAmount, 0);
+
+      salesByDay.push({
+        date: date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }),
+        total: dayTotal,
+      });
+    }
+    salesByDay.reverse();
 
     return res.status(200).json({
       status: 'success',
@@ -215,12 +218,11 @@ export const getDashboardStats = async (req: CustomRequest, res: Response) => {
         inventoryValue,
         accountsReceivable: clientsData._sum.balance || 0,
         totalClients: clientsData._count,
-        totalUsers,
         activeCashiers,
 
         cashiersData,
         topProducts,
-        salesByDay, // ✅ AGREGADO AQUÍ
+        salesByDay,
 
         lowStockVariants,
         criticalCount,

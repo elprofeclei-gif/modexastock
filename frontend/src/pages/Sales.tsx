@@ -30,10 +30,7 @@ export default function Sales() {
   }, [filters.search, filters.startDate, filters.endDate]);
 
   const totalPages = Math.ceil(sales.length / itemsPerPage);
-  const currentSales = sales.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const currentSales = sales.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const clearFilters = () => {
     setSearchInput('');
@@ -76,7 +73,9 @@ export default function Sales() {
           />
         </div>
         <div>
-          <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5">Desde</label>
+          <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5">
+            Desde
+          </label>
           <input
             type="date"
             value={filters.startDate}
@@ -86,7 +85,9 @@ export default function Sales() {
         </div>
         <div className="flex gap-2">
           <div className="flex-1">
-            <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5">Hasta</label>
+            <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5">
+              Hasta
+            </label>
             <input
               type="date"
               value={filters.endDate}
@@ -107,41 +108,72 @@ export default function Sales() {
       {/* Tabla */}
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-[800px] w-full text-sm divide-y divide-slate-100 dark:divide-slate-700">
+          <table className="min-w-200 w-full text-sm divide-y divide-slate-100 dark:divide-slate-700">
             <thead className="bg-slate-50 dark:bg-slate-800/50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Folio</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Fecha</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Cliente</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Pago</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Total</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Acción</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                  Folio
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                  Fecha
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                  Cliente
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                  Pago
+                </th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">
+                  Total
+                </th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">
+                  Acción
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-100 dark:divide-slate-700">
               {loading ? (
-                <tr><td colSpan={6} className="px-6 py-8"><Loader /></td></tr>
+                <tr>
+                  <td colSpan={6} className="px-6 py-8">
+                    <Loader />
+                  </td>
+                </tr>
               ) : currentSales.length === 0 ? (
-                <tr><td colSpan={6} className="px-6 py-8 text-center text-slate-400">No hay ventas que coincidan con la búsqueda.</td></tr>
+                <tr>
+                  <td colSpan={6} className="px-6 py-8 text-center text-slate-400">
+                    No hay ventas que coincidan con la búsqueda.
+                  </td>
+                </tr>
               ) : (
                 currentSales.map((sale) => (
-                  <tr key={sale.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+                  <tr
+                    key={sale.id}
+                    className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
+                  >
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900 dark:text-white">
                       #{sale.id.substring(0, 8).toUpperCase()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                      {new Date(sale.createdAt).toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' })}
+                      {new Date(sale.createdAt).toLocaleString('es-ES', {
+                        dateStyle: 'short',
+                        timeStyle: 'short',
+                      })}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900 dark:text-white">
                       {sale.client?.name || 'Consumidor Final'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-md inline-block w-fit ${
-                        sale.paymentMethod.includes('CASH') ? 'bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400' :
-                        sale.paymentMethod.includes('CREDIT') ? 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400' :
-                        sale.paymentMethod.includes('MIXED') ? 'bg-purple-50 text-purple-600 dark:bg-purple-500/10 dark:text-purple-400' :
-                        'bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400'
-                      }`}>
+                      <span
+                        className={`px-2 py-1 text-xs font-medium rounded-md inline-block w-fit ${
+                          sale.paymentMethod.includes('CASH')
+                            ? 'bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400'
+                            : sale.paymentMethod.includes('CREDIT')
+                              ? 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400'
+                              : sale.paymentMethod.includes('MIXED')
+                                ? 'bg-purple-50 text-purple-600 dark:bg-purple-500/10 dark:text-purple-400'
+                                : 'bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400'
+                        }`}
+                      >
                         {sale.paymentMethod}
                       </span>
                     </td>
