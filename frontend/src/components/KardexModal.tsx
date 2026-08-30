@@ -144,7 +144,7 @@ export default function KardexModal({
                   <div key={mov.id} className="relative pl-8">
                     {/* Punto en la línea de tiempo */}
                     <div
-                      className={`absolute -left-[1.15rem] top-1 w-6 h-6 rounded-full flex items-center justify-center ring-4 ring-white dark:ring-slate-800 ${config.bg}`}
+                      className={`absolute left-[-1.15rem] top-1 w-6 h-6 rounded-full flex items-center justify-center ring-4 ring-white dark:ring-slate-800 ${config.bg}`}
                     >
                       <Icon className={config.color} size={14} />
                     </div>
