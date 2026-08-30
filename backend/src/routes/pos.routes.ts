@@ -9,6 +9,9 @@ import {
   transferToCashRegister,
   withdrawFromCashRegister,
   forceCloseCashRegister,
+  suspendSale,
+  getSuspendedSales,
+  deleteSuspendedSale,
 } from '../controllers/pos.controller';
 import { authMiddleware, roleMiddleware } from '../middlewares/auth.middleware';
 
@@ -22,6 +25,11 @@ router.post('/cash-register/open', openCashRegister);
 router.post('/cash-register/close', closeCashRegister);
 router.post('/cash-register/transfer-in', transferToCashRegister);
 router.post('/cash-register/withdraw', withdrawFromCashRegister);
+router.get('/products/search', searchProduct);
+router.post('/sales', processSale);
+router.post('/sales/suspend', suspendSale);
+router.get('/sales/suspended', getSuspendedSales);
+router.delete('/sales/suspended/:id', deleteSuspendedSale);
 
 // NUEVA RUTA: Solo ADMIN y MANAGER
 router.post(
@@ -29,8 +37,5 @@ router.post(
   roleMiddleware(['ADMIN', 'MANAGER']),
   forceCloseCashRegister
 );
-
-router.get('/products/search', searchProduct);
-router.post('/sales', processSale);
 
 export default router;

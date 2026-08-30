@@ -42,5 +42,6 @@ export const useSettings = () => {
     }
   };
 
-  return { settings, loading, updateSettings };
+  // ✅ Devolvemos fetchSettings
+  return { settings, loading, fetchSettings, updateSettings };
 };

@@ -1,14 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import axios from '../api/axios';
 import toast from 'react-hot-toast';
 
-// 1. Definimos el tipado estricto
+// 1. Definimos el tipado estricto (CON PHONE Y BALANCE AGREGADOS)
 export interface AuthUser {
   id: string;
   name: string;
   email: string;
   role: 'ADMIN' | 'MANAGER' | 'USER';
   isActive: boolean;
+  phone?: string; // ✅ AGREGADO
+  balance?: number; // ✅ AGREGADO (por si usas el módulo de descuadres)
 }
 
 export const useAuth = () => {
@@ -32,7 +34,7 @@ export const useAuth = () => {
 
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
-      setUser(user); // Actualizamos el estado de React
+      setUser(user);
 
       toast.success(`Bienvenido, ${user.name}!`);
       return true;
@@ -54,11 +56,14 @@ export const useAuth = () => {
     toast.success('Sesión cerrada');
   };
 
-  const updateProfile = async (data: { name: string; email: string; password?: string }) => {
+  // 3. Actualizamos la ruta a /users/profile y agregamos el teléfono
+  const updateProfile = async (data: { name: string; email: string; phone?: string }) => {
     try {
-      const response = await axios.put('/auth/profile', data);
-      localStorage.setItem('user', JSON.stringify(response.data.data));
-      setUser(response.data.data); // Actualizamos el estado
+      const response = await axios.put('/users/profile', data);
+      const updatedUser = response.data.data;
+
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      setUser(updatedUser); // Actualizamos el estado de React al instante
       toast.success('Perfil actualizado correctamente');
       return true;
     } catch (error: any) {

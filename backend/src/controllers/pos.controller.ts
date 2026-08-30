@@ -2,11 +2,12 @@ import { Response } from 'express';
 import { CustomRequest } from '../middlewares/auth.middleware';
 import prisma from '../config/prisma';
 import bcrypt from 'bcryptjs';
+import { logAction } from '../utils/audit';
 
 // 1. Abrir Caja (Forzando el saldo del último cierre)
 export const openCashRegister = async (req: CustomRequest, res: Response) => {
   try {
-    const { physicalBoxId, openingAmount } = req.body;
+    const { physicalBoxId, openingAmount, adminEmail, adminPassword, originAccountId } = req.body;
     const userId = req.user?.id!;
 
     const box = await prisma.physicalBox.findUnique({ where: { id: physicalBoxId } });
@@ -15,19 +16,131 @@ export const openCashRegister = async (req: CustomRequest, res: Response) => {
 
     const openRegister = await prisma.cashRegister.findFirst({ where: { userId, status: 'OPEN' } });
     if (openRegister)
-      return res.status(400).json({ status: 'error', message: 'Ya tienes una caja abierta' });
-
-    // El monto inicial SIEMPRE será el que el cajero cuente físicamente
-    const realOpeningAmount = parseFloat(openingAmount) || 0;
-
-    // Si el monto contado es diferente al saldo del sistema, actualizamos la caja física
-    if (realOpeningAmount !== box.balance) {
-      await prisma.physicalBox.update({
-        where: { id: physicalBoxId },
-        data: { balance: realOpeningAmount },
+      return res.status(400).json({
+        status: 'error',
+        message: 'Ya tienes una caja abierta activa. Debes cerrarla primero.',
       });
-      // Opcional: Aquí podrías crear un registro de "Ajuste de Caja" si quieres auditoría extrema,
-      // pero actualizar el saldo es suficiente para que el cajero no herede el faltante.
+
+    const boxInUseByOther = await prisma.cashRegister.findFirst({
+      where: { physicalBoxId, status: 'OPEN' },
+      include: { user: true },
+    });
+
+    if (boxInUseByOther) {
+      return res.status(400).json({
+        status: 'error',
+        message: `Esta caja física ya está en uso por ${boxInUseByOther.user.name}. Debe cerrar su turno primero.`,
+      });
+    }
+
+    const realOpeningAmount = parseFloat(openingAmount) || 0;
+    const difference = realOpeningAmount - box.balance;
+
+    // Si hay diferencia (faltante o sobrante), exigimos autorización
+    if (Math.abs(difference) > 0) {
+      if (!adminEmail || !adminPassword) {
+        return res.status(403).json({
+          status: 'error',
+          message:
+            'Se requiere autorización de administrador para justificar el faltante/sobrante.',
+        });
+      }
+
+      const adminUser = await prisma.user.findFirst({
+        where: { email: adminEmail, role: { in: ['ADMIN', 'MANAGER'] }, isActive: true },
+      });
+      if (!adminUser)
+        return res
+          .status(403)
+          .json({ status: 'error', message: 'Correo de administrador no válido o sin permisos.' });
+
+      const isMatch = await bcrypt.compare(adminPassword, adminUser.password);
+      if (!isMatch)
+        return res
+          .status(403)
+          .json({ status: 'error', message: 'Contraseña de autorización incorrecta.' });
+
+      // ✅ NUEVO: Buscar quién fue el último cajero en cerrar esta caja
+      const lastClosedRegister = await prisma.cashRegister.findFirst({
+        where: { physicalBoxId: box.id, status: 'CLOSED' },
+        orderBy: { closedAt: 'desc' },
+        include: { user: true },
+      });
+
+      const responsibleCashier = lastClosedRegister?.user.name || 'Desconocido';
+      const cashierId = lastClosedRegister?.userId || null;
+
+      const result = await prisma.$transaction(async (tx) => {
+        if (difference < 0) {
+          // Faltante (Gasto/Pérdida)
+          await tx.expense.create({
+            data: {
+              amount: Math.abs(difference),
+              // ✅ Registramos la caja y el cajero responsable en el concepto
+              concept: `Faltante en Caja [${box.name}]. Último cajero: ${responsibleCashier} (Aut: ${adminUser.name})`,
+              accountId: null,
+              userId: adminUser.id,
+            },
+          });
+        } else {
+          // Sobrante (Inyección de dinero)
+          if (originAccountId) {
+            const account = await tx.account.findUnique({ where: { id: originAccountId } });
+            if (!account) throw new Error('La cuenta de origen (Caja Fuerte/Banco) no existe.');
+            if (account.balance < difference)
+              throw new Error(
+                `Saldo insuficiente en ${account.name}. Faltan ${difference - account.balance}.`
+              );
+
+            await tx.account.update({
+              where: { id: originAccountId },
+              data: { balance: { decrement: difference } },
+            });
+
+            await tx.transaction.create({
+              data: {
+                amount: difference,
+                type: 'WITHDRAWAL',
+                concept: `Inyección de apertura a Caja Física [${box.name}] (Aut: ${adminUser.name})`,
+                accountId: originAccountId,
+              },
+            });
+          } else {
+            await tx.expense.create({
+              data: {
+                amount: -difference,
+                concept: `Sobrante en Caja [${box.name}] - Inyección de Capital (Aut: ${adminUser.name})`,
+                accountId: null,
+                userId: adminUser.id,
+              },
+            });
+          }
+        }
+
+        return tx.physicalBox.update({
+          where: { id: physicalBoxId },
+          data: { balance: realOpeningAmount },
+        });
+      });
+
+      // ✅ Bitácora detallada
+      if (difference < 0) {
+        await logAction(
+          adminUser.id,
+          'OPENING_SHORTAGE',
+          'PhysicalBox',
+          box.id,
+          `Faltante de ${Math.abs(difference)} en Caja ${box.name}. Último cajero responsable: ${responsibleCashier}.`
+        );
+      } else {
+        await logAction(
+          adminUser.id,
+          'OPENING_SURPLUS',
+          'PhysicalBox',
+          box.id,
+          `Sobrante de ${difference} en Caja ${box.name}. Origen: ${originAccountId ? 'Cuenta Bancaria/Caja Fuerte' : 'Capital'}.`
+        );
+      }
     }
 
     const newRegister = await prisma.cashRegister.create({
@@ -38,10 +151,20 @@ export const openCashRegister = async (req: CustomRequest, res: Response) => {
       },
     });
 
+    await logAction(
+      userId,
+      'OPEN_CASH_REGISTER',
+      'CashRegister',
+      newRegister.id,
+      `Caja abierta con fondo de ${realOpeningAmount}.`
+    );
+
     return res.status(201).json({ status: 'success', data: newRegister });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error opening cash register:', error);
-    return res.status(500).json({ status: 'error', message: 'Error interno del servidor' });
+    return res
+      .status(500)
+      .json({ status: 'error', message: error.message || 'Error interno del servidor' });
   }
 };
 
@@ -53,13 +176,21 @@ export const getCurrentCashRegister = async (req: CustomRequest, res: Response) 
     const openCashRegister = await prisma.cashRegister.findFirst({
       where: { userId, status: 'OPEN' },
       include: {
-        sales: { where: { paymentMethod: 'CASH' } },
-        purchases: { where: { accountId: null } },
+        // ✅ CORREGIDO: Filtrar ventas explícitamente por el ID de la caja
+        sales: {
+          where: { paymentMethod: { contains: 'CASH' } }, // Prisma filtra por relación automáticamente
+        },
+        purchases: {
+          where: { accountId: null, cashRegisterId: undefined },
+        },
       },
     });
 
     if (openCashRegister) {
-      const cashSalesTotal = openCashRegister.sales.reduce((acc, s) => acc + s.totalAmount, 0);
+      const cashSalesTotal = openCashRegister.sales.reduce(
+        (acc, s) => acc + ((s.receivedAmount || 0) - (s.change || 0)), // ✅ FÓRMULA EXACTA
+        0
+      );
       const cashPurchasesTotal = openCashRegister.purchases.reduce(
         (acc, p) => acc + p.totalAmount,
         0
@@ -93,7 +224,7 @@ export const getCurrentCashRegister = async (req: CustomRequest, res: Response) 
   }
 };
 
-//3. Cerrar Caja (Arqueo con Caja Física y Descuadre al Usuario)
+// 3. Cerrar Caja (Arqueo con Caja Física y Descuadre al Usuario)
 export const closeCashRegister = async (req: CustomRequest, res: Response) => {
   try {
     const { countedAmount, depositAmount, depositAccountId } = req.body;
@@ -102,7 +233,7 @@ export const closeCashRegister = async (req: CustomRequest, res: Response) => {
     const cashRegister = await prisma.cashRegister.findFirst({
       where: { userId, status: 'OPEN' },
       include: {
-        sales: { where: { paymentMethod: 'CASH' } },
+        sales: { where: { paymentMethod: { contains: 'CASH' } } },
         purchases: { where: { accountId: null } },
       },
     });
@@ -111,7 +242,10 @@ export const closeCashRegister = async (req: CustomRequest, res: Response) => {
       return res.status(400).json({ status: 'error', message: 'No hay caja abierta para cerrar' });
     }
 
-    const cashSalesTotal = cashRegister.sales.reduce((acc, sale) => acc + sale.totalAmount, 0);
+    const cashSalesTotal = cashRegister.sales.reduce(
+      (acc, sale) => acc + ((sale.receivedAmount || 0) - (sale.change || 0)), // ✅ FÓRMULA EXACTA
+      0
+    );
     const cashPurchasesTotal = cashRegister.purchases.reduce(
       (acc, purchase) => acc + purchase.totalAmount,
       0
@@ -123,6 +257,7 @@ export const closeCashRegister = async (req: CustomRequest, res: Response) => {
       cashPurchasesTotal +
       (cashRegister.manualInflows || 0) -
       (cashRegister.manualOutflows || 0);
+
     const realAmount = parseFloat(countedAmount) || 0;
 
     // EL DESCUADRE (Faltante o Sobrante)
@@ -154,8 +289,6 @@ export const closeCashRegister = async (req: CustomRequest, res: Response) => {
       }
 
       // 3. APLICAR DESCUADRE AL USUARIO
-      // Si la diferencia es negativa (faltante), se resta de su balance (queda debiendo).
-      // Si es positiva (sobrante), se suma a su balance.
       await tx.user.update({
         where: { id: userId },
         data: { balance: { increment: difference } },
@@ -180,6 +313,14 @@ export const closeCashRegister = async (req: CustomRequest, res: Response) => {
 
       return closedRegister;
     });
+    // ✅ LOG DE AUDITORÍA
+    await logAction(
+      userId,
+      'CLOSE_CASH_REGISTER',
+      'CashRegister',
+      cashRegister.id,
+      `Caja cerrada. Esperado: ${expectedAmount}, Real: ${realAmount}, Diferencia: ${difference}.`
+    );
 
     return res.status(200).json({
       status: 'success',
@@ -230,7 +371,12 @@ export const searchProduct = async (req: CustomRequest, res: Response) => {
 // 5. Procesar Venta
 export const processSale = async (req: CustomRequest, res: Response) => {
   try {
-    const { items, paymentMethod, receivedAmount, clientId, reference, accountId } = req.body;
+    const {
+      items,
+      clientId,
+      discountAmount,
+      payments,
+    }: { items: any[]; clientId?: string; discountAmount?: number; payments: any[] } = req.body;
     const userId = req.user?.id!;
 
     const cashRegister = await prisma.cashRegister.findFirst({ where: { userId, status: 'OPEN' } });
@@ -238,15 +384,11 @@ export const processSale = async (req: CustomRequest, res: Response) => {
       return res
         .status(400)
         .json({ status: 'error', message: 'No hay caja abierta. Abre una caja primero.' });
-    if (paymentMethod === 'CREDIT' && !clientId)
+
+    if (!payments || payments.length === 0)
       return res
         .status(400)
-        .json({ status: 'error', message: 'Para venta a crédito, debes seleccionar un cliente.' });
-    if ((paymentMethod === 'CARD' || paymentMethod === 'TRANSFER') && !accountId)
-      return res.status(400).json({
-        status: 'error',
-        message: 'Selecciona la cuenta bancaria donde ingresó el dinero.',
-      });
+        .json({ status: 'error', message: 'Debe registrar al menos un método de pago.' });
 
     const sale = await prisma.$transaction(async (tx) => {
       let totalAmount = 0;
@@ -276,45 +418,90 @@ export const processSale = async (req: CustomRequest, res: Response) => {
           unitPrice,
           subtotal,
         });
+
+        await tx.inventoryMovement.create({
+          data: {
+            productVariantId: item.productVariantId,
+            userId,
+            type: 'SALE',
+            quantityChange: -item.quantity,
+            reason: `Venta POS`,
+          },
+        });
       }
 
-      const received = paymentMethod === 'CASH' ? parseFloat(receivedAmount) || 0 : totalAmount;
-      const change = paymentMethod === 'CASH' ? Math.max(0, received - totalAmount) : 0;
+      // Aplicar descuento
+      const parsedDiscount = Number(discountAmount) || 0;
+      if (parsedDiscount > 0) {
+        if (parsedDiscount > totalAmount)
+          throw new Error('El descuento no puede ser mayor al total.');
+        totalAmount -= parsedDiscount;
+      }
+
+      // Procesar pagos (Split Tender)
+      let nonCashPaid = 0;
+      let cashPaid = 0;
+      let creditAmount = 0; // ✅ NUEVO
+      let paymentMethodStr = '';
+      let firstReference = '';
+
+      for (const p of payments) {
+        if (p.method === 'CASH') {
+          cashPaid += p.amount;
+        } else if (p.method === 'CARD' || p.method === 'TRANSFER') {
+          const account = await tx.account.findUnique({ where: { id: p.accountId } });
+          if (!account) throw new Error('Cuenta bancaria no encontrada');
+
+          await tx.account.update({
+            where: { id: p.accountId },
+            data: { balance: { increment: p.amount } },
+          });
+          await tx.transaction.create({
+            data: {
+              amount: p.amount,
+              type: 'DEPOSIT',
+              concept: `Venta POS (${p.method}) - Ref: ${p.reference || 'N/A'}`,
+              accountId: p.accountId,
+            },
+          });
+          nonCashPaid += p.amount;
+          if (!firstReference && p.reference) firstReference = p.reference;
+        } else if (p.method === 'CREDIT') {
+          creditAmount += p.amount; // ✅ Acumular el crédito
+        }
+        paymentMethodStr += (paymentMethodStr ? ' + ' : '') + p.method;
+      }
+
+      // ✅ El total pagado ahora SUMA el crédito, así que no dará error de monto menor
+      const totalPaid = cashPaid + nonCashPaid + creditAmount;
+      if (totalPaid < totalAmount)
+        throw new Error(`El monto pagado (${totalPaid}) es menor al total (${totalAmount}).`);
+
+      // El cambio se calcula restando al efectivo lo que NO fue crédito ni banco
+      const change = Math.max(0, cashPaid - (totalAmount - nonCashPaid - creditAmount));
+      const received = cashPaid;
 
       const newSale = await tx.sale.create({
         data: {
           totalAmount,
+          discountAmount: parsedDiscount,
           receivedAmount: received,
           change: change,
-          reference: reference || null,
-          paymentMethod,
+          reference: firstReference || null,
+          paymentMethod: paymentMethodStr,
           userId,
           cashRegisterId: cashRegister.id,
-          clientId: paymentMethod === 'CREDIT' ? clientId : null,
+          clientId: clientId || null,
           items: { create: saleItemsData },
         },
-        include: { items: true },
+        include: { items: true, client: { select: { name: true, document: true } } },
       });
 
-      if (paymentMethod === 'CREDIT' && clientId) {
+      // ✅ Si hubo pago a CRÉDITO, se lo sumamos a la deuda del cliente
+      if (clientId && creditAmount > 0) {
         await tx.client.update({
           where: { id: clientId },
-          data: { balance: { increment: totalAmount } },
-        });
-      }
-
-      if ((paymentMethod === 'CARD' || paymentMethod === 'TRANSFER') && accountId) {
-        await tx.account.update({
-          where: { id: accountId },
-          data: { balance: { increment: totalAmount } },
-        });
-        await tx.transaction.create({
-          data: {
-            amount: totalAmount,
-            type: 'DEPOSIT',
-            concept: `Venta POS (${paymentMethod}) - Ref: ${reference || 'N/A'}`,
-            accountId,
-          },
+          data: { balance: { increment: creditAmount } },
         });
       }
 
@@ -335,6 +522,7 @@ export const transferToCashRegister = async (req: CustomRequest, res: Response) 
   try {
     const { accountId, amount, adminEmail, adminPassword } = req.body;
     const userId = req.user?.id!;
+    const parsedAmount = parseFloat(amount) || 0;
 
     const adminUser = await prisma.user.findFirst({
       where: { email: adminEmail, role: { in: ['ADMIN', 'MANAGER'] }, isActive: true },
@@ -357,15 +545,16 @@ export const transferToCashRegister = async (req: CustomRequest, res: Response) 
     const result = await prisma.$transaction(async (tx) => {
       const account = await tx.account.findUnique({ where: { id: accountId } });
       if (!account) throw new Error('Cuenta de tesorería no encontrada');
-      if (account.balance < amount) throw new Error('Saldo insuficiente en la cuenta de origen');
+      if (account.balance < parsedAmount)
+        throw new Error('Saldo insuficiente en la cuenta de origen');
 
       await tx.account.update({
         where: { id: accountId },
-        data: { balance: { decrement: amount } },
+        data: { balance: { decrement: parsedAmount } },
       });
       await tx.transaction.create({
         data: {
-          amount,
+          amount: parsedAmount,
           type: 'WITHDRAWAL',
           concept: `Transferencia a Caja POS (Aut: ${adminUser.name})`,
           accountId,
@@ -373,7 +562,7 @@ export const transferToCashRegister = async (req: CustomRequest, res: Response) 
       });
       const updatedReg = await tx.cashRegister.update({
         where: { id: cashRegister.id },
-        data: { manualInflows: { increment: amount } },
+        data: { manualInflows: { increment: parsedAmount } },
       });
 
       return updatedReg;
@@ -385,11 +574,12 @@ export const transferToCashRegister = async (req: CustomRequest, res: Response) 
   }
 };
 
-// 7. NUEVO: Retirar dinero de la Caja Actual hacia Tesorería o Gasto (Sangría)
+// 7. Retirar dinero de la Caja Actual hacia Tesorería o Gasto (Sangría)
 export const withdrawFromCashRegister = async (req: CustomRequest, res: Response) => {
   try {
     const { accountId, amount, adminEmail, adminPassword, concept } = req.body;
     const userId = req.user?.id!;
+    const parsedAmount = parseFloat(amount) || 0;
 
     const adminUser = await prisma.user.findFirst({
       where: { email: adminEmail, role: { in: ['ADMIN', 'MANAGER'] }, isActive: true },
@@ -410,18 +600,17 @@ export const withdrawFromCashRegister = async (req: CustomRequest, res: Response
       return res.status(400).json({ status: 'error', message: 'No hay caja abierta' });
 
     const result = await prisma.$transaction(async (tx) => {
-      // Si se selecciona una cuenta, el dinero va a la Caja Fuerte/Banco
       if (accountId) {
         const account = await tx.account.findUnique({ where: { id: accountId } });
         if (!account) throw new Error('Cuenta de destino no encontrada');
 
         await tx.account.update({
           where: { id: accountId },
-          data: { balance: { increment: amount } },
+          data: { balance: { increment: parsedAmount } },
         });
         await tx.transaction.create({
           data: {
-            amount,
+            amount: parsedAmount,
             type: 'DEPOSIT',
             concept: `Retiro de Caja POS hacia ${account.name} (Aut: ${adminUser.name})`,
             accountId,
@@ -430,17 +619,16 @@ export const withdrawFromCashRegister = async (req: CustomRequest, res: Response
       } else {
         await tx.expense.create({
           data: {
-            amount,
+            amount: parsedAmount,
             concept: concept || 'Retiro de efectivo de caja',
-            accountId: null, // <-- ASEGÚRATE DE QUE DIGA null AQUÍ
+            accountId: null,
             userId: adminUser.id,
           },
         });
       }
-      // Descontar de la caja del cajero para no afectar su arqueo
       const updatedReg = await tx.cashRegister.update({
         where: { id: cashRegister.id },
-        data: { manualOutflows: { increment: amount } },
+        data: { manualOutflows: { increment: parsedAmount } },
       });
 
       return updatedReg;
@@ -458,16 +646,26 @@ export const getCashRegisterHistory = async (req: CustomRequest, res: Response) 
     const history = await prisma.cashRegister.findMany({
       include: {
         user: { select: { name: true } },
+        physicalBox: { select: { name: true } }, // ✅ AGREGADO para mostrar en el frontend
         depositAccount: { select: { name: true } },
-        sales: { where: { paymentMethod: 'CASH' }, select: { totalAmount: true } },
-        purchases: { where: { accountId: null }, select: { totalAmount: true } },
+        sales: {
+          where: { paymentMethod: { contains: 'CASH' } },
+          select: { receivedAmount: true, change: true }, // ✅ Traemos lo que nos interesa
+        },
+        purchases: {
+          where: { accountId: null },
+          select: { totalAmount: true },
+        },
       },
       orderBy: { openedAt: 'desc' },
       take: 50,
     });
 
     const formattedHistory = history.map((reg) => {
-      const cashSalesTotal = reg.sales.reduce((acc, s) => acc + s.totalAmount, 0);
+      const cashSalesTotal = reg.sales.reduce(
+        (acc, s) => acc + ((s.receivedAmount || 0) - (s.change || 0)), // ✅ FÓRMULA EXACTA
+        0
+      );
       const cashPurchasesTotal = reg.purchases.reduce((acc, p) => acc + p.totalAmount, 0);
       const manualInflows = reg.manualInflows || 0;
       const manualOutflows = reg.manualOutflows || 0;
@@ -481,6 +679,7 @@ export const getCashRegisterHistory = async (req: CustomRequest, res: Response) 
       return {
         id: reg.id,
         userName: reg.user.name,
+        physicalBoxName: reg.physicalBox?.name || 'N/A', // ✅ LISTO PARA USARSE
         openingAmount: reg.openingAmount,
         manualInflows,
         manualOutflows,
@@ -492,6 +691,7 @@ export const getCashRegisterHistory = async (req: CustomRequest, res: Response) 
         depositAccountName: reg.depositAccount?.name || null,
         status: reg.status,
         openedAt: reg.openedAt,
+        closedAt: reg.closedAt,
       };
     });
 
@@ -502,12 +702,13 @@ export const getCashRegisterHistory = async (req: CustomRequest, res: Response) 
   }
 };
 
-// Cierre Forzoso por Administrador/Gerente
+// 9. Cierre Forzoso por Administrador/Gerente
 export const forceCloseCashRegister = async (req: CustomRequest, res: Response) => {
   try {
     const { id } = req.params;
     const { countedAmount } = req.body;
     const adminRole = req.user?.role;
+    const adminId = req.user?.id; // ✅ Capturamos el ID del admin que hace la acción
 
     // Solo ADMIN y MANAGER pueden forzar cierres
     if (adminRole !== 'ADMIN' && adminRole !== 'MANAGER') {
@@ -519,7 +720,7 @@ export const forceCloseCashRegister = async (req: CustomRequest, res: Response) 
     const cashRegister = await prisma.cashRegister.findUnique({
       where: { id },
       include: {
-        sales: { where: { paymentMethod: 'CASH' } },
+        sales: { where: { paymentMethod: { contains: 'CASH' } } },
         purchases: { where: { accountId: null } },
       },
     });
@@ -530,7 +731,10 @@ export const forceCloseCashRegister = async (req: CustomRequest, res: Response) 
         .json({ status: 'error', message: 'Caja no encontrada o ya está cerrada' });
     }
 
-    const cashSalesTotal = cashRegister.sales.reduce((acc, s) => acc + s.totalAmount, 0);
+    const cashSalesTotal = cashRegister.sales.reduce(
+      (acc, s) => acc + ((s.receivedAmount || 0) - (s.change || 0)), // ✅ FÓRMULA EXACTA
+      0
+    );
     const cashPurchasesTotal = cashRegister.purchases.reduce((acc, p) => acc + p.totalAmount, 0);
     const expectedAmount =
       cashRegister.openingAmount +
@@ -541,9 +745,6 @@ export const forceCloseCashRegister = async (req: CustomRequest, res: Response) 
 
     const realAmount = parseFloat(countedAmount) || 0;
     const difference = realAmount - expectedAmount;
-
-    // En el cierre forzoso, asumimos que el admin no hace depósito a caja fuerte en este momento,
-    // simplemente deja el dinero contado en el cajón para el siguiente turno.
     const finalClosingAmount = realAmount;
 
     await prisma.$transaction(async (tx) => {
@@ -573,6 +774,15 @@ export const forceCloseCashRegister = async (req: CustomRequest, res: Response) 
       });
     });
 
+    // ✅ REGISTRO EN LA BITÁCORA DEL SISTEMA (AUDITORÍA)
+    await logAction(
+      adminId,
+      'FORCE_CLOSE_CASH_REGISTER',
+      'CashRegister',
+      cashRegister.id,
+      `Caja forzosamente cerrada. Descuadre de ${difference} aplicado a la cuenta del cajero.`
+    );
+
     return res.status(200).json({
       status: 'success',
       message: `Caja cerrada forzosamente. Descuadre de $${difference.toLocaleString('es-CO')} aplicado a la cuenta del cajero.`,
@@ -580,5 +790,52 @@ export const forceCloseCashRegister = async (req: CustomRequest, res: Response) 
   } catch (error) {
     console.error('Error force closing cash register:', error);
     return res.status(500).json({ status: 'error', message: 'Error interno del servidor' });
+  }
+};
+
+// SUSPENDER VENTA
+export const suspendSale = async (req: CustomRequest, res: Response) => {
+  try {
+    const { items, discount } = req.body; // ✅ Recibimos el descuento
+    const userId = req.user?.id!;
+
+    if (!items || items.length === 0) {
+      return res.status(400).json({ status: 'error', message: 'El carrito está vacío' });
+    }
+
+    // ✅ Guardamos el carrito y el descuento juntos en el JSON
+    const suspended = await prisma.suspendedSale.create({
+      data: { userId, items: { cart: items, discount: discount || 0 } as any },
+    });
+
+    return res.status(201).json({ status: 'success', data: suspended });
+  } catch (error) {
+    return res.status(500).json({ status: 'error', message: 'Error al suspender venta' });
+  }
+};
+
+// OBTENER VENTAS SUSPENDIDAS DEL CAJERO
+export const getSuspendedSales = async (req: CustomRequest, res: Response) => {
+  try {
+    const userId = req.user?.id!;
+    const sales = await prisma.suspendedSale.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      take: 20, // Últimas 20 ventas pausadas
+    });
+    return res.status(200).json({ status: 'success', data: sales });
+  } catch (error) {
+    return res.status(500).json({ status: 'error', message: 'Error al obtener ventas' });
+  }
+};
+
+// ELIMINAR VENTA SUSPENDIDA (Al recuperarla o cancelarla)
+export const deleteSuspendedSale = async (req: CustomRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    await prisma.suspendedSale.delete({ where: { id } });
+    return res.status(204).send();
+  } catch (error) {
+    return res.status(500).json({ status: 'error', message: 'Error al eliminar' });
   }
 };

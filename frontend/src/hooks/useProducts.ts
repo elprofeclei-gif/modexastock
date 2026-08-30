@@ -29,7 +29,8 @@ export const useProducts = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get('/products');
+      // ✅ Le pasamos el parámetro limit=1000 para que traiga el inventario completo
+      const response = await axios.get('/products?limit=1000');
       setProducts(response.data.data);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Error al cargar productos');
@@ -54,5 +55,6 @@ export const useProducts = () => {
     }
   };
 
-  return { products, loading, error, createProduct };
+  // ✅ AGREGADO fetchProducts y setProducts al return
+  return { products, loading, error, createProduct, fetchProducts, setProducts };
 };

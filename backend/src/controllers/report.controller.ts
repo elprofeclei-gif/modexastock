@@ -51,15 +51,19 @@ export const getDashboardStats = async (req: CustomRequest, res: Response) => {
         where: { status: 'OPEN' },
         include: {
           user: { select: { name: true } },
-          sales: { select: { totalAmount: true, paymentMethod: true } },
+          sales: {
+            select: { totalAmount: true, paymentMethod: true, receivedAmount: true, change: true },
+          }, // ✅ AGREGAR received y change
           purchases: { where: { accountId: null }, select: { totalAmount: true } },
         },
       });
 
       allOpenRegisters.forEach((reg) => {
+        // ✅ Usamos la fórmula exacta: Efectivo recibido menos cambio entregado
         const salesTotal = reg.sales
-          .filter((s) => s.paymentMethod === 'CASH')
-          .reduce((acc, s) => acc + s.totalAmount, 0);
+          .filter((s) => s.paymentMethod.includes('CASH'))
+          .reduce((acc, s) => acc + ((s.receivedAmount || 0) - (s.change || 0)), 0);
+
         const purchasesTotal = reg.purchases.reduce((acc, p) => acc + p.totalAmount, 0);
         const expectedCash =
           reg.openingAmount +
@@ -67,7 +71,6 @@ export const getDashboardStats = async (req: CustomRequest, res: Response) => {
           purchasesTotal +
           (reg.manualInflows || 0) -
           (reg.manualOutflows || 0);
-        const totalSalesRegister = reg.sales.reduce((acc, s) => acc + s.totalAmount, 0);
 
         openCashRegister += expectedCash;
         cashiersData.push({
@@ -129,12 +132,43 @@ export const getDashboardStats = async (req: CustomRequest, res: Response) => {
       }
     }
 
+    // ✅ LÓGICA PARA LA GRÁFICA DE LOS ÚLTIMOS 7 DÍAS
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6); // 6 días atrás + hoy = 7 días
+    sevenDaysAgo.setHours(0, 0, 0, 0);
+
+    const last7DaysSales = await prisma.sale.findMany({
+      where: {
+        createdAt: { gte: sevenDaysAgo },
+        isVoided: false,
+      },
+      select: { totalAmount: true, createdAt: true },
+    });
+
+    const salesByDay = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      date.setHours(0, 0, 0, 0);
+      const nextDate = new Date(date);
+      nextDate.setDate(nextDate.getDate() + 1);
+
+      const dayTotal = last7DaysSales
+        .filter((s) => s.createdAt >= date && s.createdAt < nextDate)
+        .reduce((acc, s) => acc + s.totalAmount, 0);
+
+      salesByDay.push({
+        date: date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }),
+        total: dayTotal,
+      });
+    }
+    salesByDay.reverse(); // Para que la gráfica vaya de izquierda a derecha
+
     const totalProducts = await prisma.product.count();
     const totalVariants = await prisma.productVariant.count();
 
-    // NUEVO: Calcular total de unidades físicas y valor
     const inventory = await prisma.productVariant.findMany({ include: { product: true } });
-    const totalStockUnits = inventory.reduce((acc, v) => acc + v.stock, 0); // NUEVO
+    const totalStockUnits = inventory.reduce((acc, v) => acc + v.stock, 0);
     const inventoryValue = inventory.reduce((acc, v) => acc + v.stock * v.product.price, 0);
 
     const lowStockVariantsRaw = await prisma.productVariant.findMany({
@@ -177,7 +211,7 @@ export const getDashboardStats = async (req: CustomRequest, res: Response) => {
 
         totalProducts,
         totalVariants,
-        totalStockUnits, // NUEVO
+        totalStockUnits,
         inventoryValue,
         accountsReceivable: clientsData._sum.balance || 0,
         totalClients: clientsData._count,
@@ -186,6 +220,7 @@ export const getDashboardStats = async (req: CustomRequest, res: Response) => {
 
         cashiersData,
         topProducts,
+        salesByDay, // ✅ AGREGADO AQUÍ
 
         lowStockVariants,
         criticalCount,
@@ -229,6 +264,134 @@ export const downloadSalesReport = async (req: CustomRequest, res: Response) => 
     res.setHeader('Content-Disposition', 'attachment; filename="reporte_ventas_modexastock.csv"');
     return res.status(200).send(csv);
   } catch (error) {
+    return res.status(500).json({ status: 'error', message: 'Error al generar el reporte' });
+  }
+};
+
+// REPORTE DE UTILIDADES Y RENTABILIDAD (P&G)
+export const getProfitLoss = async (req: CustomRequest, res: Response) => {
+  try {
+    const { startDate, endDate } = req.query;
+
+    // Fechas por defecto (Mes actual)
+    const start = startDate
+      ? new Date(startDate as string)
+      : new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    const end = endDate ? new Date(endDate as string) : new Date();
+
+    // Asegurar que la fecha final cubra hasta el último segundo del día
+    end.setHours(23, 59, 59, 999);
+
+    // 1. Buscar todas las ventas del periodo (no anuladas)
+    const sales = await prisma.sale.findMany({
+      where: {
+        createdAt: { gte: start, lte: end },
+        isVoided: false,
+      },
+      include: {
+        items: {
+          include: {
+            productVariant: { include: { product: true } },
+          },
+        },
+      },
+    });
+
+    // 2. Calcular Ingresos y COGS (Costo de Mercancía Vendida)
+    let totalRevenue = 0;
+    let totalCOGS = 0;
+
+    sales.forEach((sale) => {
+      totalRevenue += sale.totalAmount;
+      sale.items.forEach((item) => {
+        // Costo del producto en el momento de la venta
+        totalCOGS += item.quantity * (item.productVariant.product.cost || 0);
+      });
+    });
+
+    const grossProfit = totalRevenue - totalCOGS;
+
+    // 3. Calcular Gastos Operativos del periodo
+    const expensesData = await prisma.expense.aggregate({
+      _sum: { amount: true },
+      where: {
+        date: { gte: start, lte: end },
+      },
+    });
+    const totalExpenses = Math.abs(expensesData._sum.amount || 0); // Usar abs porque los sobrantes se guardan en negativo
+
+    // 4. Utilidad Neta
+    const netProfit = grossProfit - totalExpenses;
+
+    // 5. Margen de Rentabilidad (%)
+    const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
+
+    return res.status(200).json({
+      status: 'success',
+      data: {
+        totalRevenue,
+        totalCOGS,
+        grossProfit,
+        totalExpenses,
+        netProfit,
+        profitMargin: parseFloat(profitMargin.toFixed(2)),
+      },
+    });
+  } catch (error) {
+    console.error('Error getting P&L report:', error);
+    return res.status(500).json({ status: 'error', message: 'Error interno del servidor' });
+  }
+};
+
+// EXPORTAR INVENTARIO A CSV
+export const downloadInventoryReport = async (req: CustomRequest, res: Response) => {
+  try {
+    const products = await prisma.product.findMany({
+      include: {
+        category: true,
+        brand: true,
+        variants: { include: { size: true, color: true } },
+      },
+      orderBy: { name: 'asc' },
+    });
+
+    const headers = [
+      'SKU',
+      'Nombre',
+      'Categoría',
+      'Marca',
+      'Talla',
+      'Color',
+      'Stock Actual',
+      'Costo Unit.',
+      'Precio Venta',
+      'Valor Inventario',
+    ];
+    const rows = products.flatMap((p) =>
+      p.variants.map((v) =>
+        [
+          p.sku,
+          `"${p.name}"`, // Comillas para evitar que Excel rompa si hay comas
+          `"${p.category.name}"`,
+          `"${p.brand.name}"`,
+          v.size.name,
+          v.color.name,
+          v.stock,
+          (p.cost || 0).toFixed(2),
+          p.price.toFixed(2),
+          (v.stock * p.price).toFixed(2), // Valor total de esa variante
+        ].join(',')
+      )
+    );
+
+    const csv = [headers.join(','), ...rows].join('\n');
+
+    // BOM al inicio para que Excel reconozca los acentos y la ñ
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="inventario_modexastock.csv"');
+    return res.status(200).send('\ufeff' + csv); // \ufeff es el BOM
+  } catch (error) {
+    console.error('Error generating inventory report:', error);
     return res.status(500).json({ status: 'error', message: 'Error al generar el reporte' });
   }
 };

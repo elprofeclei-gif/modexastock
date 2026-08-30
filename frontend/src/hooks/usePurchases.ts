@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import axios from '../api/axios';
 import toast from 'react-hot-toast';
-import { formatCurrency } from '../utils/format'; // <-- Import
+import { formatCurrency } from '../utils/format';
 
 export const usePurchases = () => {
   const [loading, setLoading] = useState(false);
@@ -35,11 +35,21 @@ export const usePurchases = () => {
     }
   };
 
-  const createPurchase = async (items: any[], vendorId: string, accountId?: string) => {
+  // ✅ Agregamos paymentMethod para que el backend sepa si fue de contado o a crédito
+  const createPurchase = async (
+    items: any[],
+    vendorId: string,
+    accountId?: string,
+    paymentMethod: string = 'CASH'
+  ) => {
     setLoading(true);
     try {
-      const response = await axios.post('/purchases', { items, vendorId, accountId });
-      // FORMATO EN TOAST
+      const response = await axios.post('/purchases', {
+        items,
+        vendorId,
+        accountId,
+        paymentMethod,
+      });
       toast.success(`Compra registrada: ${formatCurrency(response.data.data.totalAmount)}`);
       return true;
     } catch (error: any) {

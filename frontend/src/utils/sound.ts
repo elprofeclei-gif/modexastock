@@ -1,7 +1,15 @@
+// ✅ Variable global para guardar la única instancia del AudioContext
+let audioContextInstance: AudioContext | null = null;
+
 export const playSound = (type: 'success' | 'error') => {
   try {
-    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-    const audioContext = new AudioContext();
+    // Si no existe la instancia, la creamos una sola vez
+    if (!audioContextInstance) {
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+      audioContextInstance = new AudioContext();
+    }
+
+    const audioContext = audioContextInstance;
 
     // Reanudar el contexto si el navegador lo tiene suspendido (políticas de autoplay)
     if (audioContext.state === 'suspended') {

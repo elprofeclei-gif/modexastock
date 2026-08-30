@@ -66,19 +66,6 @@ export const useClients = () => {
     }
   };
 
-  const payDebt = async (id: string, amount: number, accountId?: string) => {
-    try {
-      const res = await axios.post(`/clients/${id}/pay-debt`, { amount, accountId });
-      setClients((prev) =>
-        prev.map((c) => (c.id === id ? { ...c, balance: c.balance - amount } : c))
-      );
-      toast.success('Abono registrado');
-      return true;
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Error');
-      return false;
-    }
-  };
-
-  return { clients, loading, createClient, updateClient, deleteClient, payDebt };
+  // ✅ AQUÍ ESTÁ LA SOLUCIÓN: Se agregó fetchClients al return
+  return { clients, loading, fetchClients, createClient, updateClient, deleteClient };
 };

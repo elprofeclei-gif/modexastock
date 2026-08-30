@@ -5,18 +5,29 @@ import {
   getProductById,
   updateProduct,
   deleteProduct,
+  adjustStock,
+  getProductKardex,
 } from '../controllers/product.controller';
-import { authMiddleware } from '../middlewares/auth.middleware';
+import { authMiddleware, roleMiddleware } from '../middlewares/auth.middleware';
 
 const router = Router();
 
-// Protegemos todas las rutas de productos con el middleware
+// Todo requiere estar logueado
 router.use(authMiddleware);
 
+// Rutas accesibles para todos los usuarios (Cajeros, Vendedores)
 router.get('/', getProducts);
-router.post('/', createProduct);
 router.get('/:id', getProductById);
-router.put('/:id', updateProduct);
-router.delete('/:id', deleteProduct);
+
+// Rutas protegidas (Solo ADMIN y MANAGER)
+router.post('/', roleMiddleware(['ADMIN', 'MANAGER']), createProduct);
+router.put('/:id', roleMiddleware(['ADMIN', 'MANAGER']), updateProduct);
+router.delete('/:id', roleMiddleware(['ADMIN', 'MANAGER']), deleteProduct);
+
+// Rutas de Auditoría (Solo ADMIN y MANAGER pueden ver el Kardex)
+router.get('/variants/:variantId/kardex', roleMiddleware(['ADMIN', 'MANAGER']), getProductKardex);
+
+// El ajuste de stock requiere admin, pero lo validamos dentro del controlador con bcrypt
+router.post('/variants/:id/adjust', adjustStock);
 
 export default router;

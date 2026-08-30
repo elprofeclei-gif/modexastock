@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from '../api/axios';
 import toast from 'react-hot-toast';
 import Loader from '../components/Loader';
+import { Trash2, Plus, AlertTriangle } from 'lucide-react';
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState('company');
@@ -15,6 +16,12 @@ export default function Settings() {
     colors: [],
   });
   const [newItem, setNewItem] = useState({ type: 'category', name: '', hex: '#000000' });
+
+  // ✅ ESTADOS UNIFICADOS PARA EL MODAL DE ELIMINAR
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<{ type: string; id: string } | 'CLEANUP' | null>(
+    null
+  );
 
   const fetchData = async () => {
     try {
@@ -57,14 +64,32 @@ export default function Settings() {
     }
   };
 
-  const handleDeleteItem = async (type: string, id: string) => {
-    if (window.confirm('¿Eliminar este registro?')) {
+  // ✅ FUNCIÓN UNIFICADA QUE EJECUTA EL BORRADO O LA LIMPIEZA
+  const confirmDeleteItem = async () => {
+    if (itemToDelete === 'CLEANUP') {
       try {
-        await axios.delete(`/settings/catalogs/${type}/${id}`);
-        toast.success('Eliminado');
+        const res = await axios.delete('/settings/catalogs/cleanup');
+        toast.success(res.data.message);
+        fetchData();
+      } catch (error: any) {
+        toast.error(error.response?.data?.message || 'Error al limpiar');
+      } finally {
+        setShowDeleteModal(false);
+        setItemToDelete(null);
+      }
+      return;
+    }
+
+    if (itemToDelete) {
+      try {
+        await axios.delete(`/settings/catalogs/${itemToDelete.type}/${itemToDelete.id}`);
+        toast.success('Eliminado / Desactivado');
         fetchData();
       } catch (error: any) {
         toast.error(error.response?.data?.message || 'No se puede eliminar');
+      } finally {
+        setShowDeleteModal(false);
+        setItemToDelete(null);
       }
     }
   };
@@ -83,13 +108,13 @@ export default function Settings() {
       <div className="flex border-b border-slate-200 dark:border-slate-700">
         <button
           onClick={() => setActiveTab('company')}
-          className={`px-6 py-3 text-sm font-medium ${activeTab === 'company' ? 'border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400' : 'text-slate-500'}`}
+          className={`px-6 py-3 text-sm font-medium transition-colors ${activeTab === 'company' ? 'border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
         >
           Datos de la Empresa
         </button>
         <button
           onClick={() => setActiveTab('catalogs')}
-          className={`px-6 py-3 text-sm font-medium ${activeTab === 'catalogs' ? 'border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400' : 'text-slate-500'}`}
+          className={`px-6 py-3 text-sm font-medium transition-colors ${activeTab === 'catalogs' ? 'border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
         >
           Catálogos
         </button>
@@ -160,7 +185,6 @@ export default function Settings() {
               />
             </div>
 
-            {/* NUEVO: Mensaje para Cotización */}
             <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5">
                 Mensaje para Cotización
@@ -238,14 +262,14 @@ export default function Settings() {
                   type="color"
                   value={newItem.hex}
                   onChange={(e) => setNewItem({ ...newItem, hex: e.target.value })}
-                  className="w-full h-10 rounded-lg border border-slate-200 dark:border-slate-700"
+                  className="w-full h-10 rounded-lg border border-slate-200 dark:border-slate-700 cursor-pointer"
                 />
               )}
               <button
                 type="submit"
-                className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition-colors"
+                className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
               >
-                Añadir
+                <Plus size={16} /> Añadir
               </button>
             </form>
           </div>
@@ -281,18 +305,85 @@ export default function Settings() {
                         {item.name}
                       </span>
                       <button
-                        onClick={() =>
-                          handleDeleteItem(key.replace('ies', 'y').replace('s', ''), item.id)
-                        }
-                        className="text-slate-300 hover:text-red-500 text-xs"
+                        onClick={() => {
+                          setItemToDelete({
+                            type: key.replace('ies', 'y').replace('s', ''),
+                            id: item.id,
+                          });
+                          setShowDeleteModal(true);
+                        }}
+                        className="text-slate-300 hover:text-red-500 transition-colors"
                       >
-                        ✕
+                        <Trash2 size={12} />
                       </button>
                     </div>
                   ))}
                 </div>
               </div>
             ))}
+
+            {/* ✅ BOTÓN DE LIMPIEZA MASIVA */}
+            <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-red-100 dark:border-red-500/20">
+              <h4 className="text-sm font-bold text-slate-500 uppercase mb-3">
+                Limpieza de Base de Datos
+              </h4>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">
+                Elimina automáticamente categorías y marcas que se crearon por error y no tienen
+                productos asociados.
+              </p>
+              <button
+                onClick={() => {
+                  setItemToDelete('CLEANUP');
+                  setShowDeleteModal(true);
+                }}
+                className="w-full py-2 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 text-sm font-semibold rounded-lg border border-red-200 dark:border-red-500/30 transition-colors flex items-center justify-center gap-2"
+              >
+                <Trash2 size={14} /> Limpiar Catálogos Vacíos
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ✅ MODAL DE CONFIRMACIÓN UNIFICADO */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 no-print">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md p-6 border border-slate-100 dark:border-slate-700 overflow-hidden">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="p-3 bg-red-50 dark:bg-red-500/10 rounded-full">
+                <AlertTriangle className="text-red-600 dark:text-red-400" size={24} />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                  {itemToDelete === 'CLEANUP' ? 'Confirmar Limpieza' : 'Eliminar Registro'}
+                </h3>
+                <p className="text-xs text-slate-500">Esta acción no se puede deshacer.</p>
+              </div>
+            </div>
+
+            <p className="text-sm text-slate-600 dark:text-slate-300 mb-6">
+              {itemToDelete === 'CLEANUP'
+                ? '¿Deseas eliminar todas las categorías y marcas que no tienen productos asociados?'
+                : '¿Estás seguro de que deseas eliminar este registro del catálogo?'}
+            </p>
+
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setItemToDelete(null);
+                }}
+                className="px-4 py-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-sm font-medium transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmDeleteItem}
+                className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors flex items-center gap-2"
+              >
+                <Trash2 size={16} /> Sí, Eliminar
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -23,7 +23,7 @@ export const useTreasury = () => {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
-  const [transactions, setTransactions] = useState<any[]>([]); // <-- ASEGÚRATE DE QUE ESTÉ
+  const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
@@ -32,12 +32,12 @@ export const useTreasury = () => {
         axios.get('/treasury/accounts'),
         axios.get('/treasury/expenses'),
         axios.get('/treasury/expenses/categories'),
-        axios.get('/treasury/transactions'), // <-- ASEGÚRATE DE QUE ESTÉ
+        axios.get('/treasury/transactions'),
       ]);
       setAccounts(accRes.data.data);
       setExpenses(expRes.data.data);
       setCategories(catRes.data.data);
-      setTransactions(transRes.data.data); // <-- ASEGÚRATE DE QUE ESTÉ
+      setTransactions(transRes.data.data);
     } catch (error) {
       console.error('Error fetching treasury data', error);
     } finally {
@@ -54,11 +54,9 @@ export const useTreasury = () => {
       const response = await axios.post('/treasury/expenses', data);
       setExpenses((prev) => [response.data.data, ...prev]);
       setAccounts((prev) =>
-        prev.map((acc) =>
-          acc.id === data.accountId ? { ...acc, balance: acc.balance - data.amount } : acc
-        )
+        prev.map((acc) => acc.id === data.accountId ? { ...acc, balance: acc.balance - data.amount } : acc)
       );
-      fetchData(); // Volvemos a fetch para que la nueva transacción aparezca
+      fetchData(); 
       toast.success('Gasto registrado');
       return true;
     } catch (error: any) {
@@ -90,28 +88,14 @@ export const useTreasury = () => {
       return false;
     }
   };
-  // Añade esta función antes del return:
-  const createTransaction = async (data: {
-    accountId: string;
-    amount: number;
-    type: string;
-    concept: string;
-  }) => {
+
+  const createTransaction = async (data: { accountId: string; amount: number; type: string; concept: string; }) => {
     try {
       await axios.post('/treasury/transactions', data);
-      // Actualizamos el saldo de la cuenta en el estado local
       setAccounts((prev) =>
-        prev.map((acc) =>
-          acc.id === data.accountId
-            ? {
-                ...acc,
-                balance:
-                  data.type === 'DEPOSIT' ? acc.balance + data.amount : acc.balance - data.amount,
-              }
-            : acc
-        )
+        prev.map((acc) => acc.id === data.accountId ? { ...acc, balance: data.type === 'DEPOSIT' ? acc.balance + data.amount : acc.balance - data.amount } : acc)
       );
-      fetchData(); // Refrescar historial de transacciones
+      fetchData(); 
       toast.success('Movimiento registrado correctamente');
       return true;
     } catch (error: any) {
@@ -120,12 +104,14 @@ export const useTreasury = () => {
     }
   };
 
+  // ✅ Devolvemos fetchData para poder refrescar la pantalla de tesorería cuando sea necesario
   return {
     accounts,
     expenses,
     categories,
     transactions,
     loading,
+    fetchData, // <--- AGREGADO
     createExpense,
     createAccount,
     createCategory,

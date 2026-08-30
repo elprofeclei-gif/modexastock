@@ -13,7 +13,8 @@ export const useUpload = () => {
       const formData = new FormData();
       formData.append('image', file);
 
-      const response = await axios.post('/upload', formData, {
+      // ✅ Corregido a /upload/image
+      const response = await axios.post('/upload/image', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 

@@ -65,16 +65,19 @@ export const useUsers = () => {
       return false;
     }
   };
+
   const toggleStatus = async (id: string) => {
     try {
       const res = await axios.put(`/users/${id}/toggle-status`);
       setUsers((prev) => prev.map((u) => (u.id === id ? res.data.data : u)));
       toast.success('Estado actualizado');
-      return true; // <-- AÑADE ESTO
+      return true;
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Error');
-      return false; // <-- AÑADE ESTO
+      return false;
     }
   };
-  return { users, loading, createUser, updateUser, deleteUser, toggleStatus };
+
+  // ✅ Devolvemos fetchUsers para poder refrescar la lista al crear/editar
+  return { users, loading, fetchUsers, createUser, updateUser, deleteUser, toggleStatus };
 };

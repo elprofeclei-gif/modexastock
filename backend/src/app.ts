@@ -1,16 +1,22 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
-import cookieParser from 'cookie-parser'; // <-- Importar
+import cookieParser from 'cookie-parser';
 import routes from './routes';
 
 const app = express();
 
-// Lista de URLs permitidas (localhost y tu red local)
+// ✅ Leemos CLIENT_URL y separamos por comas. Si no existe, usamos un array vacío.
+const clientUrls = process.env.CLIENT_URL
+  ? process.env.CLIENT_URL.split(',').map((url) => url.trim())
+  : [];
+
+// Lista final de orígenes permitidos
 const allowedOrigins = [
   'http://localhost:5173',
+  'http://192.168.2.50:5173',
   'http://127.0.0.1:5173',
-  'http://192.168.1.7:5173', // Añade aquí tu IP local si cambia en el futuro
-];
+  ...clientUrls, // ✅ Agregamos las URLs de tu variable
+].filter(Boolean); // Limpiamos espacios vacíos
 
 // Middlewares
 app.use(
@@ -20,6 +26,7 @@ app.use(
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
+        console.warn(`[CORS Bloqueado] Origen no permitido: ${origin}`);
         callback(new Error('No permitido por CORS'));
       }
     },
@@ -27,7 +34,7 @@ app.use(
   })
 );
 
-app.use(express.json());
+app.use(express.json({ limit: '10mb' })); // Límite para Excel pesados
 app.use(cookieParser());
 
 // Usamos todas las rutas bajo el prefijo /api

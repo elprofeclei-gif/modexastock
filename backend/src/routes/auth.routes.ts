@@ -4,8 +4,11 @@ import { authMiddleware } from '../middlewares/auth.middleware';
 
 const router = Router();
 
+// Rutas públicas
 router.post('/login', login);
-router.post('/logout', logout); // <-- Nueva ruta
+router.post('/logout', logout);
+
+// Rutas protegidas (requieren estar logueado)
 router.put('/profile', authMiddleware, updateProfile);
 
 export default router;

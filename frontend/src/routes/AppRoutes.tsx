@@ -15,6 +15,9 @@ import Layout from '../components/Layout';
 import ProtectedRoute from '../components/ProtectedRoute';
 import DataCenter from '../pages/DataCenter';
 import Settings from '../pages/Settings';
+import AuditLogs from '../pages/AuditLogs';
+import ProfitLoss from '../pages/ProfitLoss';
+import Settlements from '../pages/Settlements'; // ✅ Importado
 
 // Componente para validar roles
 const RoleRoute = ({ children, roles }: { children: React.ReactNode; roles: string[] }) => {
@@ -23,7 +26,6 @@ const RoleRoute = ({ children, roles }: { children: React.ReactNode; roles: stri
 
   const user = JSON.parse(userStr);
   if (!roles.includes(user.role)) {
-    // Si no tiene permiso, lo mandamos al dashboard
     return <Navigate to="/" replace />;
   }
 
@@ -37,158 +39,53 @@ export default function AppRoutes() {
         <Route path="/login" element={<Login />} />
 
         {/* Rutas accesibles para todos los logueados */}
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <Dashboard />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/pos"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <POS />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/sales"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <Sales />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <Profile />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
+        <Route path="/pos" element={<ProtectedRoute><Layout><POS /></Layout></ProtectedRoute>} />
+        <Route path="/sales" element={<ProtectedRoute><Layout><Sales /></Layout></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Layout><Profile /></Layout></ProtectedRoute>} />
+        
+        <Route path="/clients" element={
+          <ProtectedRoute><Layout><RoleRoute roles={['ADMIN', 'MANAGER', 'USER']}><Clients /></RoleRoute></Layout></ProtectedRoute>
+        } />
 
         {/* Rutas SOLO para Admin y Manager */}
-        <Route
-          path="/purchases"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <RoleRoute roles={['ADMIN', 'MANAGER']}>
-                  <Purchases />
-                </RoleRoute>
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/purchases/history"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <RoleRoute roles={['ADMIN', 'MANAGER']}>
-                  <PurchaseHistory />
-                </RoleRoute>
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/treasury"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <RoleRoute roles={['ADMIN', 'MANAGER']}>
-                  <Treasury />
-                </RoleRoute>
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/cash-history"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <RoleRoute roles={['ADMIN', 'MANAGER']}>
-                  <CashHistory />
-                </RoleRoute>
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/inventory"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <RoleRoute roles={['ADMIN', 'MANAGER']}>
-                  <Inventory />
-                </RoleRoute>
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/clients"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <RoleRoute roles={['ADMIN', 'MANAGER', 'USER']}>
-                  <Clients />
-                </RoleRoute>
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/purchases" element={
+          <ProtectedRoute><Layout><RoleRoute roles={['ADMIN', 'MANAGER']}><Purchases /></RoleRoute></Layout></ProtectedRoute>
+        } />
+        <Route path="/purchases/history" element={
+          <ProtectedRoute><Layout><RoleRoute roles={['ADMIN', 'MANAGER']}><PurchaseHistory /></RoleRoute></Layout></ProtectedRoute>
+        } />
+        <Route path="/treasury" element={
+          <ProtectedRoute><Layout><RoleRoute roles={['ADMIN', 'MANAGER']}><Treasury /></RoleRoute></Layout></ProtectedRoute>
+        } />
+        <Route path="/cash-history" element={
+          <ProtectedRoute><Layout><RoleRoute roles={['ADMIN', 'MANAGER']}><CashHistory /></RoleRoute></Layout></ProtectedRoute>
+        } />
+        <Route path="/inventory" element={
+          <ProtectedRoute><Layout><RoleRoute roles={['ADMIN', 'MANAGER']}><Inventory /></RoleRoute></Layout></ProtectedRoute>
+        } />
+        <Route path="/data-center" element={
+          <ProtectedRoute><Layout><RoleRoute roles={['ADMIN', 'MANAGER']}><DataCenter /></RoleRoute></Layout></ProtectedRoute>
+        } />
+        <Route path="/settings" element={
+          <ProtectedRoute><Layout><RoleRoute roles={['ADMIN', 'MANAGER']}><Settings /></RoleRoute></Layout></ProtectedRoute>
+        } />
+        
+        {/* ✅ NUEVAS RUTAS AÑADIDAS Y ENVUELTAS EN LAYOUT */}
+        <Route path="/audit-logs" element={
+          <ProtectedRoute><Layout><RoleRoute roles={['ADMIN', 'MANAGER']}><AuditLogs /></RoleRoute></Layout></ProtectedRoute>
+        } />
+        <Route path="/profit-loss" element={
+          <ProtectedRoute><Layout><RoleRoute roles={['ADMIN', 'MANAGER']}><ProfitLoss /></RoleRoute></Layout></ProtectedRoute>
+        } />
+        <Route path="/settlements" element={
+          <ProtectedRoute><Layout><RoleRoute roles={['ADMIN', 'MANAGER']}><Settlements /></RoleRoute></Layout></ProtectedRoute>
+        } />
 
-        {/* Rutas SOLO para Admin */}
-        <Route
-          path="/users"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <RoleRoute roles={['ADMIN']}>
-                  <Users />
-                </RoleRoute>
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/data-center"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <RoleRoute roles={['ADMIN', 'MANAGER']}>
-                  <DataCenter />
-                </RoleRoute>
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/settings"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <RoleRoute roles={['ADMIN', 'MANAGER']}>
-                  <Settings />
-                </RoleRoute>
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
+        {/* Ruta SOLO para Admin */}
+        <Route path="/users" element={
+          <ProtectedRoute><Layout><RoleRoute roles={['ADMIN']}><Users /></RoleRoute></Layout></ProtectedRoute>
+        } />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

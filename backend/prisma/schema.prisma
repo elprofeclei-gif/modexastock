@@ -25,6 +25,11 @@ model User {
   expenses      Expense[]
   isActive Boolean @default(true)
   balance      Float    @default(0)
+  voidedSales    Sale[]     @relation("VoidedSales")
+  clientPayments ClientPayment[]
+  inventoryMovements InventoryMovement[]
+  auditLogs AuditLog[]
+  suspendedSales SuspendedSale[]
 }
 
 model Category {
@@ -63,6 +68,7 @@ model Product {
   name        String
   description String?
   sku         String           @unique
+  cost Float @default(0)
   price       Float
   imageUrl    String?
   isActive    Boolean          @default(true)
@@ -78,6 +84,7 @@ model Product {
   updatedAt   DateTime         @updatedAt
 
   @@index([categoryId, brandId])
+  
 }
 
 model ProductVariant {
@@ -102,6 +109,7 @@ model ProductVariant {
   purchaseItems PurchaseItem[]
 
   @@unique([productId, sizeId, colorId])
+  movements InventoryMovement[]
 }
 
 // --- ENTIDADES FINANCIERAS Y OPERATIVAS ---
@@ -113,9 +121,10 @@ model Client {
   phone     String?
   document  String?  // Cédula o RIF
   address   String?
-   balance   Float    @default(0)
+  balance   Float    @default(0)
   createdAt DateTime @default(now())
   sales     Sale[]
+  payments ClientPayment[]
 }
 
 model Vendor {
@@ -126,6 +135,7 @@ model Vendor {
   email     String?   @unique
   createdAt DateTime  @default(now())
   purchases Purchase[]
+  balance Float @default(0) 
 }
 
 model PhysicalBox {
@@ -157,6 +167,7 @@ model CashRegister {
   purchases     Purchase[]
   physicalBoxId String?
   physicalBox   PhysicalBox? @relation(fields: [physicalBoxId], references: [id])
+  clientPayments ClientPayment[]
 }
 
 model Sale {
@@ -165,7 +176,7 @@ model Sale {
   receivedAmount Float?
   change        Float?
   reference     String?
-  paymentMethod PaymentMethod
+  paymentMethod String
   createdAt     DateTime @default(now())
   
   clientId      String?  
@@ -178,6 +189,12 @@ model Sale {
   cashRegister   CashRegister @relation(fields: [cashRegisterId], references: [id])
   
   items         SaleItem[]
+  isVoided       Boolean    @default(false)
+  voidedAt       DateTime?
+  voidedById     String?
+  voidedReason   String?
+  voidedBy       User?      @relation("VoidedSales", fields: [voidedById], references: [id])
+  discountAmount Float @default(0)
 }
 
 model SaleItem {
@@ -238,7 +255,8 @@ model Account {
   expenses      Expense[]
   cashDeposits  CashRegister[] @relation("TransfersFromAccount")
   transactions  Transaction[]
-  purchases     Purchase[]      // <-- AÑADE ESTA LÍNEA
+  purchases     Purchase[]
+  clientPayments ClientPayment[]
 }
 
 model ExpenseCategory {
@@ -286,6 +304,56 @@ model Setting {
   wholesaleMargin Float  @default(20)
   updatedAt     DateTime @updatedAt
 }
+
+model ClientPayment {
+  id             String   @id @default(uuid())
+  amount         Float
+  paymentMethod  String
+  reference      String?
+  clientId       String
+  client         Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  cashRegisterId String?
+  cashRegister   CashRegister? @relation(fields: [cashRegisterId], references: [id])
+  accountId      String?
+  account        Account? @relation(fields: [accountId], references: [id])
+  createdAt      DateTime @default(now())
+}
+
+model InventoryMovement {
+  id              String   @id @default(uuid())
+  productVariantId String
+  productVariant  ProductVariant @relation(fields: [productVariantId], references: [id])
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  type            String   // "SALE", "PURCHASE", "ADJUSTMENT", "VOID_SALE"
+  quantityChange  Int      // Positivo para entradas, Negativo para salidas
+  reason          String?  // Motivo del ajuste
+  createdAt       DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String   // Ej: "DELETE_PRODUCT", "VOID_SALE", "FORCE_CLOSE"
+  entity    String   // Ej: "Product", "Sale", "CashRegister"
+  entityId  String?
+  details   String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+}
+
+model SuspendedSale {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  items     Json     // Guardaremos todo el carrito en formato JSON
+  createdAt DateTime @default(now())
+}
+
+
 
 // --- ENUMS ---
 

@@ -60,7 +60,7 @@ export default function QuoteModal({ isOpen, onClose, cart, total }: QuoteModalP
             </button>
           </div>
 
-          <div className="p-6 flex-grow" id="printable-quote">
+          <div className="p-6 grow" id="printable-quote">
             <div className="text-center mb-6 border-b border-dashed border-slate-200 dark:border-slate-700 pb-4">
               <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
                 {settings?.companyName || 'Modexastock'}

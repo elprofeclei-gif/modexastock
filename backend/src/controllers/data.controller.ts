@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { CustomRequest } from '../middlewares/auth.middleware';
 import prisma from '../config/prisma';
 import * as XLSX from 'xlsx';
+import { logAction } from '../utils/audit'; // ✅ Importado
 
 // Generar un color hex aleatorio para los colores nuevos del Excel
 const generateRandomHex = () => {
@@ -69,9 +70,9 @@ export const importProducts = async (req: CustomRequest, res: Response) => {
       const colorName = row.color?.toString().trim() || 'Único';
 
       if (!categoriesMap.has(catName.toLowerCase()))
-        newCats.set(catName.toLowerCase(), { name: catName });
+        newCats.set(catName.toLowerCase(), { name: catName, isActive: true });
       if (!brandsMap.has(brandName.toLowerCase()))
-        newBrands.set(brandName.toLowerCase(), { name: brandName });
+        newBrands.set(brandName.toLowerCase(), { name: brandName, isActive: true });
       if (!sizesMap.has(sizeName.toLowerCase()))
         newSizes.set(sizeName.toLowerCase(), { name: sizeName });
       if (!colorsMap.has(colorName.toLowerCase()))
@@ -114,6 +115,8 @@ export const importProducts = async (req: CustomRequest, res: Response) => {
     const productsToCreate: {
       name: string;
       sku: string;
+      description: string | null;
+      cost: number;
       price: number;
       categoryId: string;
       brandId: string;
@@ -143,6 +146,8 @@ export const importProducts = async (req: CustomRequest, res: Response) => {
           productsToCreate.push({
             name,
             sku,
+            description: row.descripcion?.toString().trim() || null,
+            cost: parseNumeric(row.costo),
             price: parseNumeric(row.precio),
             categoryId: cat.id,
             brandId: brand.id,
@@ -158,9 +163,9 @@ export const importProducts = async (req: CustomRequest, res: Response) => {
     const updatedProducts = await prisma.product.findMany();
     const finalProductsMap = new Map(updatedProducts.map((p) => [p.sku, p]));
 
-    const variantsMap = new Map<
+        const variantsMap = new Map<
       string,
-      { productId: string; sizeId: string; colorId: string; stock: number }
+      { productId: string; sizeId: string; colorId: string; stock: number; minStock: number }
     >();
 
     data.forEach((row, index) => {
@@ -173,6 +178,7 @@ export const importProducts = async (req: CustomRequest, res: Response) => {
       const size = sizesMap.get(sizeName);
       const color = colorsMap.get(colorName);
       const stock = parseNumeric(row.stock);
+      const minStock = parseNumeric(row.stock_minimo) || 5; // ✅ Lee el mínimo, si no, usa 5
 
       if (!product || !size || !color) {
         console.warn(`Fila ${index + 2} omitida: variante incompleta.`);
@@ -190,11 +196,12 @@ export const importProducts = async (req: CustomRequest, res: Response) => {
           sizeId: size.id,
           colorId: color.id,
           stock,
+          minStock,
         });
       }
     });
 
-    const variantsToCreate: any[] = [];
+       const variantsToCreate: any[] = [];
     const variantsToUpdate: any[] = [];
 
     for (const [key, variantData] of variantsMap.entries()) {
@@ -204,35 +211,78 @@ export const importProducts = async (req: CustomRequest, res: Response) => {
         variantsToUpdate.push({
           id: existingVariant.id,
           stock: variantData.stock,
+          minStock: variantData.minStock
         });
       } else {
+        // ✅ Ya no forzamos minStock a 5 aquí, lo toma de variantData
         variantsToCreate.push({
           ...variantData,
-          minStock: 5,
         });
       }
     }
 
-    if (variantsToCreate.length > 0) {
-      await prisma.productVariant.createMany({
-        data: variantsToCreate,
-        skipDuplicates: true,
-      });
-    }
+    const userId = req.user?.id!;
 
-    if (variantsToUpdate.length > 0) {
-      for (let i = 0; i < variantsToUpdate.length; i += 50) {
-        const chunk = variantsToUpdate.slice(i, i + 50);
-        await prisma.$transaction(
-          chunk.map((variant) =>
-            prisma.productVariant.update({
-              where: { id: variant.id },
-              data: { stock: variant.stock },
-            })
-          )
-        );
+    if (variantsToCreate.length > 0) {
+      for (const v of variantsToCreate) {
+        const newVariant = await prisma.productVariant.create({ data: v });
+
+        // ✅ REGISTRO EN KARDEX PARA VARIANTES NUEVAS
+        await prisma.inventoryMovement.create({
+          data: {
+            productVariantId: newVariant.id,
+            userId,
+            type: 'PURCHASE',
+            quantityChange: newVariant.stock,
+            reason: 'Stock inicial por importación de Excel',
+          },
+        });
       }
     }
+
+        if (variantsToUpdate.length > 0) {
+      for (let i = 0; i < variantsToUpdate.length; i += 50) {
+        const chunk = variantsToUpdate.slice(i, i + 50);
+        
+        await prisma.$transaction(async (tx) => {
+          for (const variant of chunk) {
+            const dbVariant = await tx.productVariant.findUnique({ where: { id: variant.id } });
+            if (!dbVariant) continue;
+            
+            const difference = variant.stock - dbVariant.stock;
+            
+            await tx.productVariant.update({
+              where: { id: variant.id },
+              data: { 
+                stock: variant.stock,
+                minStock: variant.minStock // ✅ Actualizamos el mínimo también
+              },
+            });
+
+            if (difference !== 0) {
+              await tx.inventoryMovement.create({
+                data: {
+                  productVariantId: variant.id,
+                  userId,
+                  type: 'ADJUSTMENT',
+                  quantityChange: difference,
+                  reason: 'Actualización de stock por importación de Excel'
+                }
+              });
+            }
+          }
+        });
+      }
+    }
+
+    // ✅ Log general en la bitácora del sistema
+    await logAction(
+      userId,
+      'IMPORT_EXCEL',
+      'Data',
+      undefined,
+      `Importación masiva de productos desde Excel. Filas: ${data.length}`
+    );
 
     return res.status(200).json({
       status: 'success',
@@ -266,6 +316,15 @@ export const downloadBackup = async (req: CustomRequest, res: Response) => {
       timestamp: new Date().toISOString(),
       data: { users, products, categories, brands, sales, purchases, accounts, clients, vendors },
     };
+
+    // ✅ Registro en bitácora (Descargar backup es una acción sensible)
+    await logAction(
+      req.user?.id,
+      'DOWNLOAD_BACKUP',
+      'Data',
+      undefined,
+      `El usuario descargó un respaldo completo de la base de datos.`
+    );
 
     res.setHeader('Content-Type', 'application/json');
     res.setHeader(
@@ -310,6 +369,15 @@ export const downloadInventoryReport = async (req: CustomRequest, res: Response)
       ),
     ].join('\n');
 
+    // ✅ Registro en bitácora
+    await logAction(
+      req.user?.id,
+      'EXPORT_INVENTORY_CSV',
+      'Data',
+      undefined,
+      `El usuario exportó el reporte general de inventario a CSV.`
+    );
+
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', 'attachment; filename="reporte_inventario.csv"');
     return res.status(200).send(csv);
@@ -350,6 +418,15 @@ export const downloadSalesReport = async (req: CustomRequest, res: Response) => 
         headers.map((fieldName) => JSON.stringify(row[fieldName as keyof typeof row])).join(',')
       ),
     ].join('\n');
+
+    // ✅ Registro en bitácora
+    await logAction(
+      req.user?.id,
+      'EXPORT_SALES_CSV',
+      'Data',
+      undefined,
+      `El usuario exportó el reporte general de ventas a CSV.`
+    );
 
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', 'attachment; filename="reporte_ventas_general.csv"');

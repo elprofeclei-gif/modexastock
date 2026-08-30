@@ -3,6 +3,7 @@ import { CustomRequest } from '../middlewares/auth.middleware';
 import prisma from '../config/prisma';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { logAction } from '../utils/audit'; // ✅ Importado
 
 export const login = async (req: Request, res: Response) => {
   try {
@@ -30,17 +31,22 @@ export const login = async (req: Request, res: Response) => {
       { expiresIn: '8h' }
     );
 
-    // Configuración de cookie para red local (HTTP)
+    // ✅ Dinámico: False en local, True en producción (HTTPS)
+    const isProduction = process.env.NODE_ENV === 'production';
+
     res.cookie('token', token, {
       httpOnly: true,
-      secure: false, // Debe ser false porque estamos en HTTP local, no HTTPS
-      sameSite: 'lax', // 'lax' permite que la cookie viaje en la red local
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax', // 'none' permite cross-site en prod con HTTPS
       maxAge: 8 * 60 * 60 * 1000, // 8 horas
     });
 
+    // ✅ Registro en bitácora
+    await logAction(user.id, 'LOGIN', 'Auth', user.id, `Inicio de sesión exitoso.`);
+
     return res.status(200).json({
       status: 'success',
-      user: { id: user.id, name: user.name, email: user.email, role: user.role }, // Ya NO enviamos el token en el JSON
+      user: { id: user.id, name: user.name, email: user.email, role: user.role },
     });
   } catch (error) {
     console.error('Error en login:', error);
@@ -55,7 +61,6 @@ export const updateProfile = async (req: CustomRequest, res: Response) => {
 
     const data: any = { name, email };
 
-    // Si el usuario envía una nueva contraseña, la hasheamos
     if (password && password.length > 0) {
       const salt = await bcrypt.genSalt(10);
       data.password = await bcrypt.hash(password, salt);
@@ -64,8 +69,11 @@ export const updateProfile = async (req: CustomRequest, res: Response) => {
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data,
-      select: { id: true, name: true, email: true, role: true },
+      select: { id: true, name: true, email: true, role: true, phone: true },
     });
+
+    // ✅ Registro en bitácora
+    await logAction(userId, 'UPDATE_PROFILE', 'User', userId, `Usuario actualizó su perfil.`);
 
     return res.status(200).json({ status: 'success', data: updatedUser });
   } catch (error) {

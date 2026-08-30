@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { CustomRequest } from '../middlewares/auth.middleware';
 import prisma from '../config/prisma';
+import { logAction } from '../utils/audit'; // ✅ IMPORTADO
 
 export const getAccounts = async (req: CustomRequest, res: Response) => {
   try {
@@ -53,17 +54,20 @@ export const createExpense = async (req: CustomRequest, res: Response) => {
       return res.status(400).json({ status: 'error', message: 'Faltan campos obligatorios' });
     }
 
+    const parsedAmount = parseFloat(amount) || 0;
+
     const result = await prisma.$transaction(async (tx) => {
       const account = await tx.account.findUnique({ where: { id: accountId } });
       if (!account) throw new Error('Cuenta no encontrada');
 
-      if (account.balance < amount) {
+      // ✅ Usar el monto parseado para validar saldo
+      if (account.balance < parsedAmount) {
         throw new Error('Saldo insuficiente en la cuenta seleccionada');
       }
 
       const expense = await tx.expense.create({
         data: {
-          amount: parseFloat(amount),
+          amount: parsedAmount, // ✅
           concept,
           accountId,
           categoryId: categoryId || null,
@@ -73,13 +77,13 @@ export const createExpense = async (req: CustomRequest, res: Response) => {
 
       await tx.account.update({
         where: { id: accountId },
-        data: { balance: { decrement: parseFloat(amount) } },
+        data: { balance: { decrement: parsedAmount } }, // ✅
       });
 
-      // NUEVO: Guardar en el historial de transacciones
+      // Guardar en el historial de transacciones
       await tx.transaction.create({
         data: {
-          amount: parseFloat(amount),
+          amount: parsedAmount, // ✅
           type: 'EXPENSE',
           concept: `Gasto: ${concept}`,
           accountId,
@@ -88,6 +92,15 @@ export const createExpense = async (req: CustomRequest, res: Response) => {
 
       return expense;
     });
+
+    // ✅ REGISTRO EN LA BITÁCORA DEL SISTEMA
+    await logAction(
+      userId,
+      'CREATE_EXPENSE',
+      'Expense',
+      result.id,
+      `Gasto registrado por ${parsedAmount}. Concepto: ${concept}.`
+    );
 
     return res.status(201).json({ status: 'success', data: result });
   } catch (error: any) {
@@ -112,7 +125,6 @@ export const getExpenses = async (req: CustomRequest, res: Response) => {
   }
 };
 
-// Obtener historial de transacciones
 export const getTransactions = async (req: CustomRequest, res: Response) => {
   try {
     const transactions = await prisma.transaction.findMany({
@@ -132,17 +144,21 @@ export const getTransactions = async (req: CustomRequest, res: Response) => {
 export const createManualTransaction = async (req: CustomRequest, res: Response) => {
   try {
     const { accountId, amount, type, concept } = req.body;
+    const userId = req.user?.id!;
 
     if (!accountId || !amount || !type || !concept) {
       return res.status(400).json({ status: 'error', message: 'Faltan campos obligatorios' });
     }
+
+    const parsedAmount = parseFloat(amount) || 0;
 
     const result = await prisma.$transaction(async (tx) => {
       const account = await tx.account.findUnique({ where: { id: accountId } });
       if (!account) throw new Error('Cuenta no encontrada');
 
       // Si es un retiro (egreso manual), validar que haya saldo
-      if (type === 'WITHDRAWAL' && account.balance < amount) {
+      if (type === 'WITHDRAWAL' && account.balance < parsedAmount) {
+        // ✅
         throw new Error('Saldo insuficiente en la cuenta para este retiro');
       }
 
@@ -150,15 +166,15 @@ export const createManualTransaction = async (req: CustomRequest, res: Response)
       await tx.account.update({
         where: { id: accountId },
         data: {
-          balance: type === 'DEPOSIT' ? { increment: amount } : { decrement: amount },
+          balance: type === 'DEPOSIT' ? { increment: parsedAmount } : { decrement: parsedAmount }, // ✅
         },
       });
 
       // Guardar en historial de transacciones
       const transaction = await tx.transaction.create({
         data: {
-          amount,
-          type: type, // 'DEPOSIT' o 'WITHDRAWAL'
+          amount: parsedAmount, // ✅
+          type: type,
           concept,
           accountId,
         },
@@ -166,6 +182,15 @@ export const createManualTransaction = async (req: CustomRequest, res: Response)
 
       return transaction;
     });
+
+    // ✅ REGISTRO EN LA BITÁCORA DEL SISTEMA
+    await logAction(
+      userId,
+      'CREATE_MANUAL_TRANSACTION',
+      'Transaction',
+      result.id,
+      `Movimiento manual de Tesorería (${type}) por ${parsedAmount}. Concepto: ${concept}.`
+    );
 
     return res.status(201).json({ status: 'success', data: result });
   } catch (error: any) {

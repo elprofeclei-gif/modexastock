@@ -3,6 +3,8 @@ import { z } from 'zod';
 export const productSchema = z.object({
   name: z.string().min(1, 'El nombre es obligatorio'),
   sku: z.string().min(1, 'El SKU es obligatorio'),
+  description: z.string().optional().or(z.literal('')), // ✅ AGREGADO
+  cost: z.coerce.number().min(0, 'El costo debe ser mayor o igual a 0').default(0), // ✅ AGREGADO
   price: z.coerce.number().min(0, 'El precio debe ser mayor o igual a 0'),
   imageUrl: z.string().optional().or(z.literal('')),
   categoryId: z.string().min(1, 'Selecciona una categoría'),

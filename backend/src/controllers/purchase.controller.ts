@@ -1,27 +1,25 @@
 import { Response } from 'express';
 import { CustomRequest } from '../middlewares/auth.middleware';
 import prisma from '../config/prisma';
+import { logAction } from '../utils/audit'; // ✅ IMPORTADO
 
 export const createPurchase = async (req: CustomRequest, res: Response) => {
   try {
-    const { items, vendorId, accountId } = req.body;
+    const { items, vendorId, accountId, paymentMethod } = req.body; // ✅ Agregamos paymentMethod
     const userId = req.user?.id!;
 
     let cashRegister = null;
 
-    // Si no se selecciona una cuenta de tesorería, intentamos usar la caja actual
-    if (!accountId) {
+    // Si es de contado en efectivo, buscamos la caja abierta
+    if (paymentMethod === 'CASH' && !accountId) {
       cashRegister = await prisma.cashRegister.findFirst({
         where: { userId, status: 'OPEN' },
       });
-
       if (!cashRegister) {
-        return res
-          .status(400)
-          .json({
-            status: 'error',
-            message: 'Debes abrir caja o seleccionar una cuenta de tesorería para pagar.',
-          });
+        return res.status(400).json({
+          status: 'error',
+          message: 'Debes abrir caja para pagar en efectivo o selecciona una cuenta bancaria.',
+        });
       }
     }
 
@@ -29,7 +27,6 @@ export const createPurchase = async (req: CustomRequest, res: Response) => {
       return res.status(400).json({ status: 'error', message: 'La compra no tiene items.' });
     }
 
-    // AUMENTAMOS EL TIMEOUT A 10 SEGUNDOS (10000 ms)
     const purchase = await prisma.$transaction(
       async (tx) => {
         let totalAmount = 0;
@@ -39,12 +36,21 @@ export const createPurchase = async (req: CustomRequest, res: Response) => {
           const variant = await tx.productVariant.findUnique({
             where: { id: item.productVariantId },
           });
-
           if (!variant) throw new Error(`Variante no encontrada`);
 
           await tx.productVariant.update({
             where: { id: variant.id },
             data: { stock: { increment: item.quantity } },
+          });
+
+          await tx.inventoryMovement.create({
+            data: {
+              productVariantId: variant.id,
+              userId,
+              type: 'PURCHASE',
+              quantityChange: item.quantity,
+              reason: `Compra a proveedor`,
+            },
           });
 
           const unitCost = parseFloat(item.unitCost) || 0;
@@ -59,36 +65,48 @@ export const createPurchase = async (req: CustomRequest, res: Response) => {
           });
         }
 
-        if (accountId) {
-          const account = await tx.account.findUnique({ where: { id: accountId } });
-          if (!account) throw new Error('Cuenta no encontrada');
+        // LÓGICA DE PAGO
+        if (paymentMethod === 'CREDIT') {
+          // ✅ Si es a crédito, sumamos deuda al proveedor
+          if (!vendorId) throw new Error('Debes seleccionar un proveedor para compras a crédito');
+          await tx.vendor.update({
+            where: { id: vendorId },
+            data: { balance: { increment: totalAmount } },
+          });
+        } else {
+          // Si es de contado, descontamos dinero
+          if (accountId) {
+            const account = await tx.account.findUnique({ where: { id: accountId } });
+            if (!account) throw new Error('Cuenta no encontrada');
+            if (account.balance < totalAmount)
+              throw new Error('Saldo insuficiente en la cuenta seleccionada');
 
-          if (account.balance < totalAmount) {
-            throw new Error('Saldo insuficiente en la cuenta seleccionada');
+            await tx.account.update({
+              where: { id: accountId },
+              data: { balance: { decrement: totalAmount } },
+            });
+            await tx.transaction.create({
+              data: {
+                amount: totalAmount,
+                type: 'EXPENSE',
+                concept: `Compra a proveedor (Contado)`,
+                accountId,
+              },
+            });
+          } else if (cashRegister) {
+            await tx.cashRegister.update({
+              where: { id: cashRegister.id },
+              data: { manualOutflows: { increment: totalAmount } },
+            });
           }
-
-          await tx.account.update({
-            where: { id: accountId },
-            data: { balance: { decrement: totalAmount } },
-          });
-
-          await tx.transaction.create({
-            data: {
-              amount: totalAmount,
-              type: 'EXPENSE',
-              concept: `Compra a proveedor`,
-              accountId,
-            },
-          });
         }
 
-        // Si hay caja abierta, la usamos. Si no (compra de banco), queda null.
         const newPurchase = await tx.purchase.create({
           data: {
             totalAmount,
             vendorId,
             userId,
-            cashRegisterId: cashRegister?.id || null, // <-- Si es de banco, queda null
+            cashRegisterId: cashRegister?.id || null,
             accountId: accountId || null,
             items: { create: purchaseItemsData },
           },
@@ -98,7 +116,15 @@ export const createPurchase = async (req: CustomRequest, res: Response) => {
         return newPurchase;
       },
       { timeout: 10000 }
-    ); // <-- AQUI ESTÁ EL CAMBIO CLAVE DEL TIMEOUT
+    );
+
+    await logAction(
+      userId,
+      'CREATE_PURCHASE',
+      'Purchase',
+      purchase.id,
+      `Compra registrada por ${purchase.totalAmount}. Pago: ${paymentMethod}.`
+    );
 
     return res.status(201).json({ status: 'success', data: purchase });
   } catch (error: any) {

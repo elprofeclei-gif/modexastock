@@ -4,6 +4,8 @@ import { authMiddleware } from '../middlewares/auth.middleware';
 
 const router = Router();
 
-router.get('/', authMiddleware, getMetadata);
+router.use(authMiddleware); // Solo usuarios del sistema pueden ver los catálogos
+
+router.get('/', getMetadata);
 
 export default router;

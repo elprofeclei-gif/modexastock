@@ -69,30 +69,23 @@ export default function DataCenter() {
     }
   };
 
-  const downloadTemplate = () => {
-    const headers = ['nombre', 'sku', 'categoria', 'marca', 'talla', 'color', 'stock', 'precio'];
+    const downloadTemplate = () => {
+    const headers = ['sku', 'nombre', 'descripcion', 'categoria', 'marca', 'talla', 'color', 'costo', 'precio', 'stock', 'stock_minimo'];
     const example1 = [
-      'Pantalon Jean Levi',
-      'JEA-LEV-AZU-32',
-      'Pantalones',
-      'Levi',
-      'S',
-      'Blanco',
-      '3',
-      '120000',
-    ];
-    const example2 = [
-      'Pantalon Jean Levi',
-      'JEA-LEV-AZU-32',
-      'Pantalones',
-      'Levi',
-      'L',
+      'MOD-001',
+      'Camiseta Algodón',
+      'Camiseta cuello redondo 100% algodón',
+      'Ropa',
+      'Nike',
+      'M',
       'Negro',
-      '8',
-      '120000',
+      '15000',
+      '25000',
+      '50',
+      '5'
     ];
 
-    const csv = [headers.join(','), example1.join(','), example2.join(',')].join('\n');
+    const csv = [headers.join(','), example1.join(',')].join('\n');
 
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);

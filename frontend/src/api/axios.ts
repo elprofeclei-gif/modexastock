@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-// Detecta automáticamente el hostname (localhost o tu IP local)
-// Si entras desde PC será "localhost", si entras desde el celular será "192.168.1.7"
-const API_URL = `http://${window.location.hostname}:3000/api`;
+// ✅ Si hay una variable de entorno (Producción), úsala.
+// Si no hay (Desarrollo local), usa la magia del hostname dinámico.
+const API_URL = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:3000/api`;
 
 const axiosInstance = axios.create({
   baseURL: API_URL,

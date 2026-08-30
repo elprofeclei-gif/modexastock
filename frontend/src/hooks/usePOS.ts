@@ -25,6 +25,7 @@ export const usePOS = () => {
   const [productForVariant, setProductForVariant] = useState<Product | null>(null);
   const [suggestedOpening, setSuggestedOpening] = useState(0);
   const [isLoadingRegister, setIsLoadingRegister] = useState(true);
+  const [discount, setDiscount] = useState(0);
 
   const checkOpenCashRegister = async () => {
     try {
@@ -50,14 +51,37 @@ export const usePOS = () => {
     checkOpenCashRegister();
   }, []);
 
-  const openCashRegister = async (physicalBoxId: string, openingAmount: number) => {
+  const openCashRegister = async (
+    boxId: string,
+    amount: number,
+    adminAuth?: { email: string; password: string },
+    originAccountId?: string
+  ) => {
+    setLoading(true);
     try {
-      await axios.post('/pos/cash-register/open', { physicalBoxId, openingAmount });
-      await checkOpenCashRegister();
-      toast.success('Caja abierta correctamente');
-      return true;
+      const response = await axios.post('/pos/cash-register/open', {
+        physicalBoxId: boxId,
+        openingAmount: amount,
+        adminEmail: adminAuth?.email,
+        adminPassword: adminAuth?.password,
+        originAccountId: originAccountId === 'CAPITAL' ? undefined : originAccountId,
+      });
+
+      if (response.data.status === 'success') {
+        setCashRegister(response.data.data);
+        toast.success('Caja abierta correctamente.');
+        setLoading(false);
+        return true;
+      } else {
+        toast.error(response.data.message || 'No se pudo abrir la caja.');
+        setLoading(false);
+        return false;
+      }
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Error al abrir caja');
+      console.error('Error al abrir caja:', error);
+      const errorMessage = error.response?.data?.message || 'Error de conexión al abrir la caja.';
+      toast.error(errorMessage);
+      setLoading(false);
       return false;
     }
   };
@@ -217,18 +241,52 @@ export const usePOS = () => {
     setCart((prevCart) => prevCart.filter((item) => item.productVariantId !== id));
   };
 
-  // NUEVA FUNCIÓN: Vaciar carrito completo
+  // SUSPENDER VENTA ACTUAL
+  const suspendCurrentSale = async () => {
+    if (cart.length === 0) {
+      toast.error('El carrito está vacío');
+      return false;
+    }
+    try {
+      // ✅ Enviamos el carrito Y el descuento
+      await axios.post('/pos/sales/suspend', { items: cart, discount });
+      setCart([]);
+      setDiscount(0); // ✅ Borramos el descuento de la pantalla actual
+      toast.success('Venta suspendida correctamente');
+      return true;
+    } catch (error) {
+      toast.error('Error al suspender venta');
+      return false;
+    }
+  };
+
+  // OBTENER VENTAS SUSPENDIDAS
+  const fetchSuspendedSales = async () => {
+    try {
+      const res = await axios.get('/pos/sales/suspended');
+      return res.data.data;
+    } catch (error) {
+      return [];
+    }
+  };
+
+  // RECUPERAR VENTA SUSPENDIDA
+  const resumeSuspendedSale = async (id: string, items: CartItem[], discountAmount: number = 0) => {
+    try {
+      setCart(items);
+      setDiscount(discountAmount); // ✅ Restauramos el descuento guardado
+      await axios.delete(`/pos/sales/suspended/${id}`);
+      toast.success('Venta recuperada');
+    } catch (error) {
+      toast.error('Error al recuperar venta');
+    }
+  };
+
   const clearCart = () => {
     setCart([]);
   };
 
-  const processSale = async (
-    paymentMethod: string,
-    receivedAmount?: number,
-    clientId?: string,
-    reference?: string,
-    accountId?: string
-  ) => {
+  const processSale = async (payments: any[], clientId?: string, discountAmount?: number) => {
     if (cart.length === 0) {
       toast.error('El carrito está vacío');
       return false;
@@ -239,23 +297,20 @@ export const usePOS = () => {
         productVariantId: item.productVariantId,
         quantity: item.quantity,
       }));
-      const payload: any = { items, paymentMethod };
-      if (paymentMethod === 'CASH') payload.receivedAmount = receivedAmount;
-      if (paymentMethod === 'CREDIT' && clientId) payload.clientId = clientId;
-      if (paymentMethod === 'CARD' || paymentMethod === 'TRANSFER') {
-        if (reference) payload.reference = reference;
-        if (accountId) payload.accountId = accountId;
-      }
+
+      const payload: any = { items, payments, discountAmount };
+      if (clientId) payload.clientId = clientId;
 
       const response = await axios.post('/pos/sales', payload);
 
-      const successMsg =
-        paymentMethod === 'CASH'
-          ? `Venta procesada. Cambio: ${formatCurrency(response.data.data.change)}`
-          : 'Venta procesada exitosamente';
+      const cashPayment = payments.find((p) => p.method === 'CASH');
+      const successMsg = cashPayment
+        ? `Venta procesada. Cambio: ${formatCurrency(response.data.data.change)}`
+        : 'Venta procesada exitosamente';
       toast.success(successMsg);
 
       setCart([]);
+      setDiscount(0);
       await checkOpenCashRegister();
       return true;
     } catch (error: any) {
@@ -265,8 +320,8 @@ export const usePOS = () => {
       setLoading(false);
     }
   };
-
-  const total = cart.reduce((acc, item) => acc + item.subtotal, 0);
+  const subtotal = cart.reduce((acc, item) => acc + item.subtotal, 0);
+  const total = subtotal - discount; // ✅ El total final le resta el descuento
 
   return {
     cashRegister,
@@ -277,8 +332,11 @@ export const usePOS = () => {
     addToCart,
     updateQuantity,
     removeFromCart,
-    clearCart, // <-- EXPORTADA
+    clearCart,
     processSale,
+    discount,
+    setDiscount,
+    subtotal,
     total,
     loading,
     productForVariant,
@@ -288,5 +346,8 @@ export const usePOS = () => {
     transferToCashRegister,
     withdrawFromCashRegister,
     toggleWholesale,
+    suspendCurrentSale,
+    fetchSuspendedSales,
+    resumeSuspendedSale,
   };
 };

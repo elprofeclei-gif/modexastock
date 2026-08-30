@@ -1,9 +1,10 @@
 import { Navigate } from 'react-router-dom';
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const user = localStorage.getItem('user');
+  // ✅ Verificamos el token, que es lo que realmente valida el backend
+  const token = localStorage.getItem('token');
 
-  if (!user) {
+  if (!token) {
     return <Navigate to="/login" replace />;
   }
 

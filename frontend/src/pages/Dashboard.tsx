@@ -24,7 +24,19 @@ import {
   Users,
   ArrowRight,
   Crown,
+  Activity,
 } from 'lucide-react';
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+} from 'recharts';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -53,6 +65,7 @@ export default function Dashboard() {
     }
   }, [settings]);
 
+  // Vista de cajeros (Si el rol es USER, ven una pantalla simplificada)
   if (user?.role === 'USER') {
     return (
       <div className="flex flex-col items-center justify-center py-20">
@@ -127,9 +140,8 @@ export default function Dashboard() {
     else playSound('error');
   };
 
-  // Componente interno para KPIs minimalistas con variación
   const KpiCard = ({ icon: Icon, label, value, sublabel, variation }: any) => (
-    <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col justify-between">
+    <div className="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col justify-between">
       <div className="flex justify-between items-start mb-2">
         <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{label}</p>
         <Icon className="text-slate-400" size={18} />
@@ -137,7 +149,7 @@ export default function Dashboard() {
       {loading ? (
         <Loader />
       ) : (
-        <p className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">{value}</p>
+        <p className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">{value}</p>
       )}
       <div className="flex items-center justify-between mt-2">
         {variation !== undefined && (
@@ -162,13 +174,13 @@ export default function Dashboard() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Dashboard</h1>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Dashboard Gerencial</h1>
         <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">
-          Resumen financiero y operativo.
+          Resumen financiero, operativo y de auditoría.
         </p>
       </div>
 
-      {/* Onboarding Limpio (Sin Emojis) */}
+      {/* Onboarding Limpio */}
       {needsOnboarding && !loading && (
         <div className="bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 rounded-2xl p-6">
           <h3 className="text-lg font-bold text-indigo-800 dark:text-indigo-300 mb-4 flex items-center gap-2">
@@ -302,7 +314,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Fila 1: KPIs Financieros Minimalistas */}
+      {/* Fila 1: KPIs Financieros */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
         <KpiCard
           icon={Receipt}
@@ -331,137 +343,200 @@ export default function Dashboard() {
         />
       </div>
 
-           {/* Fila 2: KPIs Operativos */}
+      {/* Fila 2: KPIs Operativos */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-        <KpiCard 
-          icon={Package} 
-          label="Modelos y Variantes" 
-          value={`${stats?.totalProducts || 0} / ${stats?.totalVariants || 0}`} 
-          sublabel="Modelos (SKUs) / Variantes" 
+        <KpiCard
+          icon={Package}
+          label="Modelos y Variantes"
+          value={`${stats?.totalProducts || 0} / ${stats?.totalVariants || 0}`}
+          sublabel="Modelos (SKUs) / Variantes"
         />
-        <KpiCard 
-          icon={Package} 
-          label="Unidades en Stock" 
-          value={`${stats?.totalStockUnits || 0}`} 
-          sublabel="Total de prendas físicas" 
+        <KpiCard
+          icon={Package}
+          label="Unidades en Stock"
+          value={`${stats?.totalStockUnits || 0}`}
+          sublabel="Total de prendas físicas"
         />
-        <KpiCard 
-          icon={Landmark} 
-          label="Valor Inventario" 
-          value={formatCurrency(stats?.inventoryValue)} 
-          sublabel="Precio de venta total" 
+        <KpiCard
+          icon={Landmark}
+          label="Valor Inventario"
+          value={formatCurrency(stats?.inventoryValue)}
+          sublabel="Precio de venta total"
         />
-        <KpiCard 
-          icon={Users} 
-          label="Cuentas por Cobrar" 
-          value={formatCurrency(stats?.accountsReceivable)} 
-          sublabel="Créditos a clientes" 
+        <KpiCard
+          icon={Users}
+          label="Cuentas por Cobrar"
+          value={formatCurrency(stats?.accountsReceivable)}
+          sublabel="Créditos a clientes"
         />
       </div>
 
-      {/* Fila 3: Top Productos y Cajeros */}
+      {/* Fila 3: GRÁFICAS DE TENDENCIA (NUEVAS) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Top Productos */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-6">
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-            <Crown size={20} className="text-amber-500" /> Top 5 Productos (Hoy)
+        {/* Gráfica de Ventas (Toma 2 columnas) */}
+        <div className="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+          <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
+            <Activity size={18} className="text-indigo-600" /> Tendencia de Ventas
           </h3>
-          <div className="space-y-4">
-            {loading ? (
-              <Loader />
-            ) : stats?.topProducts && stats.topProducts.length > 0 ? (
-              stats.topProducts.map((p, idx) => (
-                <div key={idx} className="flex items-center gap-4">
-                  <span className="text-slate-400 font-bold w-4">{idx + 1}</span>
-                  {p.imageUrl ? (
-                    <img
-                      src={p.imageUrl}
-                      alt={p.name}
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
-                      <Package size={16} className="text-slate-400" />
-                    </div>
-                  )}
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
-                      {p.name}
-                    </p>
-                    <p className="text-xs text-slate-500">{p.quantity} unidades vendidas</p>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-slate-400 text-center py-4">
-                No hay ventas registradas hoy.
-              </p>
-            )}
+          <p className="text-xs text-slate-500 mb-6">Ingresos diarios de los últimos 7 días.</p>
+
+          <div className="h-64 w-full">
+            {/* Asegúrate de que tu backend devuelva stats.salesByDay */}
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart
+                data={stats?.salesByDay || []}
+                margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
+              >
+                <defs>
+                  <linearGradient id="colorSale" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#4f46e5" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#94a3b8" strokeOpacity={0.2} />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fill: '#94a3b8', fontSize: 12 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis tick={{ fill: '#94a3b8', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#1e293b',
+                    border: 'none',
+                    borderRadius: '8px',
+                    color: '#fff',
+                    fontSize: '12px',
+                  }}
+                  formatter={(value: any) => [formatCurrency(value), 'Ventas']}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="total"
+                  stroke="#4f46e5"
+                  strokeWidth={3}
+                  fillOpacity={1}
+                  fill="url(#colorSale)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Cajeros en Turno */}
-        <div className="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden">
-          <div className="p-5 border-b border-slate-100 dark:border-slate-700">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Cajeros en Turno</h3>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-100 dark:divide-slate-700">
-              <thead className="bg-slate-50 dark:bg-slate-800/50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">
-                    Cajero
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase">
-                    N° Ventas
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase">
-                    Efectivo en Caja
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-100 dark:divide-slate-700">
-                {loading ? (
-                  <tr>
-                    <td colSpan={3} className="px-6 py-8">
-                      <Loader />
-                    </td>
-                  </tr>
-                ) : stats?.cashiersData && stats.cashiersData.length > 0 ? (
-                  stats.cashiersData.map((c, idx) => (
-                    <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-slate-700/30">
-                      <td className="px-6 py-4 text-sm font-medium text-slate-900 dark:text-white">
-                        {c.name}
-                        <p className="text-xs text-slate-400 font-normal">
-                          Inicio:{' '}
-                          {new Date(c.startTime).toLocaleTimeString('es-ES', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </p>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-slate-900 dark:text-white text-right">
-                        {c.totalSales}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-green-600 text-right font-bold">
-                        {formatCurrency(c.cashInDrawer)}
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={3} className="px-6 py-8 text-center text-slate-400">
-                      No hay cajeros activos.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+        {/* Top Productos con Gráfica de Barras (Toma 1 columna) */}
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+          <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
+            <Crown size={18} className="text-amber-500" /> Top 5 Productos
+          </h3>
+          <p className="text-xs text-slate-500 mb-6">Más vendidos históricamente.</p>
+
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={stats?.topProducts || []}
+                layout="vertical"
+                margin={{ top: 0, right: 10, left: 20, bottom: 0 }}
+              >
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="#94a3b8"
+                  strokeOpacity={0.2}
+                  horizontal={false}
+                />
+                <XAxis
+                  type="number"
+                  tick={{ fill: '#94a3b8', fontSize: 12 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  type="category"
+                  dataKey="name"
+                  tick={{ fill: '#94a3b8', fontSize: 11 }}
+                  axisLine={false}
+                  tickLine={false}
+                  width={80}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#1e293b',
+                    border: 'none',
+                    borderRadius: '8px',
+                    color: '#fff',
+                    fontSize: '12px',
+                  }}
+                  formatter={(value: any) => [`${value} und.`, 'Vendidas']}
+                  cursor={{ fill: 'rgba(148, 163, 184, 0.1)' }}
+                />
+                <Bar dataKey="quantity" fill="#10b981" radius={[0, 4, 4, 0]} barSize={18} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
       </div>
 
-      {/* Fila 4: Alertas Detalladas */}
+      {/* Fila 4: Cajeros en Turno (Tabla) */}
+      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden">
+        <div className="p-5 border-b border-slate-100 dark:border-slate-700">
+          <h3 className="text-lg font-bold text-slate-900 dark:text-white">Cajeros en Turno</h3>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-slate-100 dark:divide-slate-700">
+            <thead className="bg-slate-50 dark:bg-slate-800/50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">
+                  Cajero
+                </th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase">
+                  N° Ventas
+                </th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase">
+                  Efectivo en Caja
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-100 dark:divide-slate-700">
+              {loading ? (
+                <tr>
+                  <td colSpan={3} className="px-6 py-8">
+                    <Loader />
+                  </td>
+                </tr>
+              ) : stats?.cashiersData && stats.cashiersData.length > 0 ? (
+                stats.cashiersData.map((c, idx) => (
+                  <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-slate-700/30">
+                    <td className="px-6 py-4 text-sm font-medium text-slate-900 dark:text-white">
+                      {c.name}
+                      <p className="text-xs text-slate-400 font-normal">
+                        Inicio:{' '}
+                        {new Date(c.startTime).toLocaleTimeString('es-ES', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </p>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-slate-900 dark:text-white text-right">
+                      {c.totalSales}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-green-600 text-right font-bold">
+                      {formatCurrency(c.cashInDrawer)}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={3} className="px-6 py-8 text-center text-slate-400">
+                    No hay cajeros activos.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Fila 5: Alertas de Inventario */}
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-6">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">

@@ -23,6 +23,12 @@ export interface LowStockVariant {
   severity: 'critical' | 'low';
 }
 
+// ✅ NUEVA INTERFAZ PARA LA GRÁFICA
+export interface SalesByDay {
+  date: string;
+  total: number;
+}
+
 export interface DashboardStats {
   todaySalesTotal: number;
   todaySalesCount: number;
@@ -31,21 +37,22 @@ export interface DashboardStats {
   openCashRegister: number;
   bankBalance: number;
   todayExpenses: number;
-  
+
   totalProducts: number;
   totalVariants: number;
-  totalStockUnits: number; // NUEVO
+  totalStockUnits: number;
   inventoryValue: number;
   accountsReceivable: number;
   totalClients: number;
   totalUsers: number;
   activeCashiers: number;
-  
+
   cashiersData: CashierData[];
   topProducts: TopProduct[];
   lowStockVariants: LowStockVariant[];
   criticalCount: number;
   lowCount: number;
+  salesByDay: SalesByDay[]; // ✅ AGREGADO AQUÍ
 }
 
 export const useReports = () => {

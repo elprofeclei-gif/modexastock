@@ -91,6 +91,9 @@ export default function Layout({ children }: LayoutProps) {
       children: [
         { name: 'Tesorería', path: '/treasury', roles: ['ADMIN', 'MANAGER'] },
         { name: 'Historial de Caja', path: '/cash-history', roles: ['ADMIN', 'MANAGER'] },
+        { name: 'Bitácora', path: '/audit-logs', roles: ['ADMIN', 'MANAGER'] },
+        // ✅ AGREGAMOS EL REPORTE DE UTILIDADES AQUÍ
+        { name: 'Utilidades (P&G)', path: '/profit-loss', roles: ['ADMIN', 'MANAGER'] },
       ],
     },
     { name: 'Inventario', path: '/inventory', roles: ['ADMIN', 'MANAGER'] },
@@ -344,7 +347,8 @@ export default function Layout({ children }: LayoutProps) {
         )}
       </nav>
 
-      <main className="flex-1 w-full max-w-screen-2xl mx-auto py-8 px-4 sm:px-6 lg:px-8 overflow-y-auto">
+      {/* Eliminamos el py-8 y dejamos solo px y un pequeño pb */}
+      <main className="flex-1 w-full max-w-screen-2xl mx-auto py-4 px-4 sm:px-6 lg:px-8 overflow-y-auto">
         {children}
       </main>
     </div>

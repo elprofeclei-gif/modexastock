@@ -16,6 +16,8 @@ import clientRoutes from './client.routes';
 import dataRoutes from './data.routes';
 import settingRoutes from './setting.routes';
 import boxRoutes from './box.routes';
+import dashboardRoutes from './dashboard.routes';
+import auditRoutes from './audit.routes'; // ✅ IMPORTADO
 
 const router = Router();
 
@@ -36,5 +38,7 @@ router.use('/clients', clientRoutes);
 router.use('/data', dataRoutes);
 router.use('/settings', settingRoutes);
 router.use('/boxes', boxRoutes);
+router.use('/dashboard', dashboardRoutes);
+router.use('/audit', auditRoutes); // ✅ REGISTRADO
 
 export default router;

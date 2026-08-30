@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import prisma from '../config/prisma';
 
+// Extendemos la interfaz de Request para que TypeScript reconozca req.user
 export interface CustomRequest extends Request {
   user?: {
     id: string;
@@ -9,8 +10,8 @@ export interface CustomRequest extends Request {
   };
 }
 
+// Middleware de autenticación (Verifica token y si el usuario sigue activo)
 export const authMiddleware = async (req: CustomRequest, res: Response, next: NextFunction) => {
-  // 1. Leer el token de las cookies
   const token = req.cookies.token;
 
   if (!token) {
@@ -23,18 +24,16 @@ export const authMiddleware = async (req: CustomRequest, res: Response, next: Ne
       role: string;
     };
 
-    // 2. VERIFICACIÓN EN TIEMPO REAL: Consultar la BD para ver si el usuario sigue activo
+    // VERIFICACIÓN EN TIEMPO REAL
     const user = await prisma.user.findUnique({ where: { id: decoded.id } });
 
     if (!user || !user.isActive) {
-      // Si fue desactivado, limpiamos la cookie y lanzamos error 401
       res.clearCookie('token');
       return res
         .status(401)
         .json({ status: 'error', message: 'Tu sesión ha sido cerrada por un administrador.' });
     }
 
-    // 3. Inyectamos el usuario en la request
     req.user = { id: user.id, role: user.role };
     next();
   } catch (error) {
@@ -42,9 +41,17 @@ export const authMiddleware = async (req: CustomRequest, res: Response, next: Ne
   }
 };
 
+// Middleware de autorización (Verifica roles)
 export const roleMiddleware = (roles: string[]) => {
   return (req: CustomRequest, res: Response, next: NextFunction) => {
     if (!req.user || !roles.includes(req.user.role)) {
+      // ✅ MEJORA PARA AUDITORÍA: Registrar el intento de acceso denegado
+      const userId = req.user?.id || 'Desconocido';
+      const route = req.originalUrl;
+      console.warn(
+        `[AUDITORÍA DE SEGURIDAD] Acceso denegado. Usuario ID: ${userId} intentó acceder a ${route}. Roles permitidos: ${roles.join(', ')}`
+      );
+
       return res
         .status(403)
         .json({ status: 'error', message: 'Acceso denegado. No tienes permisos suficientes.' });
