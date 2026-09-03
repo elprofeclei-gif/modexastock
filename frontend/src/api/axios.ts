@@ -1,20 +1,25 @@
 import axios from 'axios';
 
-// ✅ Si hay una variable de entorno (Producción), úsala.
-// Si no hay (Desarrollo local), usa la magia del hostname dinámico.
 const API_URL = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:3000/api`;
 
 const axiosInstance = axios.create({
   baseURL: API_URL,
-  withCredentials: true,
+  withCredentials: true, // Lo dejamos por si acaso
 });
 
-// Eliminamos el interceptor de request, ya no necesitamos inyectar el token manualmente
+// ✅ INTERCEPTOR: Enviar el Token en el Header en cada petición
+axiosInstance.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token && token !== 'cookie-active') {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // ✅ Si NO estamos en la página de login, recargamos
       if (!window.location.pathname.includes('/login')) {
         window.location.href = '/login';
       }

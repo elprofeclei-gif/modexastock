@@ -12,7 +12,11 @@ export interface CustomRequest extends Request {
 
 // Middleware de autenticación (Verifica token y si el usuario sigue activo)
 export const authMiddleware = async (req: CustomRequest, res: Response, next: NextFunction) => {
-  const token = req.cookies.token;
+  // ✅ Leer de cookie O del Header Authorization
+  let token = req.cookies.token;
+  if (!token && req.headers.authorization) {
+    token = req.headers.authorization.split(' ')[1]; // Quita la palabra "Bearer "
+  }
 
   if (!token) {
     return res.status(401).json({ status: 'error', message: 'Token no proporcionado' });
