@@ -1,0 +1,25 @@
+{
+  "name": "modexastock",
+  "version": "1.0.0",
+  "description": "🛍️ Modexastock - Sistema POS & ERP para Tiendas de Ropa\r Sistema completo de punto de venta, inventario por variantes (talla/color), tesorería y facturación. Construido con arquitectura MVC, TypeScript estricto y diseño SaaS moderno.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elprofeclei-gif/modexastock.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/elprofeclei-gif/modexastock/issues"
+  },
+  "homepage": "https://github.com/elprofeclei-gif/modexastock#readme",
+  "devDependencies": {
+    "husky": "^9.1.7"
+  }
+}

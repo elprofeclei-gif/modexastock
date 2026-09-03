@@ -1,0 +1,20 @@
+#!/bin/sh
+echo "🛡️ Revisando código antes de hacer commit..."
+
+# Revisar Backend
+cd backend && npm run build
+if [ $? -ne 0 ]; then
+  echo "❌ Error en el Backend. Commit cancelado."
+  exit 1
+fi
+cd ..
+
+# Revisar Frontend
+cd frontend && npm run build
+if [ $? -ne 0 ]; then
+  echo "❌ Error en el Frontend. Commit cancelado."
+  exit 1
+fi
+cd ..
+
+echo "✅ Código perfecto. Commit exitoso."
