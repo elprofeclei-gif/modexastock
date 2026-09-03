@@ -61,4 +61,5 @@ app.use((req: Request, res: Response) => {
   res.status(404).json({ status: 'error', message: 'Route not found' });
 });
 
-export { app, loginLimiter }; // ✅ Exportamos el loginLimiter
+export default app;
+export { loginLimiter };
