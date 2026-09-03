@@ -176,25 +176,28 @@ export const getCurrentCashRegister = async (req: CustomRequest, res: Response) 
     const openCashRegister = await prisma.cashRegister.findFirst({
       where: { userId, status: 'OPEN' },
       include: {
-        // ✅ CORREGIDO: Filtrar ventas explícitamente por el ID de la caja
+        // ✅ CORREGIDO: Quitamos cashRegisterId: undefined
         sales: {
-          where: { paymentMethod: { contains: 'CASH' } }, // Prisma filtra por relación automáticamente
+          where: { paymentMethod: { contains: 'CASH' } },
         },
         purchases: {
-          where: { accountId: null, cashRegisterId: undefined },
+          where: { accountId: null },
         },
       },
     });
 
     if (openCashRegister) {
+      // ✅ Usamos la fórmula exacta: recibido menos cambio entregado
       const cashSalesTotal = openCashRegister.sales.reduce(
-        (acc, s) => acc + ((s.receivedAmount || 0) - (s.change || 0)), // ✅ FÓRMULA EXACTA
+        (acc, s) => acc + ((s.receivedAmount || 0) - (s.change || 0)),
         0
       );
+
       const cashPurchasesTotal = openCashRegister.purchases.reduce(
         (acc, p) => acc + p.totalAmount,
         0
       );
+
       const expectedAmount =
         openCashRegister.openingAmount +
         cashSalesTotal -

@@ -37,12 +37,16 @@ export interface DashboardStats {
   openCashRegister: number;
   bankBalance: number;
   todayExpenses: number;
+  todayCOGS?: number;
+  netProfit?: number;
+  voidedSalesToday?: number;
 
   totalProducts: number;
   totalVariants: number;
   totalStockUnits: number;
   inventoryValue: number;
   accountsReceivable: number;
+  accountsPayable?: number;
   totalClients: number;
   activeCashiers: number;
 

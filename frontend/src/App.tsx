@@ -8,11 +8,13 @@ function App() {
       {/* Este componente renderiza todas las notificaciones de react-hot-toast */}
       <Toaster
         position="top-right"
+        containerStyle={{ zIndex: 999999 }}
         toastOptions={{
           duration: 4000,
           style: {
             background: '#363636',
             color: '#fff',
+            zIndex: 999999,
           },
           success: {
             iconTheme: {

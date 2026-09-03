@@ -22,18 +22,44 @@ export const getDashboardStats = async (req: CustomRequest, res: Response) => {
     let bankBalance = 0;
     let cashiersData: any[] = [];
     let topProducts: any[] = [];
+    let todayCOGS = 0; // ✅ NUEVO: Costo de mercancía vendida hoy
+    let netProfit = 0; // ✅ NUEVO: Utilidad neta hoy
+    let todayVoidedSales = 0;
 
     const accounts = await prisma.account.findMany();
     bankBalance = accounts.reduce((acc, accData) => acc + accData.balance, 0);
 
     if (role === 'ADMIN' || role === 'MANAGER') {
-      const todaySales = await prisma.sale.aggregate({
-        _sum: { totalAmount: true },
-        _count: true,
+      // ✅ En lugar de aggregate, traemos las ventas con sus items para poder sumar el costo
+      const todaySalesData = await prisma.sale.findMany({
         where: { createdAt: { gte: today }, isVoided: false },
+        select: {
+          totalAmount: true,
+          items: {
+            select: {
+              quantity: true,
+              productVariant: { select: { product: { select: { cost: true } } } },
+            },
+          },
+        },
       });
-      todaySalesTotal = todaySales._sum.totalAmount || 0;
-      todaySalesCount = todaySales._count || 0;
+
+      todaySalesCount = todaySalesData.length;
+
+      // ✅ Calculamos el total de ventas y el costo de esa mercancía
+      todaySalesData.forEach((sale) => {
+        todaySalesTotal += sale.totalAmount;
+        sale.items.forEach((item) => {
+          todayCOGS += item.quantity * (item.productVariant?.product?.cost || 0);
+        });
+      });
+      // ✅ 3. AGREGAR ESTO NUEVO AQUÍ DEBAJO (Para contar las anuladas)
+      todayVoidedSales = await prisma.sale.count({
+        where: {
+          voidedAt: { gte: today },
+          isVoided: true,
+        },
+      });
 
       const yesterdaySales = await prisma.sale.aggregate({
         _sum: { totalAmount: true },
@@ -167,6 +193,10 @@ export const getDashboardStats = async (req: CustomRequest, res: Response) => {
 
     const activeCashiers = await prisma.cashRegister.count({ where: { status: 'OPEN' } });
     const clientsData = await prisma.client.aggregate({ _sum: { balance: true }, _count: true });
+
+    // ✅ NUEVO: Calcular total de deudas con proveedores
+    const vendorsData = await prisma.vendor.aggregate({ _sum: { balance: true } });
+
     const todayExpenses = await prisma.expense.aggregate({
       _sum: { amount: true },
       where: { date: { gte: today } },
@@ -201,6 +231,10 @@ export const getDashboardStats = async (req: CustomRequest, res: Response) => {
     }
     salesByDay.reverse();
 
+    // ✅ Calcular Utilidad Neta (Ventas - Costo - Gastos)
+    const todayExpensesTotal = todayExpenses._sum.amount || 0;
+    netProfit = todaySalesTotal - todayCOGS - todayExpensesTotal;
+
     return res.status(200).json({
       status: 'success',
       data: {
@@ -210,13 +244,16 @@ export const getDashboardStats = async (req: CustomRequest, res: Response) => {
         avgTicket,
         openCashRegister,
         bankBalance,
-        todayExpenses: todayExpenses._sum.amount || 0,
-
+        todayExpenses: todayExpensesTotal,
+        todayCOGS,
+        netProfit,
+        voidedSalesToday: todayVoidedSales,
         totalProducts,
         totalVariants,
         totalStockUnits,
         inventoryValue,
         accountsReceivable: clientsData._sum.balance || 0,
+        accountsPayable: vendorsData._sum.balance || 0,
         totalClients: clientsData._count,
         activeCashiers,
 

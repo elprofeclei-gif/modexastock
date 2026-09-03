@@ -30,12 +30,12 @@ export const useAuth = () => {
     setLoading(true);
     try {
       const response = await axios.post('/auth/login', { email, password });
-      const { token, user } = response.data;
+      const { user } = response.data;
 
-      localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
-      setUser(user);
+      localStorage.setItem('token', 'cookie-active');
 
+      setUser(user);
       toast.success(`Bienvenido, ${user.name}!`);
       return true;
     } catch (error: any) {

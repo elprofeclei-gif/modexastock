@@ -18,13 +18,14 @@ import {
   TrendingDown,
   ShoppingBag,
   Wallet,
+  Users,
+  Package,
   Landmark,
   Receipt,
-  Package,
-  Users,
   ArrowRight,
   Crown,
   Activity,
+  Ban,
 } from 'lucide-react';
 import {
   AreaChart,
@@ -141,15 +142,18 @@ export default function Dashboard() {
   };
 
   const KpiCard = ({ icon: Icon, label, value, sublabel, variation }: any) => (
-    <div className="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col justify-between">
+    <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col justify-between">
       <div className="flex justify-between items-start mb-2">
-        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{label}</p>
-        <Icon className="text-slate-400" size={18} />
+        <p className="text-xs font-medium text-slate-500 dark:text-slate-400">{label}</p>
+        <Icon className="text-slate-400 shrink-0" size={16} />
       </div>
       {loading ? (
         <Loader />
       ) : (
-        <p className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">{value}</p>
+        // ✅ whitespace-nowrap obliga a que se quede en una sola línea
+        <p className="text-lg lg:text-xl font-bold text-slate-900 dark:text-white tracking-tight whitespace-nowrap">
+          {value}
+        </p>
       )}
       <div className="flex items-center justify-between mt-2">
         {variation !== undefined && (
@@ -165,7 +169,9 @@ export default function Dashboard() {
           </div>
         )}
         {sublabel && (
-          <p className="text-xs text-slate-400 dark:text-slate-500 text-right">{sublabel}</p>
+          <p className="text-[10px] text-slate-400 dark:text-slate-500 text-right truncate ml-2">
+            {sublabel}
+          </p>
         )}
       </div>
     </div>
@@ -314,14 +320,20 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Fila 1: KPIs Financieros */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+      {/* Fila 1: KPIs Financieros (6 columnas) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3">
         <KpiCard
           icon={Receipt}
           label="Ventas de Hoy"
           value={formatCurrency(stats?.todaySalesTotal)}
           variation={stats?.salesVariation}
           sublabel={`Ticket: ${formatCurrency(stats?.avgTicket)}`}
+        />
+        <KpiCard
+          icon={TrendingUp}
+          label="Utilidad Neta Hoy"
+          value={formatCurrency(stats?.netProfit || 0)}
+          sublabel={`Costo: ${formatCurrency(stats?.todayCOGS || 0)}`}
         />
         <KpiCard
           icon={Wallet}
@@ -341,21 +353,56 @@ export default function Dashboard() {
           value={`-${formatCurrency(stats?.todayExpenses)}`}
           sublabel="Egresos operativos"
         />
+
+        {/* ✅ TARJETA DE ALERTA DE ANULACIONES */}
+        <div
+          className={`p-5 rounded-xl border shadow-sm flex flex-col justify-between ${stats?.voidedSalesToday && stats.voidedSalesToday > 0 ? 'bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/30' : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700'}`}
+        >
+          <div className="flex justify-between items-start mb-2">
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+              Anulaciones Hoy
+            </p>
+            <Ban
+              className={
+                stats?.voidedSalesToday && stats.voidedSalesToday > 0
+                  ? 'text-red-600'
+                  : 'text-slate-400'
+              }
+              size={18}
+            />
+          </div>
+          {loading ? (
+            <Loader />
+          ) : (
+            <p
+              className={`text-2xl font-bold tracking-tight ${stats?.voidedSalesToday && stats.voidedSalesToday > 0 ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-white'}`}
+            >
+              {stats?.voidedSalesToday || 0}
+            </p>
+          )}
+          <div className="flex items-center justify-between mt-2">
+            <p className="text-xs text-slate-400 dark:text-slate-500 text-right">
+              {stats?.voidedSalesToday && stats.voidedSalesToday > 0
+                ? '¡Revisar Bitácora!'
+                : 'Sin novedades'}
+            </p>
+          </div>
+        </div>
       </div>
 
-      {/* Fila 2: KPIs Operativos */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+      {/* ✅ Fila 2: KPIs Operativos (6 columnas) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3">
         <KpiCard
           icon={Package}
           label="Modelos y Variantes"
           value={`${stats?.totalProducts || 0} / ${stats?.totalVariants || 0}`}
-          sublabel="Modelos (SKUs) / Variantes"
+          sublabel="SKUs / Variantes"
         />
         <KpiCard
           icon={Package}
           label="Unidades en Stock"
           value={`${stats?.totalStockUnits || 0}`}
-          sublabel="Total de prendas físicas"
+          sublabel="Prendas físicas"
         />
         <KpiCard
           icon={Landmark}
@@ -369,10 +416,26 @@ export default function Dashboard() {
           value={formatCurrency(stats?.accountsReceivable)}
           sublabel="Créditos a clientes"
         />
+
+        {/* ✅ NUEVA TARJETA DE CUENTAS POR PAGAR */}
+        <KpiCard
+          icon={Landmark}
+          label="Cuentas por Pagar"
+          value={formatCurrency(stats?.accountsPayable || 0)}
+          sublabel="Deudas a proveedores"
+        />
+
+        <KpiCard
+          icon={Users}
+          label="Total Clientes"
+          value={`${stats?.totalClients || 0}`}
+          sublabel="Registrados en sistema"
+        />
       </div>
 
       {/* Fila 3: GRÁFICAS DE TENDENCIA (NUEVAS) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* ... aquí sigue tu código de las gráficas que ya tienes ... */}
         {/* Gráfica de Ventas (Toma 2 columnas) */}
         <div className="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
           <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-1 flex items-center gap-2">

@@ -14,8 +14,10 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Si la sesión expira, redirigir al login
-      window.location.href = '/login';
+      // ✅ Si NO estamos en la página de login, recargamos
+      if (!window.location.pathname.includes('/login')) {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
