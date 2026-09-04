@@ -351,6 +351,16 @@ export default function Layout({ children }: LayoutProps) {
       <main className="flex-1 w-full max-w-screen-2xl mx-auto py-4 px-4 sm:px-6 lg:px-8 overflow-y-auto">
         {children}
       </main>
+      {/* ✅ FOOTER DE COPYRIGHT */}
+      <footer className="w-full max-w-screen-2xl mx-auto py-4 px-4 sm:px-6 lg:px-8 border-t border-slate-100 dark:border-slate-700 mt-auto">
+        <p className="text-center text-xs text-slate-400 dark:text-slate-500">
+          © {new Date().getFullYear()} Modexastock v2.0. Desarrollado por{' '}
+          <span className="font-semibold text-slate-600 dark:text-slate-400">
+            El Profeclei & IA
+          </span>
+          . Todos los derechos reservados.
+        </p>
+      </footer>
     </div>
   );
 }
