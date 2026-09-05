@@ -2,7 +2,22 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from '../api/axios';
 import toast from 'react-hot-toast';
-import { Building, FileUp, Database, FileDown, Package, Loader2 } from 'lucide-react';
+import {
+  Building,
+  FileUp,
+  Database,
+  FileDown,
+  Package,
+  Loader2,
+  ShieldAlert,
+  Wallet,
+  History,
+  TrendingUp,
+  Landmark,
+  Users,
+  BarChart2,
+  AlertTriangle,
+} from 'lucide-react';
 import { playSound } from '../utils/sound';
 
 export default function DataCenter() {
@@ -56,6 +71,16 @@ export default function DataCenter() {
   const handleDownloadFile = async (endpoint: string, filename: string) => {
     try {
       const response = await axios.get(endpoint, { responseType: 'blob' });
+
+      // ✅ Si el backend devuelve un JSON de error (ej: no hay datos), lo leemos
+      if (response.data.type && response.data.type.includes('application/json')) {
+        const text = await response.data.text();
+        const errorData = JSON.parse(text);
+        toast.error(errorData.message || 'Error al generar el reporte');
+        return;
+      }
+
+      // ✅ Si es un archivo válido, lo descargamos
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
@@ -63,14 +88,37 @@ export default function DataCenter() {
       document.body.appendChild(link);
       link.click();
       link.remove();
-      toast.success('Reporte descargado');
+      toast.success('Reporte descargado correctamente');
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Error al descargar reporte');
+      // ✅ Capturamos errores de red o 400/500 que Axios convierte en Blob
+      if (error.response && error.response.data instanceof Blob) {
+        const text = await error.response.data.text();
+        try {
+          const errorJson = JSON.parse(text);
+          toast.error(errorJson.message || 'Error al descargar');
+        } catch (e) {
+          toast.error('Error al descargar el reporte');
+        }
+      } else {
+        toast.error('Error de conexión al descargar');
+      }
     }
   };
 
-    const downloadTemplate = () => {
-    const headers = ['sku', 'nombre', 'descripcion', 'categoria', 'marca', 'talla', 'color', 'costo', 'precio', 'stock', 'stock_minimo'];
+  const downloadTemplate = () => {
+    const headers = [
+      'sku',
+      'nombre',
+      'descripcion',
+      'categoria',
+      'marca',
+      'talla',
+      'color',
+      'costo',
+      'precio',
+      'stock',
+      'stock_minimo',
+    ];
     const example1 = [
       'MOD-001',
       'Camiseta Algodón',
@@ -82,7 +130,7 @@ export default function DataCenter() {
       '15000',
       '25000',
       '50',
-      '5'
+      '5',
     ];
 
     const csv = [headers.join(','), example1.join(',')].join('\n');
@@ -203,41 +251,231 @@ export default function DataCenter() {
             <Database size={16} /> Descargar Backup (.json)
           </button>
         </div>
-
-        {/* Reporte Inventario */}
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col">
-          <div className="w-12 h-12 bg-amber-50 dark:bg-amber-500/10 rounded-xl flex items-center justify-center text-amber-600 mb-4">
-            <FileDown size={24} />
+      </div>
+      {/* ✅ SECCIÓN DE REPORTES PARA AUDITORÍA */}
+      <div>
+        <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4 mt-2">
+          Reportes para Auditoría
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* ✅ NUEVO: Productos Agotados / Bajo Stock */}
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col">
+            <div className="w-12 h-12 bg-red-50 dark:bg-red-500/10 rounded-xl flex items-center justify-center text-red-600 mb-4">
+              <AlertTriangle size={24} />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+              Productos Agotados
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 flex-1">
+              Lista completa de productos en stock crítico o en cero para reabastecer.
+            </p>
+            <button
+              onClick={() =>
+                handleDownloadFile('/data/reports/low-stock', 'productos_agotados.csv')
+              }
+              className="w-full py-2 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 text-white text-sm font-semibold rounded-lg transition-colors mt-auto flex items-center justify-center gap-2"
+            >
+              <FileDown size={16} /> Exportar CSV
+            </button>
           </div>
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
-            Reporte Inventario
-          </h3>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 flex-1">
-            Exporta el estado actual del inventario desglosado por variante.
-          </p>
-          <button
-            onClick={() => handleDownloadFile('/data/reports/inventory', 'reporte_inventario.csv')}
-            className="w-full py-2 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 text-white text-sm font-semibold rounded-lg transition-colors mt-auto flex items-center justify-center gap-2"
-          >
-            <FileDown size={16} /> Exportar Inventario
-          </button>
-        </div>
-
-        {/* Reporte Ventas */}
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col">
-          <div className="w-12 h-12 bg-blue-50 dark:bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-600 mb-4">
-            <FileDown size={24} />
+          {/* ✅ NUEVO: Ranking de Ventas y Rentabilidad */}
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col">
+            <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-600 mb-4">
+              <BarChart2 size={24} />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+              Ranking de Ventas
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 flex-1">
+              Productos más vendidos, ingresos, costos y ganancia bruta real.
+            </p>
+            <button
+              onClick={() =>
+                handleDownloadFile('/data/reports/sales-ranking', 'ranking_ventas_rentabilidad.csv')
+              }
+              className="w-full py-2 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 text-white text-sm font-semibold rounded-lg transition-colors mt-auto flex items-center justify-center gap-2"
+            >
+              <FileDown size={16} /> Exportar CSV
+            </button>
           </div>
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Reporte Ventas</h3>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 flex-1">
-            Exporta todas las ventas con cajero, método de pago y totales.
-          </p>
-          <button
-            onClick={() => handleDownloadFile('/data/reports/sales', 'reporte_ventas.csv')}
-            className="w-full py-2 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 text-white text-sm font-semibold rounded-lg transition-colors mt-auto flex items-center justify-center gap-2"
-          >
-            <FileDown size={16} /> Exportar Ventas
-          </button>
+          {/* Inventario Físico */}
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col">
+            <div className="w-12 h-12 bg-amber-50 dark:bg-amber-500/10 rounded-xl flex items-center justify-center text-amber-600 mb-4">
+              <FileDown size={24} />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+              Inventario Físico
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 flex-1">
+              Stock actual desglosado y valor comercial.
+            </p>
+            <button
+              onClick={() =>
+                handleDownloadFile('/data/reports/inventory', 'reporte_inventario.csv')
+              }
+              className="w-full py-2 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 text-white text-sm font-semibold rounded-lg transition-colors mt-auto flex items-center justify-center gap-2"
+            >
+              <FileDown size={16} /> Exportar CSV
+            </button>
+          </div>
+
+          {/* Ventas Generales */}
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col">
+            <div className="w-12 h-12 bg-blue-50 dark:bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-600 mb-4">
+              <FileDown size={24} />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+              Ventas Generales
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 flex-1">
+              Facturas, cajeros y métodos de pago.
+            </p>
+            <button
+              onClick={() => handleDownloadFile('/data/reports/sales', 'reporte_ventas.csv')}
+              className="w-full py-2 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 text-white text-sm font-semibold rounded-lg transition-colors mt-auto flex items-center justify-center gap-2"
+            >
+              <FileDown size={16} /> Exportar CSV
+            </button>
+          </div>
+
+          {/* Kardex (Inventario Detallado) */}
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col">
+            <div className="w-12 h-12 bg-indigo-50 dark:bg-indigo-500/10 rounded-xl flex items-center justify-center text-indigo-600 mb-4">
+              <History size={24} />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+              Kardex General
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 flex-1">
+              Trazabilidad total de entradas/salidas.
+            </p>
+            <button
+              onClick={() => handleDownloadFile('/data/reports/kardex', 'kardex_inventario.csv')}
+              className="w-full py-2 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 text-white text-sm font-semibold rounded-lg transition-colors mt-auto flex items-center justify-center gap-2"
+            >
+              <FileDown size={16} /> Exportar CSV
+            </button>
+          </div>
+
+          {/* Estado de Resultados (P&G) */}
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col">
+            <div className="w-12 h-12 bg-green-50 dark:bg-green-500/10 rounded-xl flex items-center justify-center text-green-600 mb-4">
+              <TrendingUp size={24} />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+              Utilidades (P&G)
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 flex-1">
+              Estado de Resultados histórico.
+            </p>
+            <button
+              onClick={() =>
+                handleDownloadFile('/data/reports/profit-loss', 'estado_resultados.csv')
+              }
+              className="w-full py-2 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 text-white text-sm font-semibold rounded-lg transition-colors mt-auto flex items-center justify-center gap-2"
+            >
+              <FileDown size={16} /> Exportar CSV
+            </button>
+          </div>
+
+          {/* Tesorería y Gastos */}
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col">
+            <div className="w-12 h-12 bg-cyan-50 dark:bg-cyan-500/10 rounded-xl flex items-center justify-center text-cyan-600 mb-4">
+              <Landmark size={24} />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+              Tesorería y Gastos
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 flex-1">
+              Movimientos de bancos y egresos.
+            </p>
+            <button
+              onClick={() => handleDownloadFile('/data/reports/treasury', 'reporte_tesoreria.csv')}
+              className="w-full py-2 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 text-white text-sm font-semibold rounded-lg transition-colors mt-auto flex items-center justify-center gap-2"
+            >
+              <FileDown size={16} /> Exportar CSV
+            </button>
+          </div>
+
+          {/* Bitácora del Sistema */}
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col">
+            <div className="w-12 h-12 bg-red-50 dark:bg-red-500/10 rounded-xl flex items-center justify-center text-red-600 mb-4">
+              <ShieldAlert size={24} />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Bitácora</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 flex-1">
+              Registro de auditoría y seguridad.
+            </p>
+            <button
+              onClick={() => handleDownloadFile('/data/reports/audit-logs', 'bitacora_sistema.csv')}
+              className="w-full py-2 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 text-white text-sm font-semibold rounded-lg transition-colors mt-auto flex items-center justify-center gap-2"
+            >
+              <FileDown size={16} /> Exportar CSV
+            </button>
+          </div>
+
+          {/* Historial de Cajas */}
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col">
+            <div className="w-12 h-12 bg-purple-50 dark:bg-purple-500/10 rounded-xl flex items-center justify-center text-purple-600 mb-4">
+              <Wallet size={24} />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+              Historial de Cajas
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 flex-1">
+              Arqueos, faltantes y sobrantes.
+            </p>
+            <button
+              onClick={() =>
+                handleDownloadFile('/data/reports/cash-history', 'historial_cajas.csv')
+              }
+              className="w-full py-2 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 text-white text-sm font-semibold rounded-lg transition-colors mt-auto flex items-center justify-center gap-2"
+            >
+              <FileDown size={16} /> Exportar CSV
+            </button>
+          </div>
+
+          {/* Cartera de Clientes */}
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col">
+            <div className="w-12 h-12 bg-pink-50 dark:bg-pink-500/10 rounded-xl flex items-center justify-center text-pink-600 mb-4">
+              <Users size={24} />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+              Cartera de Clientes
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 flex-1">
+              Deudores, al día y saldos pendientes.
+            </p>
+            <button
+              onClick={() =>
+                handleDownloadFile('/data/reports/clients-debt', 'cartera_clientes.csv')
+              }
+              className="w-full py-2 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 text-white text-sm font-semibold rounded-lg transition-colors mt-auto flex items-center justify-center gap-2"
+            >
+              <FileDown size={16} /> Exportar CSV
+            </button>
+          </div>
+
+          {/* Descuadres de Cajeros */}
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col">
+            <div className="w-12 h-12 bg-orange-50 dark:bg-orange-500/10 rounded-xl flex items-center justify-center text-orange-600 mb-4">
+              <AlertTriangle size={24} />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+              Descuadres de Cajeros
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 flex-1">
+              Faltantes y sobrantes pendientes de pago.
+            </p>
+            <button
+              onClick={() =>
+                handleDownloadFile('/data/reports/cashiers-balance', 'descuadres_cajeros.csv')
+              }
+              className="w-full py-2 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 text-white text-sm font-semibold rounded-lg transition-colors mt-auto flex items-center justify-center gap-2"
+            >
+              <FileDown size={16} /> Exportar CSV
+            </button>
+          </div>
         </div>
       </div>
     </div>

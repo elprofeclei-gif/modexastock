@@ -244,3 +244,22 @@ export const getProductKardex = async (req: CustomRequest, res: Response) => {
     return res.status(500).json({ status: 'error', message: 'Error interno del servidor' });
   }
 };
+
+// Obtener productos con bajo stock para notificaciones
+export const getLowStockAlerts = async (req: CustomRequest, res: Response) => {
+  try {
+    const lowStockItems = await prisma.$queryRaw`
+      SELECT p.name, s.name as size, c.name as color, v.stock, v."minStock"
+      FROM "ProductVariant" v
+      JOIN "Product" p ON v."productId" = p.id
+      JOIN "Size" s ON v."sizeId" = s.id
+      JOIN "Color" c ON v."colorId" = c.id
+      WHERE v.stock <= v."minStock"
+      LIMIT 10
+    `;
+    return res.status(200).json({ status: 'success', data: lowStockItems });
+  } catch (error) {
+    console.error('Error fetching low stock alerts:', error);
+    return res.status(500).json({ status: 'error', message: 'Error interno del servidor' });
+  }
+};
