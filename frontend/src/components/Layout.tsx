@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import axios from '../api/axios';
 import {
   User,
   Settings,
@@ -10,7 +11,12 @@ import {
   Moon,
   Sun,
   ChevronDown,
+  Bell,
+  AlertTriangle,
   ShieldCheck,
+  AlertCircle,
+  Ban,
+  Wallet,
   Menu as MenuIcon,
   X,
 } from 'lucide-react';
@@ -35,6 +41,24 @@ export default function Layout({ children }: LayoutProps) {
   const { logout, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [showNotif, setShowNotif] = useState(false);
+
+  useEffect(() => {
+    const fetchNotifs = async () => {
+      try {
+        const res = await axios.get('/notifications');
+        setNotifications(res.data.data);
+      } catch (error) {
+        console.error('Error fetching notifications', error);
+      }
+    };
+
+    fetchNotifs();
+    // Se actualiza cada 45 segundos
+    const interval = setInterval(fetchNotifs, 45000);
+    return () => clearInterval(interval);
+  }, [user?.role, location.pathname]); // Se actualiza si cambia de página
 
   useEffect(() => {
     setIsDark(document.documentElement.classList.contains('dark'));
@@ -92,7 +116,6 @@ export default function Layout({ children }: LayoutProps) {
         { name: 'Tesorería', path: '/treasury', roles: ['ADMIN', 'MANAGER'] },
         { name: 'Historial de Caja', path: '/cash-history', roles: ['ADMIN', 'MANAGER'] },
         { name: 'Bitácora', path: '/audit-logs', roles: ['ADMIN', 'MANAGER'] },
-        // ✅ AGREGAMOS EL REPORTE DE UTILIDADES AQUÍ
         { name: 'Utilidades (P&G)', path: '/profit-loss', roles: ['ADMIN', 'MANAGER'] },
       ],
     },
@@ -119,8 +142,8 @@ export default function Layout({ children }: LayoutProps) {
       <nav className="bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700 sticky top-0 z-40">
         <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
+            {/* LADO IZQUIERDO: Logo y Menú */}
             <div className="flex items-center space-x-4 md:space-x-8">
-              {/* Botón Hamburguesa para Móvil */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="md:hidden text-slate-600 dark:text-slate-300"
@@ -138,7 +161,6 @@ export default function Layout({ children }: LayoutProps) {
                 <span className="hidden sm:inline">Modexastock</span>
               </Link>
 
-              {/* Menú Escritorio */}
               <div className="hidden md:flex items-center space-x-1">
                 {user &&
                   menu.map((item) => {
@@ -193,9 +215,83 @@ export default function Layout({ children }: LayoutProps) {
               </div>
             </div>
 
+            {/* LADO DERECHO: Notificaciones, Reloj y Perfil */}
             <div className="flex items-center space-x-4 md:space-x-6">
+              {/* ✅ CENTRO DE NOTIFICACIONES */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowNotif(!showNotif)}
+                  className="relative p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors"
+                >
+                  <Bell size={20} />
+                  {notifications.length > 0 && (
+                    <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+                      {notifications.length}
+                    </span>
+                  )}
+                </button>
+
+                {showNotif && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => setShowNotif(false)}></div>
+                    <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-100 dark:border-slate-700 z-20 overflow-hidden">
+                      <div className="flex justify-between items-center p-3 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
+                        <p className="text-sm font-bold text-slate-900 dark:text-white">
+                          Centro de Mensajes
+                        </p>
+                        <button
+                          onClick={() => setShowNotif(false)}
+                          className="text-slate-400 hover:text-slate-600"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                      <div className="max-h-96 overflow-y-auto">
+                        {notifications.length === 0 ? (
+                          <p className="p-8 text-center text-sm text-slate-400">
+                            No tienes notificaciones nuevas. 🟢
+                          </p>
+                        ) : (
+                          notifications.map((n, idx) => {
+                            const Icon =
+                              n.icon === 'AlertTriangle'
+                                ? AlertTriangle
+                                : n.icon === 'AlertCircle'
+                                  ? AlertCircle
+                                  : n.icon === 'Ban'
+                                    ? Ban
+                                    : Wallet;
+                            const colorClass =
+                              n.color === 'amber' ? 'text-amber-500' : 'text-red-500';
+                            return (
+                              <div
+                                key={idx}
+                                className="p-3 border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer"
+                              >
+                                <div className="flex gap-3">
+                                  <Icon size={20} className={`${colorClass} shrink-0 mt-0.5`} />
+                                  <div>
+                                    <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                                      {n.title}
+                                    </p>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                                      {n.message}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+
               <Clock />
 
+              {/* MENÚ DE USUARIO */}
               <div className="relative">
                 <button
                   onClick={() => setOpenDropdown(openDropdown === 'userPanel' ? null : 'userPanel')}
@@ -347,11 +443,10 @@ export default function Layout({ children }: LayoutProps) {
         )}
       </nav>
 
-      {/* Eliminamos el py-8 y dejamos solo px y un pequeño pb */}
       <main className="flex-1 w-full max-w-screen-2xl mx-auto py-4 px-4 sm:px-6 lg:px-8 overflow-y-auto">
         {children}
       </main>
-      {/* ✅ FOOTER DE COPYRIGHT */}
+
       <footer className="w-full max-w-screen-2xl mx-auto py-4 px-4 sm:px-6 lg:px-8 border-t border-slate-100 dark:border-slate-700 mt-auto">
         <p className="text-center text-xs text-slate-400 dark:text-slate-500">
           © {new Date().getFullYear()} Modexastock v2.0. Desarrollado por{' '}

@@ -7,6 +7,7 @@ import {
   deleteProduct,
   adjustStock,
   getProductKardex,
+  getLowStockAlerts,
 } from '../controllers/product.controller';
 import { authMiddleware, roleMiddleware } from '../middlewares/auth.middleware';
 
@@ -18,6 +19,7 @@ router.use(authMiddleware);
 // Rutas accesibles para todos los usuarios (Cajeros, Vendedores)
 router.get('/', getProducts);
 router.get('/:id', getProductById);
+router.get('/low-stock-alerts', getLowStockAlerts);
 
 // Rutas protegidas (Solo ADMIN y MANAGER)
 router.post('/', roleMiddleware(['ADMIN', 'MANAGER']), createProduct);

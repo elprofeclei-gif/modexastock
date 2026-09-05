@@ -163,7 +163,7 @@ export const importProducts = async (req: CustomRequest, res: Response) => {
     const updatedProducts = await prisma.product.findMany();
     const finalProductsMap = new Map(updatedProducts.map((p) => [p.sku, p]));
 
-        const variantsMap = new Map<
+    const variantsMap = new Map<
       string,
       { productId: string; sizeId: string; colorId: string; stock: number; minStock: number }
     >();
@@ -201,7 +201,7 @@ export const importProducts = async (req: CustomRequest, res: Response) => {
       }
     });
 
-       const variantsToCreate: any[] = [];
+    const variantsToCreate: any[] = [];
     const variantsToUpdate: any[] = [];
 
     for (const [key, variantData] of variantsMap.entries()) {
@@ -211,7 +211,7 @@ export const importProducts = async (req: CustomRequest, res: Response) => {
         variantsToUpdate.push({
           id: existingVariant.id,
           stock: variantData.stock,
-          minStock: variantData.minStock
+          minStock: variantData.minStock,
         });
       } else {
         // ✅ Ya no forzamos minStock a 5 aquí, lo toma de variantData
@@ -240,22 +240,22 @@ export const importProducts = async (req: CustomRequest, res: Response) => {
       }
     }
 
-        if (variantsToUpdate.length > 0) {
+    if (variantsToUpdate.length > 0) {
       for (let i = 0; i < variantsToUpdate.length; i += 50) {
         const chunk = variantsToUpdate.slice(i, i + 50);
-        
+
         await prisma.$transaction(async (tx) => {
           for (const variant of chunk) {
             const dbVariant = await tx.productVariant.findUnique({ where: { id: variant.id } });
             if (!dbVariant) continue;
-            
+
             const difference = variant.stock - dbVariant.stock;
-            
+
             await tx.productVariant.update({
               where: { id: variant.id },
-              data: { 
+              data: {
                 stock: variant.stock,
-                minStock: variant.minStock // ✅ Actualizamos el mínimo también
+                minStock: variant.minStock, // ✅ Actualizamos el mínimo también
               },
             });
 
@@ -266,8 +266,8 @@ export const importProducts = async (req: CustomRequest, res: Response) => {
                   userId,
                   type: 'ADJUSTMENT',
                   quantityChange: difference,
-                  reason: 'Actualización de stock por importación de Excel'
-                }
+                  reason: 'Actualización de stock por importación de Excel',
+                },
               });
             }
           }
@@ -380,7 +380,7 @@ export const downloadInventoryReport = async (req: CustomRequest, res: Response)
 
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', 'attachment; filename="reporte_inventario.csv"');
-    return res.status(200).send(csv);
+    return res.status(200).send('\ufeff' + csv);
   } catch (error) {
     console.error('Error generating inventory report:', error);
     return res.status(500).json({ status: 'error', message: 'Error al generar reporte' });
@@ -430,9 +430,525 @@ export const downloadSalesReport = async (req: CustomRequest, res: Response) => 
 
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', 'attachment; filename="reporte_ventas_general.csv"');
-    return res.status(200).send(csv);
+    return res.status(200).send('\ufeff' + csv);
   } catch (error) {
     console.error('Error generating sales report:', error);
     return res.status(500).json({ status: 'error', message: 'Error al generar reporte de ventas' });
+  }
+};
+
+// 5. REPORTE DE BITÁCORA DEL SISTEMA (CSV)
+export const downloadAuditLogReport = async (req: CustomRequest, res: Response) => {
+  try {
+    const logs = await prisma.auditLog.findMany({
+      include: { user: { select: { name: true } } },
+      orderBy: { createdAt: 'desc' },
+      take: 5000,
+    });
+
+    const rows = logs.map((l) => ({
+      Fecha: new Date(l.createdAt).toLocaleString('es-ES'),
+      Usuario: l.user?.name || 'Sistema',
+      Accion: l.action,
+      Modulo: l.entity,
+      Detalles: l.details || 'N/A',
+    }));
+
+    if (rows.length === 0)
+      return res.status(400).json({ status: 'error', message: 'No hay registros en la bitácora' });
+
+    const headers = Object.keys(rows[0]);
+    const csv = [
+      headers.join(','),
+      ...rows.map((row) =>
+        headers.map((fieldName) => JSON.stringify(row[fieldName as keyof typeof row])).join(',')
+      ),
+    ].join('\n');
+
+    await logAction(
+      req.user?.id,
+      'EXPORT_AUDIT_LOG_CSV',
+      'Data',
+      undefined,
+      `El usuario exportó el reporte de bitácora.`
+    );
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="bitacora_sistema.csv"');
+    return res.status(200).send('\ufeff' + csv);
+  } catch (error) {
+    console.error('Error generating audit log report:', error);
+    return res
+      .status(500)
+      .json({ status: 'error', message: 'Error al generar reporte de bitácora' });
+  }
+};
+
+// 6. REPORTE DE HISTORIAL DE CAJAS (CSV)
+export const downloadCashHistoryReport = async (req: CustomRequest, res: Response) => {
+  try {
+    const history = await prisma.cashRegister.findMany({
+      include: {
+        user: { select: { name: true } },
+        physicalBox: { select: { name: true } },
+        // ✅ AGREGAR ESTA LÍNEA PARA TRAER LAS VENTAS
+        sales: {
+          where: { paymentMethod: { contains: 'CASH' } },
+          select: { receivedAmount: true, change: true, totalAmount: true, paymentMethod: true },
+        },
+      },
+      orderBy: { openedAt: 'desc' },
+      take: 1000,
+    });
+
+    const rows = history.map((reg) => {
+      const cashSales =
+        reg.sales
+          ?.filter((s: any) => s.paymentMethod.includes('CASH'))
+          .reduce((acc: number, s: any) => acc + ((s.receivedAmount || 0) - (s.change || 0)), 0) ||
+        0;
+      const expected =
+        reg.openingAmount + cashSales + (reg.manualInflows || 0) - (reg.manualOutflows || 0);
+      const real = (reg.closingAmount || 0) + (reg.depositAmount || 0);
+      const diff = reg.status === 'CLOSED' ? real - expected : 0;
+
+      return {
+        Cajero: reg.user.name,
+        Caja_Fisica: reg.physicalBox?.name || 'N/A',
+        Apertura: new Date(reg.openedAt).toLocaleString('es-ES'),
+        Cierre: reg.closedAt ? new Date(reg.closedAt).toLocaleString('es-ES') : 'EN TURNO',
+        Monto_Inicial: reg.openingAmount,
+        Inyecciones: reg.manualInflows || 0,
+        Retiros: reg.manualOutflows || 0,
+        Esperado: expected,
+        Real_Contado: reg.status === 'CLOSED' ? real : 0,
+        Diferencia: reg.status === 'CLOSED' ? diff : 0,
+        Estado: reg.status,
+      };
+    });
+
+    if (rows.length === 0)
+      return res.status(400).json({ status: 'error', message: 'No hay historial de cajas' });
+
+    const headers = Object.keys(rows[0]);
+    const csv = [
+      headers.join(','),
+      ...rows.map((row) =>
+        headers.map((fieldName) => JSON.stringify(row[fieldName as keyof typeof row])).join(',')
+      ),
+    ].join('\n');
+
+    await logAction(
+      req.user?.id,
+      'EXPORT_CASH_HISTORY_CSV',
+      'Data',
+      undefined,
+      `El usuario exportó el historial de cajas.`
+    );
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="historial_cajas.csv"');
+    return res.status(200).send('\ufeff' + csv);
+  } catch (error) {
+    console.error('Error generating cash history report:', error);
+    return res
+      .status(500)
+      .json({ status: 'error', message: 'Error al generar historial de cajas' });
+  }
+};
+
+// 7. REPORTE DE TESORERÍA (CSV) - Movimientos de cuentas y gastos
+export const downloadTreasuryReport = async (req: CustomRequest, res: Response) => {
+  try {
+    const [transactions, expenses] = await Promise.all([
+      prisma.transaction.findMany({
+        include: { account: { select: { name: true } } },
+        orderBy: { date: 'desc' },
+      }),
+      prisma.expense.findMany({
+        include: {
+          account: { select: { name: true } },
+          category: { select: { name: true } },
+          user: { select: { name: true } },
+        },
+        orderBy: { date: 'desc' },
+      }),
+    ]);
+
+    const rows = [
+      ...transactions.map((t) => ({
+        Fecha: new Date(t.date).toLocaleString('es-ES'),
+        Tipo: t.type,
+        Modulo: 'Tesorería',
+        Cuenta: t.account.name,
+        Concepto: t.concept,
+        Monto: t.amount,
+      })),
+      ...expenses.map((e) => ({
+        Fecha: new Date(e.date).toLocaleString('es-ES'),
+        Tipo: 'EXPENSE',
+        Modulo: 'Gastos',
+        Cuenta: e.account?.name || 'Efectivo',
+        Concepto: e.concept,
+        Monto: e.amount,
+      })),
+    ];
+
+    if (rows.length === 0)
+      return res.status(400).json({ status: 'error', message: 'No hay movimientos en tesorería' });
+
+    const headers = Object.keys(rows[0]);
+    const csv = [
+      headers.join(','),
+      ...rows.map((row) =>
+        headers.map((f) => JSON.stringify(row[f as keyof typeof row])).join(',')
+      ),
+    ].join('\n');
+
+    await logAction(
+      req.user?.id,
+      'EXPORT_TREASURY_CSV',
+      'Data',
+      undefined,
+      `El usuario exportó el reporte de tesorería.`
+    );
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="reporte_tesoreria.csv"');
+    return res.status(200).send('\ufeff' + csv);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ status: 'error', message: 'Error al generar reporte de tesorería' });
+  }
+};
+
+// 8. REPORTE KARDEX GENERAL (CSV) - Historial completo de inventario
+export const downloadKardexReport = async (req: CustomRequest, res: Response) => {
+  try {
+    const movements = await prisma.inventoryMovement.findMany({
+      include: {
+        productVariant: {
+          include: {
+            product: { select: { name: true, sku: true } },
+            size: { select: { name: true } },
+            color: { select: { name: true } },
+          },
+        },
+        user: { select: { name: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 5000,
+    });
+
+    const rows = movements.map((m) => ({
+      Fecha: new Date(m.createdAt).toLocaleString('es-ES'),
+      Producto: m.productVariant.product.name,
+      SKU: m.productVariant.product.sku,
+      Talla_Color: `${m.productVariant.size.name}/${m.productVariant.color.name}`,
+      Tipo_Movimiento: m.type,
+      Cantidad: m.quantityChange,
+      Razon: m.reason || 'N/A',
+      Usuario: m.user.name,
+    }));
+
+    if (rows.length === 0)
+      return res.status(400).json({ status: 'error', message: 'No hay movimientos de inventario' });
+
+    const headers = Object.keys(rows[0]);
+    const csv = [
+      headers.join(','),
+      ...rows.map((row) =>
+        headers.map((f) => JSON.stringify(row[f as keyof typeof row])).join(',')
+      ),
+    ].join('\n');
+
+    await logAction(
+      req.user?.id,
+      'EXPORT_KARDEX_CSV',
+      'Data',
+      undefined,
+      `El usuario exportó el Kardex general.`
+    );
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="kardex_inventario.csv"');
+    return res.status(200).send('\ufeff' + csv);
+  } catch (error) {
+    return res.status(500).json({ status: 'error', message: 'Error al generar Kardex' });
+  }
+};
+
+// 9. ESTADO DE RESULTADOS / UTILIDADES (CSV)
+export const downloadProfitLossReport = async (req: CustomRequest, res: Response) => {
+  try {
+    const sales = await prisma.sale.findMany({
+      where: { isVoided: false },
+      include: {
+        items: {
+          include: { productVariant: { include: { product: { select: { cost: true } } } } },
+        },
+      },
+    });
+    const expenses = await prisma.expense.aggregate({ _sum: { amount: true } });
+
+    let totalRevenue = 0;
+    let totalCOGS = 0;
+
+    sales.forEach((sale) => {
+      totalRevenue += sale.totalAmount;
+      sale.items.forEach((item) => {
+        totalCOGS += item.quantity * (item.productVariant?.product?.cost || 0);
+      });
+    });
+
+    const grossProfit = totalRevenue - totalCOGS;
+    const totalExpenses = Math.abs(expenses._sum.amount || 0);
+    const netProfit = grossProfit - totalExpenses;
+
+    // Construimos un CSV formateado como un Estado de Resultados
+    const csv = [
+      'Concepto,Monto',
+      `Ingresos Totales (Ventas),${totalRevenue}`,
+      `(-) Costo de Mercancía Vendida (COGS),${totalCOGS}`,
+      `Utilidad Bruta,${grossProfit}`,
+      `(-) Gastos Operativos,${totalExpenses}`,
+      `Utilidad Neta,${netProfit}`,
+    ].join('\n');
+
+    await logAction(
+      req.user?.id,
+      'EXPORT_PNL_CSV',
+      'Data',
+      undefined,
+      `El usuario exportó el Estado de Resultados.`
+    );
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="estado_resultados.csv"');
+    return res.status(200).send('\ufeff' + csv);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ status: 'error', message: 'Error al generar Estado de Resultados' });
+  }
+};
+
+// 10. REPORTE DE CARTERA DE CLIENTES (CSV)
+export const downloadClientsDebtReport = async (req: CustomRequest, res: Response) => {
+  try {
+    const clients = await prisma.client.findMany({
+      orderBy: { balance: 'desc' },
+    });
+
+    const rows = clients.map((c) => ({
+      Nombre: c.name,
+      Documento: c.document || 'N/A',
+      Telefono: c.phone || 'N/A',
+      Deuda_Actual: c.balance,
+      Estado: c.balance > 0 ? 'Deudor' : 'Al día',
+    }));
+
+    if (rows.length === 0)
+      return res.status(400).json({ status: 'error', message: 'No hay clientes registrados' });
+
+    const headers = Object.keys(rows[0]);
+    const csv = [
+      headers.join(','),
+      ...rows.map((row) =>
+        headers.map((f) => JSON.stringify(row[f as keyof typeof row])).join(',')
+      ),
+    ].join('\n');
+
+    await logAction(
+      req.user?.id,
+      'EXPORT_CLIENTS_DEBT_CSV',
+      'Data',
+      undefined,
+      `El usuario exportó el reporte de cartera de clientes.`
+    );
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="cartera_clientes.csv"');
+    return res.status(200).send('\ufeff' + csv);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ status: 'error', message: 'Error al generar cartera de clientes' });
+  }
+};
+
+// 11. REPORTE DE DESCUADRES DE CAJEROS (CSV)
+export const downloadCashiersBalanceReport = async (req: CustomRequest, res: Response) => {
+  try {
+    const users = await prisma.user.findMany({
+      // ✅ Traemos a TODOS los roles (Admin, Manager, User) que tengan un balance diferente de 0
+      where: {
+        balance: { not: 0 },
+      },
+      orderBy: { balance: 'asc' },
+    });
+
+    const rows = users.map((u) => ({
+      Nombre: u.name,
+      Rol: u.role, // ✅ Agregamos el rol para que el auditor sepa quién fue
+      Email: u.email,
+      Balance_Sistema: u.balance,
+      Estado: u.balance < 0 ? 'Debe dinero (Faltante)' : 'Sobrante a favor',
+    }));
+
+    if (rows.length === 0)
+      return res
+        .status(400)
+        .json({ status: 'error', message: 'No hay descuadres registrados (todos cuadran)' });
+
+    const headers = Object.keys(rows[0]);
+    const csv = [
+      headers.join(','),
+      ...rows.map((row) =>
+        headers.map((f) => JSON.stringify(row[f as keyof typeof row])).join(',')
+      ),
+    ].join('\n');
+
+    await logAction(
+      req.user?.id,
+      'EXPORT_CASHIERS_BALANCE_CSV',
+      'Data',
+      undefined,
+      `El usuario exportó el reporte de descuadres de cajeros.`
+    );
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="descuadres_cajeros.csv"');
+    return res.status(200).send('\ufeff' + csv);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ status: 'error', message: 'Error al generar reporte de cajeros' });
+  }
+};
+
+// 12. REPORTE DE PRODUCTOS AGOTADOS / BAJO STOCK (CSV)
+export const downloadLowStockReport = async (req: CustomRequest, res: Response) => {
+  try {
+    const lowStockItems = await prisma.productVariant.findMany({
+      where: {
+        stock: { lte: prisma.productVariant.fields.minStock },
+      },
+      include: {
+        product: { select: { name: true, sku: true } },
+        size: { select: { name: true } },
+        color: { select: { name: true } },
+      },
+      orderBy: { stock: 'asc' },
+    });
+
+    const rows = lowStockItems.map((v) => ({
+      SKU: v.product.sku,
+      Producto: v.product.name,
+      Talla: v.size.name,
+      Color: v.color.name,
+      Stock_Actual: v.stock,
+      Stock_Minimo: v.minStock,
+      Estado: v.stock === 0 ? 'AGOTADO' : 'BAJO STOCK',
+    }));
+
+    if (rows.length === 0)
+      return res
+        .status(400)
+        .json({
+          status: 'error',
+          message: 'No hay productos con bajo stock. ¡Todo está perfecto!',
+        });
+
+    const headers = Object.keys(rows[0]);
+    const csv = [
+      headers.join(','),
+      ...rows.map((row) =>
+        headers.map((f) => JSON.stringify(row[f as keyof typeof row])).join(',')
+      ),
+    ].join('\n');
+
+    await logAction(
+      req.user?.id,
+      'EXPORT_LOW_STOCK_CSV',
+      'Data',
+      undefined,
+      `El usuario exportó el reporte de productos agotados/bajo stock.`
+    );
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="productos_agotados.csv"');
+    return res.status(200).send('\ufeff' + csv);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ status: 'error', message: 'Error al generar reporte de bajo stock' });
+  }
+};
+
+// 13. RANKING DE VENTAS Y RENTABILIDAD POR PRODUCTO (CSV)
+export const downloadSalesRankingReport = async (req: CustomRequest, res: Response) => {
+  try {
+    // Usamos SQL directo para agrupar por producto y calcular ingresos, costos y ganancias
+    const ranking = await prisma.$queryRaw`
+      SELECT 
+        p.name AS Producto, 
+        p.sku AS SKU,
+        SUM(si.quantity) AS Unidades_Vendidas,
+        SUM(si.subtotal) AS Ingresos_Totales,
+        SUM(si.quantity * p.cost) AS Costo_Total,
+        (SUM(si.subtotal) - SUM(si.quantity * p.cost)) AS Ganancia_Bruta
+      FROM "SaleItem" si
+      JOIN "Sale" s ON si."saleId" = s.id
+      JOIN "ProductVariant" pv ON si."productVariantId" = pv.id
+      JOIN "Product" p ON pv."productId" = p.id
+      WHERE s."isVoided" = false
+      GROUP BY p.id, p.name, p.sku
+      ORDER BY Ingresos_Totales DESC;
+    `;
+
+    const rows = (ranking as any[]).map((r) => ({
+      Producto: r.Producto,
+      SKU: r.SKU,
+      Unidades_Vendidas: r.Unidades_Vendidas,
+      Ingresos_Totales: r.Ingresos_Totales,
+      Costo_Total: r.Costo_Total,
+      Ganancia_Bruta: r.Ganancia_Bruta,
+      Margen_Porcentaje:
+        r.Ingresos_Totales > 0
+          ? ((r.Ganancia_Bruta / r.Ingresos_Totales) * 100).toFixed(2) + '%'
+          : '0%',
+    }));
+
+    if (rows.length === 0)
+      return res
+        .status(400)
+        .json({ status: 'error', message: 'No hay ventas registradas para analizar' });
+
+    const headers = Object.keys(rows[0]);
+    const csv = [
+      headers.join(','),
+      ...rows.map((row) =>
+        headers.map((f) => JSON.stringify(row[f as keyof typeof row])).join(',')
+      ),
+    ].join('\n');
+
+    await logAction(
+      req.user?.id,
+      'EXPORT_SALES_RANKING_CSV',
+      'Data',
+      undefined,
+      `El usuario exportó el ranking de ventas y rentabilidad.`
+    );
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="ranking_ventas_rentabilidad.csv"');
+    return res.status(200).send('\ufeff' + csv);
+  } catch (error) {
+    console.error('Error generating sales ranking report:', error);
+    return res
+      .status(500)
+      .json({ status: 'error', message: 'Error al generar el ranking de ventas' });
   }
 };

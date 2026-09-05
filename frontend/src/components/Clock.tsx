@@ -27,5 +27,6 @@ export default function Clock() {
       </p>
       <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">{formatTime(time)}</p>
     </div>
+    
   );
 }
