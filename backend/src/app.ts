@@ -4,6 +4,8 @@ import cookieParser from 'cookie-parser';
 import routes from './routes';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
+import swaggerJsdoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
 
 const app = express();
 
@@ -37,6 +39,38 @@ app.use(
 
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
+
+// ✅ CONFIGURACIÓN DE SWAGGER (Documentación de API)
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Modexastock API',
+      version: '1.0.0',
+      description: 'Documentación oficial del ERP y POS Modexastock',
+    },
+    // ✅ AGREGAR ESTO PARA EL BOTÓN "AUTHORIZE"
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        }
+      }
+    },
+    servers: [
+      {
+        url: 'http://localhost:3000/api',
+        description: 'Servidor de Desarrollo',
+      },
+    ],
+  },
+  apis: ['./src/routes/*.ts'],
+};
+
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use('/api', routes);
 
