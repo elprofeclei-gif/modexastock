@@ -6,7 +6,9 @@ const prisma = new PrismaClient();
 async function main() {
   // 1. BLOQUEO DE SEGURIDAD PARA PRODUCCIÓN
   if (process.env.NODE_ENV === 'production') {
-    console.error('❌ ERROR FATAL: No puedes ejecutar el seed en producción. Esto borraría todos los datos reales.');
+    console.error(
+      '❌ ERROR FATAL: No puedes ejecutar el seed en producción. Esto borraría todos los datos reales.'
+    );
     process.exit(1);
   }
 
@@ -16,9 +18,9 @@ async function main() {
   await prisma.expense.deleteMany();
   await prisma.saleItem.deleteMany();
   await prisma.purchaseItem.deleteMany();
-  await prisma.inventoryMovement.deleteMany(); // ✅ Limpieza de Kardex
-  await prisma.auditLog.deleteMany();         // ✅ Limpieza de Bitácora
-  await prisma.clientPayment.deleteMany();    // ✅ Limpieza de Abonos
+  await prisma.inventoryMovement.deleteMany();
+  await prisma.auditLog.deleteMany();
+  await prisma.clientPayment.deleteMany();
   await prisma.sale.deleteMany();
   await prisma.purchase.deleteMany();
   await prisma.productVariant.deleteMany();
@@ -28,6 +30,7 @@ async function main() {
   await prisma.physicalBox.deleteMany();
   await prisma.client.deleteMany();
   await prisma.vendor.deleteMany();
+  await prisma.expenseCategory.deleteMany();
   await prisma.category.deleteMany();
   await prisma.brand.deleteMany();
   await prisma.size.deleteMany();
@@ -35,7 +38,7 @@ async function main() {
   await prisma.setting.deleteMany();
   await prisma.user.deleteMany();
 
-  console.log('⚙️ Creando configuración inicial...');
+  console.log('⚙️ Creando configuración inicial de la empresa...');
   await prisma.setting.create({
     data: {
       id: 1,
@@ -51,10 +54,10 @@ async function main() {
     },
   });
 
-  console.log('👥 Creando usuarios (Admin y Cajero de prueba)...');
+  console.log('👥 Creando usuarios (Admin, Gerente y Cajero)...');
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash('password123', salt);
-  
+
   await prisma.user.createMany({
     data: [
       {
@@ -65,16 +68,23 @@ async function main() {
         isActive: true,
       },
       {
+        email: 'gerente@modexastock.com',
+        password: hashedPassword,
+        name: 'Gerente Prueba',
+        role: 'MANAGER',
+        isActive: true,
+      },
+      {
         email: 'cajero@modexastock.com',
         password: hashedPassword,
         name: 'Cajero Prueba',
         role: 'USER',
         isActive: true,
-      }
-    ]
+      },
+    ],
   });
 
-  console.log('📦 Creando cajas físicas...');
+  console.log('📦 Creando cajas físicas y cuentas financieras...');
   await prisma.physicalBox.createMany({
     data: [
       { name: 'Caja Principal', balance: 0 },
@@ -83,46 +93,51 @@ async function main() {
     skipDuplicates: true,
   });
 
-  console.log('🏦 Creando cuentas financieras (Saldos en 0)...');
   await prisma.account.createMany({
     data: [
       { name: 'Banco Principal', type: 'BANK', balance: 0 },
-      { name: 'Caja Fuerte', type: 'CASH_SAFE', balance: 0 }
-    ]
+      { name: 'Caja Fuerte', type: 'CASH_SAFE', balance: 0 },
+    ],
   });
 
-  // ✅ NUEVO: Catálogos base para facilitar el alta de productos
   console.log('🏷️ Creando catálogos base (Categorías, Marcas, Tallas, Colores)...');
   await prisma.category.createMany({
     data: [
       { name: 'Sin Categoría', isActive: true },
       { name: 'Ropa', isActive: true },
-      { name: 'Calzado', isActive: true }
+      { name: 'Calzado', isActive: true },
+      { name: 'Accesorios', isActive: true },
     ],
-    skipDuplicates: true
+    skipDuplicates: true,
   });
 
   await prisma.brand.createMany({
     data: [
       { name: 'Sin Marca', isActive: true },
       { name: 'Nike', isActive: true },
-      { name: 'Adidas', isActive: true }
+      { name: 'Adidas', isActive: true },
+      { name: 'Puma', isActive: true },
+      { name: 'Generica', isActive: true },
     ],
-    skipDuplicates: true
+    skipDuplicates: true,
   });
 
   await prisma.size.createMany({
     data: [
       { name: 'Única' },
+      { name: 'XS' },
       { name: 'S' },
       { name: 'M' },
       { name: 'L' },
       { name: 'XL' },
+      { name: 'XXL' },
       { name: '38' },
       { name: '39' },
-      { name: '40' }
+      { name: '40' },
+      { name: '41' },
+      { name: '42' },
     ],
-    skipDuplicates: true
+    skipDuplicates: true,
   });
 
   await prisma.color.createMany({
@@ -131,12 +146,42 @@ async function main() {
       { name: 'Negro', hex: '#000000' },
       { name: 'Blanco', hex: '#FFFFFF' },
       { name: 'Rojo', hex: '#FF0000' },
-      { name: 'Azul', hex: '#0000FF' }
+      { name: 'Azul', hex: '#0000FF' },
+      { name: 'Gris', hex: '#808080' },
+      { name: 'Beige', hex: '#F5F5DC' },
     ],
-    skipDuplicates: true
+    skipDuplicates: true,
   });
 
-  console.log('✅ ¡Base de datos lista para recibir la carga masiva de Excel!');
+  console.log('💰 Creando categorías de gastos para Tesorería...');
+  await prisma.expenseCategory.createMany({
+    data: [
+      { name: 'Gastos Operativos' },
+      { name: 'Servicios Públicos' },
+      { name: 'Renta / Arriendo' },
+      { name: 'Nómina / Salarios' },
+      { name: 'Mantenimiento' },
+    ],
+  });
+
+  console.log('🏭 Creando proveedores de ejemplo...');
+  await prisma.vendor.createMany({
+    data: [
+      {
+        name: 'Distribuidora Nacional',
+        phone: '+57 311 111 1111',
+        email: 'ventas@distnacional.com',
+      },
+      {
+        name: 'Importaciones Ltda.',
+        phone: '+57 322 222 2222',
+        email: 'compras@importacionesltda.com',
+      },
+    ],
+  });
+
+  console.log('✅ ¡Base de datos inicializada con entorno profesional!');
+  console.log('👉 Credenciales de prueba: admin@modexastock.com / password123');
 }
 
 main()

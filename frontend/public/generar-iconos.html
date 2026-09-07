@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Generador de Iconos PWA</title>
+</head>
+<body style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif;">
+    <h2>Generando íconos...</h2>
+    <p>Revisa tu carpeta de descargas en 2 segundos.</p>
+
+    <script>
+        function descargarIcono(size) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            
+            // Fondo color indigo (el de tu sistema)
+            ctx.fillStyle = '#4f46e5';
+            ctx.fillRect(0, 0, size, size);
+            
+            // Letra "M" blanca
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `bold ${size * 0.65}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('M', size / 2, size / 2 + (size * 0.05));
+            
+            // Descargar la imagen
+            const link = document.createElement('a');
+            link.download = `pwa-${size}x${size}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // Generar ambos tamaños
+        descargarIcono(192);
+        setTimeout(() => descargarIcono(512), 500);
+    </script>
+</body>
+</html>

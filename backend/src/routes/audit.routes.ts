@@ -7,7 +7,18 @@ const router = Router();
 // ✅ Doble seguridad: Todo requiere estar logueado Y ser Admin/Manager
 router.use(authMiddleware, roleMiddleware(['ADMIN', 'MANAGER']));
 
-// Obtener historial de la bitácora con filtros
+/**
+ * @swagger
+ * /audit:
+ *   get:
+ *     summary: Obtener bitácora del sistema
+ *     description: Consulta el registro inmutable de acciones críticas (anulaciones, ajustes, cierres forzosos).
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de registros de auditoría
+ */
 router.get('/', getAuditLogs);
 
 export default router;
