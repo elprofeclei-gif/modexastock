@@ -153,25 +153,41 @@ export const deleteCatalogItem = async (req: CustomRequest, res: Response) => {
   }
 };
 
-// LIMPIAR CATÁLOGOS VACÍOS
+// LIMPIAR CATÁLOGOS VACÍOS (Categorías, Marcas, Tallas y Colores)
 export const cleanupEmptyCatalogs = async (req: CustomRequest, res: Response) => {
   try {
-    // Eliminar categorías que NO tienen productos asociados
+    // 1. Eliminar categorías que NO tienen productos asociados
     const deletedCategories = await prisma.category.deleteMany({
-      where: { products: { none: {} } }
+      where: { products: { none: {} } },
     });
 
-    // Eliminar marcas que NO tienen productos asociados
+    // 2. Eliminar marcas que NO tienen productos asociados
     const deletedBrands = await prisma.brand.deleteMany({
-      where: { products: { none: {} } }
+      where: { products: { none: {} } },
+    });
+
+    // ✅ 3. Eliminar tallas que NO tienen variantes asociadas
+    const deletedSizes = await prisma.size.deleteMany({
+      where: { variants: { none: {} } },
+    });
+
+    // ✅ 4. Eliminar colores que NO tienen variantes asociadas
+    const deletedColors = await prisma.color.deleteMany({
+      where: { variants: { none: {} } },
     });
 
     // Registro en bitácora
-    await logAction(req.user?.id, 'CLEANUP_CATALOGS', 'Setting', undefined, `Limpieza de catálogos. Categorías eliminadas: ${deletedCategories.count}, Marcas eliminadas: ${deletedBrands.count}`);
+    await logAction(
+      req.user?.id,
+      'CLEANUP_CATALOGS',
+      'Setting',
+      undefined,
+      `Limpieza de catálogos. Categorías: ${deletedCategories.count}, Marcas: ${deletedBrands.count}, Tallas: ${deletedSizes.count}, Colores: ${deletedColors.count}`
+    );
 
     return res.status(200).json({
       status: 'success',
-      message: `Limpieza completa. Se eliminaron ${deletedCategories.count} categorías y ${deletedBrands.count} marcas vacías.`
+      message: `Limpieza completa. Se eliminaron ${deletedCategories.count} categorías, ${deletedBrands.count} marcas, ${deletedSizes.count} tallas y ${deletedColors.count} colores vacíos.`,
     });
   } catch (error: any) {
     console.error('Error cleaning catalogs:', error);
