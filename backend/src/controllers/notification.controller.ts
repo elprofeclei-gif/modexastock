@@ -6,73 +6,129 @@ export const getMyNotifications = async (req: CustomRequest, res: Response) => {
   try {
     const userId = req.user?.id!;
     const role = req.user?.role!;
-    const notifications: any[] = [];
+    const groups: any[] = [];
+    let totalAlerts = 0;
 
-    // 1. ALERTAS DE INVENTARIO (Solo Admin y Manager)
     if (role === 'ADMIN' || role === 'MANAGER') {
-      const lowStock = await prisma.productVariant.findMany({
-        where: { stock: { lte: prisma.productVariant.fields.minStock } },
-        include: { product: true, size: true, color: true },
-        take: 5,
+      // 1. GRUPO DE INVENTARIO
+      // A) Productos Totalmente Agotados (Stock = 0)
+      const outOfStockCount = await prisma.productVariant.count({
+        where: { stock: 0 },
       });
-      lowStock.forEach((item) => {
-        notifications.push({
-          type: 'STOCK',
+
+      if (outOfStockCount > 0) {
+        totalAlerts += outOfStockCount;
+        const outOfStockItems = await prisma.productVariant.findMany({
+          where: { stock: 0 },
+          include: { product: true, size: true, color: true },
+          take: 20,
+        });
+        groups.push({
+          id: 'OUT_OF_STOCK',
+          title: 'Productos Agotados',
+          icon: 'XCircle',
+          color: 'red',
+          count: outOfStockCount,
+          items: outOfStockItems.map((item) => ({
+            message: `${item.product.name} (${item.size.name}/${item.color.name}) - ¡SIN STOCK!`,
+          })),
+        });
+      }
+
+      // B) Productos con Bajo Stock (Stock > 0 pero <= minStock)
+      const lowStockCount = await prisma.productVariant.count({
+        where: {
+          stock: { gt: 0, lte: prisma.productVariant.fields.minStock },
+        },
+      });
+
+      if (lowStockCount > 0) {
+        totalAlerts += lowStockCount;
+        const lowStockItems = await prisma.productVariant.findMany({
+          where: {
+            stock: { gt: 0, lte: prisma.productVariant.fields.minStock },
+          },
+          include: { product: true, size: true, color: true },
+          take: 20,
+        });
+        groups.push({
+          id: 'STOCK',
+          title: 'Productos Bajo Stock',
           icon: 'AlertTriangle',
           color: 'amber',
-          title: 'Bajo Stock',
-          message: `${item.product.name} (${item.size.name}/${item.color.name}) - Quedan ${item.stock}`,
-          link: '/inventory',
+          count: lowStockCount,
+          items: lowStockItems.map((item) => ({
+            message: `${item.product.name} (${item.size.name}/${item.color.name}) - Quedan ${item.stock}`,
+          })),
         });
-      });
+      }
 
-      // 2. ALERTAS DE CAJEROS CON DESCUADRES (Solo Admin y Manager)
-      const cashiersWithDebt = await prisma.user.findMany({
+      // 2. GRUPO DE DESCUADRES DE CAJEROS
+      const cashiersWithDebtCount = await prisma.user.count({
         where: { balance: { not: 0 } },
       });
-      cashiersWithDebt.forEach((c) => {
-        notifications.push({
-          type: 'DEBT',
+
+      if (cashiersWithDebtCount > 0) {
+        totalAlerts += cashiersWithDebtCount;
+        const cashiersWithDebt = await prisma.user.findMany({
+          where: { balance: { not: 0 } },
+          take: 20,
+        });
+        groups.push({
+          id: 'DEBT',
+          title: 'Descuadres de Cajeros',
           icon: 'AlertCircle',
           color: 'red',
-          title: 'Descuadre Pendiente',
-          message: `${c.name} tiene un balance de ${c.balance} (Faltante/Sobrante)`,
-          link: '/settlements',
+          count: cashiersWithDebtCount,
+          items: cashiersWithDebt.map((c) => ({
+            message: `${c.name} tiene un balance de ${c.balance} (Faltante/Sobrante)`,
+          })),
         });
-      });
-    }
+      }
 
-    // 3. ALERTAS DE TESORERÍA (Solo Admin y Manager)
-    if (role === 'ADMIN' || role === 'MANAGER') {
+      // 3. GRUPO DE VENTAS ANULADAS HOY
       const voidedToday = await prisma.sale.count({
         where: { isVoided: true, voidedAt: { gte: new Date(new Date().setHours(0, 0, 0, 0)) } },
       });
+
       if (voidedToday > 0) {
-        notifications.push({
-          type: 'VOID',
+        totalAlerts += voidedToday;
+        const voidedSales = await prisma.sale.findMany({
+          where: { isVoided: true, voidedAt: { gte: new Date(new Date().setHours(0, 0, 0, 0)) } },
+          take: 20,
+        });
+        groups.push({
+          id: 'VOID',
+          title: 'Ventas Anuladas Hoy',
           icon: 'Ban',
           color: 'red',
-          title: 'Ventas Anuladas Hoy',
-          message: `Se han anulado ${voidedToday} ventas hoy. Revisar bitácora.`,
-          link: '/audit-logs',
+          count: voidedToday,
+          items: voidedSales.map((s) => ({
+            message: `Folio #${s.id.substring(0, 8)} - Total: ${s.totalAmount}`,
+          })),
         });
       }
     }
 
-    // 4. ALERTAS PERSONALES PARA EL CAJERO (Deudas propias)
+    // 4. ALERTA PERSONAL PARA EL CAJERO
     const myBalance = await prisma.user.findUnique({ where: { id: userId } });
     if (myBalance && myBalance.balance < 0) {
-      notifications.push({
-        type: 'MY_DEBT',
+      totalAlerts += 1;
+      groups.push({
+        id: 'MY_DEBT',
+        title: 'Tienes un Faltante',
         icon: 'Wallet',
         color: 'red',
-        title: 'Tienes un Faltante',
-        message: `Tienes un descuadre pendiente de ${myBalance.balance}. Acércate a administración.`,
-        link: '/profile',
+        count: 1,
+        items: [
+          {
+            message: `Tienes un descuadre pendiente de ${myBalance.balance}. Acércate a administración.`,
+          },
+        ],
       });
     }
 
-    return res.status(200).json({ status: 'success', data: notifications });
+    return res.status(200).json({ status: 'success', data: groups, total: totalAlerts });
   } catch (error) {
     console.error('Error fetching notifications:', error);
     return res.status(500).json({ status: 'error', message: 'Error interno' });
