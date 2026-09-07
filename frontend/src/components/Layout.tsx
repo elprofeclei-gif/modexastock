@@ -19,6 +19,7 @@ import {
   Wallet,
   Menu as MenuIcon,
   X,
+  XCircle,
 } from 'lucide-react';
 import Clock from './Clock';
 
@@ -42,23 +43,25 @@ export default function Layout({ children }: LayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const [notifications, setNotifications] = useState<any[]>([]);
+  const [totalAlerts, setTotalAlerts] = useState(0);
   const [showNotif, setShowNotif] = useState(false);
+  const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchNotifs = async () => {
       try {
         const res = await axios.get('/notifications');
         setNotifications(res.data.data);
+        setTotalAlerts(res.data.total || 0); // ✅ GUARDAR EL TOTAL REAL
       } catch (error) {
         console.error('Error fetching notifications', error);
       }
     };
 
     fetchNotifs();
-    // Se actualiza cada 45 segundos
     const interval = setInterval(fetchNotifs, 45000);
     return () => clearInterval(interval);
-  }, [user?.role, location.pathname]); // Se actualiza si cambia de página
+  }, [user?.role, location.pathname]);
 
   useEffect(() => {
     setIsDark(document.documentElement.classList.contains('dark'));
@@ -217,6 +220,7 @@ export default function Layout({ children }: LayoutProps) {
 
             {/* LADO DERECHO: Notificaciones, Reloj y Perfil */}
             <div className="flex items-center space-x-4 md:space-x-6">
+              <Clock />
               {/* ✅ CENTRO DE NOTIFICACIONES */}
               <div className="relative">
                 <button
@@ -224,9 +228,10 @@ export default function Layout({ children }: LayoutProps) {
                   className="relative p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors"
                 >
                   <Bell size={20} />
-                  {notifications.length > 0 && (
+                  {/* ✅ CAMBiamos notifications.length por totalAlerts */}
+                  {totalAlerts > 0 && (
                     <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
-                      {notifications.length}
+                      {totalAlerts}
                     </span>
                   )}
                 </button>
@@ -246,39 +251,64 @@ export default function Layout({ children }: LayoutProps) {
                           <X size={16} />
                         </button>
                       </div>
-                      <div className="max-h-96 overflow-y-auto">
+
+                      <div className="max-h-[70vh] overflow-y-auto">
                         {notifications.length === 0 ? (
                           <p className="p-8 text-center text-sm text-slate-400">
                             No tienes notificaciones nuevas. 🟢
                           </p>
                         ) : (
-                          notifications.map((n, idx) => {
+                          notifications.map((group, idx) => {
                             const Icon =
-                              n.icon === 'AlertTriangle'
+                              group.icon === 'AlertTriangle'
                                 ? AlertTriangle
-                                : n.icon === 'AlertCircle'
+                                : group.icon === 'AlertCircle'
                                   ? AlertCircle
-                                  : n.icon === 'Ban'
+                                  : group.icon === 'Ban'
                                     ? Ban
-                                    : Wallet;
+                                    : group.icon === 'XCircle'
+                                      ? XCircle
+                                      : Wallet;
                             const colorClass =
-                              n.color === 'amber' ? 'text-amber-500' : 'text-red-500';
+                              group.color === 'amber' ? 'text-amber-500' : 'text-red-500';
+                            const isExpanded = expandedGroup === group.id;
+
                             return (
                               <div
                                 key={idx}
-                                className="p-3 border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer"
+                                className="border-b border-slate-100 dark:border-slate-700 last:border-0"
                               >
-                                <div className="flex gap-3">
-                                  <Icon size={20} className={`${colorClass} shrink-0 mt-0.5`} />
-                                  <div>
-                                    <p className="text-sm font-semibold text-slate-900 dark:text-white">
-                                      {n.title}
-                                    </p>
-                                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                                      {n.message}
+                                <button
+                                  onClick={() => setExpandedGroup(isExpanded ? null : group.id)}
+                                  className="w-full flex justify-between items-center p-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+                                >
+                                  <div className="flex items-center gap-3">
+                                    <Icon size={20} className={`${colorClass} shrink-0`} />
+                                    <p className="text-sm font-semibold text-slate-900 dark:text-white text-left">
+                                      {group.title}
                                     </p>
                                   </div>
-                                </div>
+                                  <span
+                                    className={`px-2 py-0.5 text-xs font-bold rounded-full ${group.color === 'amber' ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400' : 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400'}`}
+                                  >
+                                    {group.count}
+                                  </span>
+                                </button>
+
+                                {isExpanded && (
+                                  <div className="bg-slate-50 dark:bg-slate-900/30 max-h-48 overflow-y-auto">
+                                    {group.items.map((item: any, i: number) => (
+                                      <div
+                                        key={i}
+                                        className="p-3 pl-12 border-t border-slate-100 dark:border-slate-700/50"
+                                      >
+                                        <p className="text-xs text-slate-600 dark:text-slate-400">
+                                          {item.message}
+                                        </p>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
                             );
                           })
@@ -288,8 +318,6 @@ export default function Layout({ children }: LayoutProps) {
                   </>
                 )}
               </div>
-
-              <Clock />
 
               {/* MENÚ DE USUARIO */}
               <div className="relative">

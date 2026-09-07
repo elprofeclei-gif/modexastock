@@ -171,7 +171,15 @@ export const getDashboardStats = async (req: CustomRequest, res: Response) => {
     const inventory = await prisma.productVariant.findMany({ include: { product: true } });
     const totalStockUnits = inventory.reduce((acc, v) => acc + v.stock, 0);
     const inventoryValue = inventory.reduce((acc, v) => acc + v.stock * v.product.price, 0);
+    // 1. Contar TODOS los productos bajos de stock en la base de datos
+    const totalCriticalCount = await prisma.productVariant.count({
+      where: { stock: { lte: 2 } },
+    });
+    const totalLowCount = await prisma.productVariant.count({
+      where: { stock: { gt: 2, lte: 10 } },
+    });
 
+    // 2. Traer solo 5 para mostrar en la lista visual del Dashboard
     const lowStockVariantsRaw = await prisma.productVariant.findMany({
       where: { stock: { lte: 10 } },
       include: { product: true, size: true, color: true },
@@ -188,8 +196,9 @@ export const getDashboardStats = async (req: CustomRequest, res: Response) => {
       severity: v.stock <= 2 ? 'critical' : 'low',
     }));
 
-    const criticalCount = lowStockVariantsRaw.filter((v) => v.stock <= 2).length;
-    const lowCount = lowStockVariantsRaw.filter((v) => v.stock > 2 && v.stock <= 10).length;
+    // 3. Usar los totales reales para las tarjetas
+    const criticalCount = totalCriticalCount;
+    const lowCount = totalLowCount;
 
     const activeCashiers = await prisma.cashRegister.count({ where: { status: 'OPEN' } });
     const clientsData = await prisma.client.aggregate({ _sum: { balance: true }, _count: true });
