@@ -106,7 +106,7 @@ export default function Dashboard() {
 
   const hasInventory = products.length > 0;
   const hasFunds = accounts.reduce((acc, a) => acc + a.balance, 0) > 0;
-  const hasCompanyData = settings?.companyName && settings.companyName !== 'Modexastock Store';
+  const hasCompanyData = !!settings?.companyName;
   const needsOnboarding = !hasInventory || !hasFunds || !hasCompanyData;
 
   const handleInjectCapital = async (e: React.FormEvent) => {
