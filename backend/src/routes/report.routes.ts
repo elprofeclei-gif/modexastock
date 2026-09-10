@@ -18,7 +18,7 @@ const router = Router();
  *     security:
  *       - bearerAuth: []
  */
-router.get('/dashboard', authMiddleware, roleMiddleware(['ADMIN', 'MANAGER']), getDashboardStats);
+router.get('/dashboard', authMiddleware, getDashboardStats);
 
 /**
  * @swagger
@@ -51,6 +51,11 @@ router.get('/profit-loss', authMiddleware, roleMiddleware(['ADMIN', 'MANAGER']),
  *     security:
  *       - bearerAuth: []
  */
-router.get('/inventory/csv', authMiddleware, roleMiddleware(['ADMIN', 'MANAGER']), downloadInventoryReport);
+router.get(
+  '/inventory/csv',
+  authMiddleware,
+  roleMiddleware(['ADMIN', 'MANAGER']),
+  downloadInventoryReport
+);
 
 export default router;
