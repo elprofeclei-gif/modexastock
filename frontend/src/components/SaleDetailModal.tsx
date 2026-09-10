@@ -226,19 +226,9 @@ export default function SaleDetailModal({ sale, onClose }: SaleDetailModalProps)
                       </span>
                     </div>
                   )}
-
-                  {/* Resto de campos (Referencia, Pago, Total)... */}
+                  {/* ✅ BLOQUE LIMPIO: Detalles finales sin duplicados */}
                   <div className="border-t border-dashed border-slate-200 dark:border-slate-700 pt-4 space-y-2">
-                    {sale.reference && (
-                      <div className="flex justify-between text-sm text-slate-600 dark:text-slate-400">
-                        <span>Referencia:</span>
-                        <span className="font-medium text-slate-900 dark:text-white">
-                          {sale.reference}
-                        </span>
-                      </div>
-                    )}
-
-                    {/* ✅ DATOS DEL CLIENTE */}
+                    {/* Datos del Cliente (Solo aparece una vez) */}
                     <div className="flex justify-between text-sm text-slate-600 dark:text-slate-400">
                       <span>Cliente:</span>
                       <span className="font-medium text-slate-900 dark:text-white">
@@ -254,6 +244,7 @@ export default function SaleDetailModal({ sale, onClose }: SaleDetailModalProps)
                       </div>
                     )}
 
+                    {/* Método de Pago (Solo aparece una vez) */}
                     <div className="flex justify-between text-sm text-slate-600 dark:text-slate-400">
                       <span>Método de Pago:</span>
                       <span className="font-medium text-slate-900 dark:text-white">
@@ -261,7 +252,17 @@ export default function SaleDetailModal({ sale, onClose }: SaleDetailModalProps)
                       </span>
                     </div>
 
-                    {/* ✅ EFECTIVO RECIBIDO Y CAMBIO AGREGADOS AQUÍ */}
+                    {/* Referencia (Solo si existe) */}
+                    {sale.reference && (
+                      <div className="flex justify-between text-sm text-slate-600 dark:text-slate-400">
+                        <span>Referencia:</span>
+                        <span className="font-medium text-slate-900 dark:text-white">
+                          {sale.reference}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Efectivo y Cambio (Solo si el pago incluye efectivo) */}
                     {sale.paymentMethod.includes('CASH') && sale.receivedAmount > 0 && (
                       <div className="flex justify-between text-sm text-slate-600 dark:text-slate-400">
                         <span>Efectivo Recibido:</span>

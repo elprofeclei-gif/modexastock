@@ -158,10 +158,10 @@ export default function Layout({ children }: LayoutProps) {
                 to="/"
                 className="flex items-center space-x-2 text-slate-900 dark:text-white font-bold text-lg"
               >
-                <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white text-sm">
-                  M
-                </div>
-                <span className="hidden sm:inline">Modexastock</span>
+                {/* ✅ CAMBIAMOS LA M POR EL LOGO */}
+                <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain" />
+                <span className="hidden sm:inline">ModexaStock</span>{' '}
+                {/* O el nombre de tu tienda */}
               </Link>
 
               <div className="hidden md:flex items-center space-x-1">
