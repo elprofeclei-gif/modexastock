@@ -1,3 +1,4 @@
+import Sentry from '@sentry/node';
 import { Response } from 'express';
 import { CustomRequest } from '../middlewares/auth.middleware';
 import prisma from '../config/prisma';
@@ -259,6 +260,7 @@ export const getLowStockAlerts = async (req: CustomRequest, res: Response) => {
     `;
     return res.status(200).json({ status: 'success', data: lowStockItems });
   } catch (error) {
+    Sentry.captureException(error);
     console.error('Error fetching low stock alerts:', error);
     return res.status(500).json({ status: 'error', message: 'Error interno del servidor' });
   }
