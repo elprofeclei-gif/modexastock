@@ -24,7 +24,7 @@ app.use(helmet());
 // Limitador general para la API
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 1000,
   message: { status: 'error', message: 'Demasiadas peticiones desde esta IP, intenta más tarde.' },
 });
 app.use('/api/', limiter);
