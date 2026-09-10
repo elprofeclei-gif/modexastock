@@ -1,3 +1,4 @@
+import Sentry from '@sentry/node';
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -8,6 +9,13 @@ import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 
 const app = express();
+
+// ✅ INICIALIZACIÓN DE SENTRY
+Sentry.init({
+  dsn: process.env.SENTRY_DSN, // Lo agregaremos al .env en el siguiente paso
+  environment: process.env.NODE_ENV || 'development',
+  tracesSampleRate: 1.0, // Captura el 100% de las transacciones (para monitoreo de rendimiento)
+});
 
 app.use(helmet());
 
@@ -56,8 +64,8 @@ const swaggerOptions = {
           type: 'http',
           scheme: 'bearer',
           bearerFormat: 'JWT',
-        }
-      }
+        },
+      },
     },
     servers: [
       {
@@ -77,7 +85,10 @@ app.use('/api', routes);
 app.get('/api/health', (req: Request, res: Response) => {
   res.status(200).json({ status: 'success', message: 'Modexastock API v2.0 API is running' });
 });
+// ✅ MIDDLEWARE DE ERRORES DE SENTRY (Debe ir antes de tus manejadores de errores)
+Sentry.setupExpressErrorHandler(app);
 
+// Manejo de rutas no encontradas
 app.use((req: Request, res: Response) => {
   res.status(404).json({ status: 'error', message: 'Route not found' });
 });
