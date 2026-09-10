@@ -245,6 +245,30 @@ export const getDashboardStats = async (req: CustomRequest, res: Response) => {
     const todayExpensesTotal = todayExpenses._sum.amount || 0;
     netProfit = todaySalesTotal - todayCOGS - todayExpensesTotal;
 
+    // ✅ NUEVO: Ventas por Categoría (Gráfica de Dona)
+    const salesItemsForCategories = await prisma.saleItem.findMany({
+      where: { sale: { isVoided: false } },
+      include: {
+        productVariant: {
+          include: {
+            product: { include: { category: true } },
+          },
+        },
+      },
+    });
+
+    const categoryMap = new Map<string, number>();
+    salesItemsForCategories.forEach((item) => {
+      const catName = item.productVariant.product.category.name;
+      const current = categoryMap.get(catName) || 0;
+      categoryMap.set(catName, current + item.subtotal);
+    });
+
+    const salesByCategory = Array.from(categoryMap.entries())
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 5); // Top 5 categorías
+
     return res.status(200).json({
       status: 'success',
       data: {
@@ -266,14 +290,13 @@ export const getDashboardStats = async (req: CustomRequest, res: Response) => {
         accountsPayable: vendorsData._sum.balance || 0,
         totalClients: clientsData._count,
         activeCashiers,
-
         cashiersData,
         topProducts,
         salesByDay,
-
         lowStockVariants,
         criticalCount,
         lowCount,
+        salesByCategory,
       },
     });
   } catch (error) {

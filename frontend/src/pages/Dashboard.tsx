@@ -37,6 +37,9 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
+  PieChart,
+  Pie,
+  Cell,
 } from 'recharts';
 
 export default function Dashboard() {
@@ -46,6 +49,7 @@ export default function Dashboard() {
   const { products } = useProducts();
   const { accounts, createTransaction } = useTreasury();
   const { settings, updateSettings } = useSettings();
+  const COLORS = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
   const [capitalAmounts, setCapitalAmounts] = useState<Record<string, string>>({});
   const [companyForm, setCompanyForm] = useState({
@@ -433,9 +437,8 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* Fila 3: GRÁFICAS DE TENDENCIA (NUEVAS) */}
+      {/* Fila 3: GRÁFICAS DE TENDENCIA (Ventas y Top 5) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* ... aquí sigue tu código de las gráficas que ya tienes ... */}
         {/* Gráfica de Ventas (Toma 2 columnas) */}
         <div className="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
           <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
@@ -444,7 +447,6 @@ export default function Dashboard() {
           <p className="text-xs text-slate-500 mb-6">Ingresos diarios de los últimos 7 días.</p>
 
           <div className="h-64 w-full">
-            {/* Asegúrate de que tu backend devuelva stats.salesByDay */}
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
                 data={stats?.salesByDay || []}
@@ -487,7 +489,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Top Productos con Gráfica de Barras (Toma 1 columna) */}
+        {/* Top 5 Productos con Gráfica de Barras (Toma 1 columna) */}
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
           <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
             <Crown size={18} className="text-amber-500" /> Top 5 Productos
@@ -539,7 +541,61 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Fila 4: Cajeros en Turno (Tabla) */}
+      {/* ✅ Fila 4: Ventas por Categoría (Dona) */}
+      <div className="grid grid-cols-1 gap-6">
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+          <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
+            <Package size={18} className="text-indigo-600" /> Ventas por Categoría
+          </h3>
+          <p className="text-xs text-slate-500 mb-6">Ingresos generados por pasillo.</p>
+
+          <div className="h-64 w-full flex items-center justify-center">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={stats?.salesByCategory || []}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={90}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {stats?.salesByCategory?.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#1e293b',
+                    border: 'none',
+                    borderRadius: '8px',
+                    color: '#fff',
+                    fontSize: '12px',
+                  }}
+                  formatter={(value: any) => [formatCurrency(value), 'Ingresos']}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="flex flex-wrap justify-center gap-3 mt-4">
+            {stats?.salesByCategory?.map((cat, idx) => (
+              <div
+                key={idx}
+                className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400"
+              >
+                <span
+                  className="w-3 h-3 rounded-full"
+                  style={{ backgroundColor: COLORS[idx % COLORS.length] }}
+                ></span>
+                {cat.name}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Fila 5: Cajeros en Turno (Tabla) */}
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden">
         <div className="p-5 border-b border-slate-100 dark:border-slate-700">
           <h3 className="text-lg font-bold text-slate-900 dark:text-white">Cajeros en Turno</h3>
@@ -599,7 +655,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Fila 5: Alertas de Inventario */}
+      {/* Fila 6: Alertas de Inventario */}
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-6">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">

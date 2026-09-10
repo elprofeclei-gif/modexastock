@@ -132,7 +132,7 @@ export const printThermalTicket = (sale: Sale, settings: Settings | null) => {
 
       <div class="dashed"></div>
 
-           <div class="totals">
+                <div class="totals">
         ${
           sale.discountAmount && sale.discountAmount > 0
             ? `
@@ -150,8 +150,6 @@ export const printThermalTicket = (sale: Sale, settings: Settings | null) => {
             : ''
         }
         <div class="total-bold"><span>TOTAL:</span><span>$${formatCurrency(sale.totalAmount)}</span></div>
-        
-        
         ${sale.paymentMethod.includes(' + ') ? `<div class="payment-method"><span>Pagado con:</span><span>${sale.paymentMethod}</span></div>` : ''}
       </div>
 

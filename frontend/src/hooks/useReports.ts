@@ -57,6 +57,7 @@ export interface DashboardStats {
   lowStockVariants: LowStockVariant[];
   criticalCount: number;
   lowCount: number;
+  salesByCategory?: { name: string; value: number }[];
 }
 
 export const useReports = () => {

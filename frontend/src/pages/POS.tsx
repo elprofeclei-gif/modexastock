@@ -1128,16 +1128,16 @@ export default function POS() {
           </div>
         </div>
 
-        {/* FOOTER FIJO (Total y Botón Cobrar) */}
+                {/* FOOTER FIJO (Total y Botón Cobrar) */}
         <div className="p-4 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 space-y-2">
           {/* ✅ RESUMEN DE SUBTOTAL Y DESCUENTO */}
           {discount > 0 && (
             <div className="space-y-1 mb-2">
-              <div className="flex justify-between items-center text-xs text-slate-500">
+              <div className="flex justify-between items-center text-xs text-slate-500 dark:text-slate-400">
                 <span>Subtotal:</span>
                 <span>{formatCurrency(subtotal)}</span>
               </div>
-              <div className="flex justify-between items-center text-xs font-medium text-red-500">
+              <div className="flex justify-between items-center text-xs font-medium text-red-500 dark:text-red-400">
                 <span>Descuento:</span>
                 <span>- {formatCurrency(discount)}</span>
               </div>
@@ -1145,15 +1145,12 @@ export default function POS() {
           )}
 
           <div className="flex justify-between items-center mb-1">
-            <span className="text-sm text-slate-500 font-medium">Total</span>
-            <span className="text-2xl font-extrabold text-slate-900 dark:text-white">
-              {formatCurrency(total)}
-            </span>
+            <span className="text-sm text-slate-500 dark:text-slate-400 font-medium">Total</span>
+            <span className="text-2xl font-extrabold text-slate-900 dark:text-white">{formatCurrency(total)}</span>
           </div>
 
-          {/* ✅ Mostrar cambio si es Efectivo o Mixto */}
-          {(paymentMethod === 'CASH' || paymentMethod === 'MIXED') && change > 0 && (
-            <div className="flex justify-between items-center text-lg font-bold text-green-600 mb-2">
+          {(paymentMethod === 'CASH' || (paymentMethod === 'MIXED' && change > 0)) && (
+            <div className="flex justify-between items-center text-lg font-bold text-green-600 dark:text-green-400 mb-2">
               <span>Cambio:</span>
               <span>{formatCurrency(change)}</span>
             </div>
@@ -1161,26 +1158,20 @@ export default function POS() {
 
           {/* ✅ BOTÓN DE DESCUENTO Y COBRAR */}
           <div className="flex gap-2">
-            <button
-              onClick={() => setShowDiscountModal(true)}
+            <button 
+              onClick={() => setShowDiscountModal(true)} 
               disabled={cart.length === 0}
               className="px-3 py-3 bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 font-semibold rounded-xl transition-colors border border-amber-200 dark:border-amber-500/30 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               title="Aplicar Descuento"
             >
-              <Tag size={20} />
+              <Tag size={20} /> 
             </button>
-            <button
-              onClick={handleProcess}
-              disabled={loading || !canProcess}
+            <button 
+              onClick={handleProcess} 
+              disabled={loading || !canProcess} 
               className="flex-1 py-3 bg-green-600 hover:bg-green-700 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white text-lg font-bold rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2"
             >
-              {loading ? (
-                'Procesando...'
-              ) : (
-                <>
-                  <Banknote size={20} /> COBRAR
-                </>
-              )}
+              {loading ? 'Procesando...' : (<><Banknote size={20} /> COBRAR</>)}
             </button>
           </div>
         </div>
