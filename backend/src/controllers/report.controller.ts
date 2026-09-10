@@ -388,6 +388,7 @@ export const getProfitLoss = async (req: CustomRequest, res: Response) => {
       },
     });
   } catch (error) {
+    Sentry.captureException(error);
     console.error('Error getting P&L report:', error);
     return res.status(500).json({ status: 'error', message: 'Error interno del servidor' });
   }

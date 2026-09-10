@@ -3,6 +3,7 @@ import { CustomRequest } from '../middlewares/auth.middleware';
 import prisma from '../config/prisma';
 import bcrypt from 'bcryptjs';
 import { logAction } from '../utils/audit';
+import * as Sentry from '@sentry/node'; // ✅ Importamos Sentry para capturar errores
 
 // 1. Abrir Caja (Forzando el saldo del último cierre)
 export const openCashRegister = async (req: CustomRequest, res: Response) => {
@@ -161,6 +162,7 @@ export const openCashRegister = async (req: CustomRequest, res: Response) => {
 
     return res.status(201).json({ status: 'success', data: newRegister });
   } catch (error: any) {
+    Sentry.captureException(error);
     console.error('Error opening cash register:', error);
     return res
       .status(500)
@@ -342,6 +344,7 @@ export const closeCashRegister = async (req: CustomRequest, res: Response) => {
       },
     });
   } catch (error) {
+    Sentry.captureException(error);
     console.error('Error closing cash register:', error);
     return res.status(500).json({ status: 'error', message: 'Error interno del servidor' });
   }
@@ -513,6 +516,7 @@ export const processSale = async (req: CustomRequest, res: Response) => {
 
     return res.status(201).json({ status: 'success', data: sale });
   } catch (error: any) {
+    Sentry.captureException(error);
     console.error('Error processing sale:', error);
     return res
       .status(400)
@@ -573,6 +577,8 @@ export const transferToCashRegister = async (req: CustomRequest, res: Response) 
 
     return res.status(200).json({ status: 'success', data: result });
   } catch (error: any) {
+    Sentry.captureException(error);
+    console.error('Error transferring to cash register:', error);
     return res.status(400).json({ status: 'error', message: error.message });
   }
 };
@@ -639,6 +645,8 @@ export const withdrawFromCashRegister = async (req: CustomRequest, res: Response
 
     return res.status(200).json({ status: 'success', data: result });
   } catch (error: any) {
+    Sentry.captureException(error);
+    console.error('Error withdrawing from cash register:', error);
     return res.status(400).json({ status: 'error', message: error.message });
   }
 };

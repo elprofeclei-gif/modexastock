@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { CustomRequest } from '../middlewares/auth.middleware';
 import prisma from '../config/prisma';
 import bcrypt from 'bcryptjs';
+import Sentry from '@sentry/node'; // ✅ IMPORTADO
 
 // Obtener todos los clientes
 export const getClients = async (req: CustomRequest, res: Response) => {
@@ -160,6 +161,7 @@ export const payClientDebt = async (req: CustomRequest, res: Response) => {
 
     return res.status(200).json({ status: 'success', data: result });
   } catch (error: any) {
+    Sentry.captureException(error);
     console.error('Error paying client debt:', error);
     return res
       .status(400)
@@ -241,6 +243,7 @@ export const addClientPayment = async (req: CustomRequest, res: Response) => {
 
     return res.status(201).json({ status: 'success', data: result });
   } catch (error: any) {
+    Sentry.captureException(error);
     console.error('Error adding payment:', error);
     return res
       .status(500)

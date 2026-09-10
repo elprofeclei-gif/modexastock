@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { CustomRequest } from '../middlewares/auth.middleware';
 import prisma from '../config/prisma';
 import { logAction } from '../utils/audit'; // ✅ IMPORTADO
+import Sentry from '@sentry/node'; // ✅ IMPORTADO
 
 export const createPurchase = async (req: CustomRequest, res: Response) => {
   try {
@@ -128,6 +129,7 @@ export const createPurchase = async (req: CustomRequest, res: Response) => {
 
     return res.status(201).json({ status: 'success', data: purchase });
   } catch (error: any) {
+    Sentry.captureException(error);
     console.error('Error creating purchase:', error);
     return res.status(400).json({ status: 'error', message: error.message });
   }
