@@ -10,6 +10,8 @@ import swaggerUi from 'swagger-ui-express';
 
 const app = express();
 
+app.set('trust proxy', 1);
+
 // ✅ INICIALIZACIÓN DE SENTRY
 Sentry.init({
   dsn: process.env.SENTRY_DSN, // Lo agregaremos al .env en el siguiente paso
