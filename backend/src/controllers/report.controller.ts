@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { CustomRequest } from '../middlewares/auth.middleware';
 import prisma from '../config/prisma';
+import * as Sentry from '@sentry/node';
 
 export const getDashboardStats = async (req: CustomRequest, res: Response) => {
   try {
@@ -276,6 +277,7 @@ export const getDashboardStats = async (req: CustomRequest, res: Response) => {
       },
     });
   } catch (error) {
+    Sentry.captureException(error);
     console.error('Error getting dashboard stats:', error);
     return res.status(500).json({ status: 'error', message: 'Error interno del servidor' });
   }
