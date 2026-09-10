@@ -3,6 +3,7 @@ import { CustomRequest } from '../middlewares/auth.middleware';
 import prisma from '../config/prisma';
 import * as XLSX from 'xlsx';
 import { logAction } from '../utils/audit'; // ✅ Importado
+import Sentry from '@sentry/node'; // ✅ Importado
 
 // Generar un color hex aleatorio para los colores nuevos del Excel
 const generateRandomHex = () => {
@@ -289,6 +290,7 @@ export const importProducts = async (req: CustomRequest, res: Response) => {
       message: `Importación completa. ${data.length} filas procesadas correctamente.`,
     });
   } catch (error: any) {
+    Sentry.captureException(error);
     console.error('Error general importando:', error);
     return res
       .status(500)
@@ -333,6 +335,8 @@ export const downloadBackup = async (req: CustomRequest, res: Response) => {
     );
     return res.status(200).json(backupData);
   } catch (error) {
+    Sentry.captureException(error);
+    console.error('Error generating backup:', error);
     return res.status(500).json({ status: 'error', message: 'Error al generar backup' });
   }
 };
@@ -854,12 +858,10 @@ export const downloadLowStockReport = async (req: CustomRequest, res: Response) 
     }));
 
     if (rows.length === 0)
-      return res
-        .status(400)
-        .json({
-          status: 'error',
-          message: 'No hay productos con bajo stock. ¡Todo está perfecto!',
-        });
+      return res.status(400).json({
+        status: 'error',
+        message: 'No hay productos con bajo stock. ¡Todo está perfecto!',
+      });
 
     const headers = Object.keys(rows[0]);
     const csv = [

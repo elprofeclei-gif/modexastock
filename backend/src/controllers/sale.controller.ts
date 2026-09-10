@@ -3,6 +3,7 @@ import { CustomRequest } from '../middlewares/auth.middleware';
 import prisma from '../config/prisma';
 import bcrypt from 'bcryptjs';
 import { logAction } from '../utils/audit';
+import Sentry from '@sentry/node';
 
 // Obtener historial de ventas (Con filtros avanzados)
 export const getSales = async (req: CustomRequest, res: Response) => {
@@ -174,6 +175,7 @@ export const voidSale = async (req: CustomRequest, res: Response) => {
       message: 'Venta anulada correctamente. Inventario y dinero revertidos.',
     });
   } catch (error: any) {
+    Sentry.captureException(error);
     console.error('Error voiding sale:', error);
     return res
       .status(500)

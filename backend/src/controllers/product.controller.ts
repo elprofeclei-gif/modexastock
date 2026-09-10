@@ -219,6 +219,7 @@ export const adjustStock = async (req: CustomRequest, res: Response) => {
       .status(200)
       .json({ status: 'success', message: 'Stock ajustado y registrado en Kardex.' });
   } catch (error: any) {
+    Sentry.captureException(error);
     console.error('Error adjusting stock:', error);
     return res
       .status(500)
@@ -241,6 +242,7 @@ export const getProductKardex = async (req: CustomRequest, res: Response) => {
 
     return res.status(200).json({ status: 'success', data: movements });
   } catch (error) {
+    Sentry.captureException(error);
     console.error('Error al obtener Kardex:', error);
     return res.status(500).json({ status: 'error', message: 'Error interno del servidor' });
   }
