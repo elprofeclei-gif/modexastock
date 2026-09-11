@@ -382,3 +382,4 @@ enum AccountType {
   BANK
   CASH_REGISTER
 }
+
