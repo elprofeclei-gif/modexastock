@@ -37,7 +37,22 @@ interface MenuItem {
 
 export default function Layout({ children }: LayoutProps) {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const [isDark, setIsDark] = useState(false);
+  // ✅ Leemos el tema guardado en el localStorage antes de renderizar la página
+  const [isDark, setIsDark] = useState(() => {
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark =
+      window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const shouldBeDark = savedTheme ? savedTheme === 'dark' : prefersDark;
+
+    // Aplicamos la clase 'dark' inmediatamente para evitar parpadeos
+    if (shouldBeDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    return shouldBeDark;
+  });
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { logout, user } = useAuth();
   const navigate = useNavigate();
@@ -62,10 +77,6 @@ export default function Layout({ children }: LayoutProps) {
     const interval = setInterval(fetchNotifs, 45000);
     return () => clearInterval(interval);
   }, [user?.role, location.pathname]);
-
-  useEffect(() => {
-    setIsDark(document.documentElement.classList.contains('dark'));
-  }, []);
 
   // Cerrar menú móvil y dropdowns al cambiar de ruta
   useEffect(() => {
