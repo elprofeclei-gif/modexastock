@@ -806,10 +806,14 @@ export default function POS() {
                   <button
                     key={method.id}
                     onClick={() => setPaymentMethod(method.id)}
-                    className={`flex flex-col items-center justify-center gap-1 py-2 rounded-lg transition-colors ${paymentMethod === method.id ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-200'}`}
+                    className={`flex flex-col items-center justify-center gap-1 py-2 rounded-lg transition-colors ${
+                      paymentMethod === method.id
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
+                    }`}
                   >
-                    <Icon size={18} />
-                    <span className="text-[10px] font-medium">{method.label}</span>
+                    <Icon size={16} />
+                    <span className="text-[9px] font-medium">{method.label}</span>
                   </button>
                 );
               })}
@@ -827,7 +831,7 @@ export default function POS() {
                 inputMode="numeric"
                 value={receivedAmount}
                 onChange={(e) => setReceivedAmount(formatInputNumber(e.target.value))}
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xl font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xl font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                 placeholder="0"
               />
 
@@ -872,7 +876,7 @@ export default function POS() {
                 type="text"
                 value={reference}
                 onChange={(e) => setReference(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm"
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm"
                 placeholder={
                   paymentMethod === 'CARD' ? 'Voucher (4 dígitos)' : 'Cod. Transferencia'
                 }
@@ -880,7 +884,7 @@ export default function POS() {
               <select
                 value={selectedBankAccount}
                 onChange={(e) => setSelectedBankAccount(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm"
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm"
               >
                 <option value="">Cuenta destino...</option>
                 {bankAccounts.map((acc) => (
@@ -889,151 +893,6 @@ export default function POS() {
                   </option>
                 ))}
               </select>
-            </div>
-          )}
-          {/* PAGO MIXTO */}
-          {paymentMethod === 'MIXED' && (
-            <div className="space-y-3 p-3 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700">
-              <div className="flex justify-between text-xs font-bold">
-                <span>Total:</span>
-                <span>{formatCurrency(total)}</span>
-              </div>
-              <div className="flex justify-between text-xs text-green-600">
-                <span>Pagado:</span>
-                <span>{formatCurrency(paidAmount)}</span>
-              </div>
-              <div className="flex justify-between text-xs font-bold text-red-500">
-                <span>Pendiente:</span>
-                <span>{formatCurrency(Math.max(0, total - paidAmount))}</span>
-              </div>
-
-              <div className="border-t border-slate-200 dark:border-slate-700 pt-2 mt-1 space-y-2">
-                {splitPayments.map((p, idx) => (
-                  <div
-                    key={idx}
-                    className="flex justify-between items-center text-xs bg-white dark:bg-slate-800 p-2 rounded-md border border-slate-200 dark:border-slate-600"
-                  >
-                    <span>
-                      {p.method} - {formatCurrency(p.amount)}{' '}
-                      {p.reference ? `(Ref: ${p.reference})` : ''}
-                    </span>
-                    <button
-                      onClick={() => setSplitPayments(splitPayments.filter((_, i) => i !== idx))}
-                      className="text-red-400 hover:text-red-600"
-                    >
-                      <XCircle size={14} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-
-              {/* ✅ Si aún hay monto pendiente por pagar, mostramos el formulario. Si ya cubrió el total, lo ocultamos. */}
-              {Math.max(0, total - paidAmount) > 0 ? (
-                <>
-                  <div className="grid grid-cols-2 gap-2">
-                    <select
-                      value={splitMethod}
-                      onChange={(e) => setSplitMethod(e.target.value)}
-                      className="px-2 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                    >
-                      <option value="CASH">Efectivo</option>
-                      <option value="CARD">Tarjeta</option>
-                      <option value="TRANSFER">Transfer.</option>
-                      <option value="CREDIT">Crédito (Fiar)</option> {/* ✅ AGREGAR ESTO */}
-                    </select>
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      value={splitAmount}
-                      onChange={(e) => setSplitAmount(formatInputNumber(e.target.value))}
-                      placeholder="Monto"
-                      className="px-2 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                    />
-                  </div>
-
-                  {/* Antes era {splitMethod !== 'CASH' && (...)} */}
-                  {/* ✅ AHORA CAMBIAMOS LA CONDICIÓN A: TARJETA O TRANSFERENCIA */}
-                  {(splitMethod === 'CARD' || splitMethod === 'TRANSFER') && (
-                    <select
-                      value={splitAccountId}
-                      onChange={(e) => setSplitAccountId(e.target.value)}
-                      className="w-full px-2 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                    >
-                      <option value="">Cuenta...</option>
-                      {bankAccounts.map((acc) => (
-                        <option key={acc.id} value={acc.id}>
-                          {acc.name}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-
-                  {/* ✅ IGUAL AQUÍ ABAJO */}
-                  {(splitMethod === 'CARD' || splitMethod === 'TRANSFER') && (
-                    <input
-                      type="text"
-                      value={splitReference}
-                      onChange={(e) => setSplitReference(e.target.value)}
-                      placeholder="Referencia"
-                      className="w-full px-2 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                    />
-                  )}
-
-                  <button
-                    onClick={() => {
-                      const amt = parseFormattedNumber(splitAmount);
-                      if (amt <= 0) return toast.error('Ingresa un monto válido');
-
-                      // Validaciones de campos requeridos
-                      if (splitMethod === 'CREDIT' && !selectedClient) {
-                        return toast.error('Para fiar una parte, debes seleccionar un cliente.');
-                      }
-                      if (
-                        (splitMethod === 'CARD' || splitMethod === 'TRANSFER') &&
-                        !splitAccountId
-                      ) {
-                        return toast.error('Selecciona la cuenta bancaria.');
-                      }
-
-                      const pending = total - paidAmount;
-
-                      // ✅ NUEVA LÓGICA DE VALIDACIÓN:
-                      // Si es Tarjeta, Transferencia o Crédito, NO puede exceder el pendiente.
-                      if (splitMethod !== 'CASH' && amt > pending) {
-                        return toast.error(
-                          `El monto excede el pendiente (${formatCurrency(pending)})`
-                        );
-                      }
-                      // Si es Efectivo, SÍ puede exceder el pendiente (porque ese excedente es para dar cambio).
-                      // Pero si ya cubriste el total, no dejes agregar más efectivo.
-                      if (splitMethod === 'CASH' && pending <= 0) {
-                        return toast.error('El total ya está cubierto, no agregues más pagos.');
-                      }
-
-                      setSplitPayments([
-                        ...splitPayments,
-                        {
-                          method: splitMethod,
-                          amount: amt,
-                          accountId: splitAccountId,
-                          reference: splitReference,
-                        },
-                      ]);
-                      setSplitAmount('');
-                      setSplitReference('');
-                      setSplitAccountId('');
-                    }}
-                    className="w-full py-1.5 text-xs font-bold bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg border border-indigo-200 dark:border-indigo-500/30"
-                  >
-                    + Agregar Pago
-                  </button>
-                </>
-              ) : (
-                /* ✅ Si el total ya está cubierto, mostramos este mensaje y ocultamos el formulario */
-                <div className="text-center text-xs text-green-600 font-bold p-2 bg-green-50 dark:bg-green-500/10 rounded-lg border border-green-200 dark:border-green-500/30">
-                  ✓ Monto total cubierto
-                </div>
-              )}
             </div>
           )}
 
@@ -1084,7 +943,7 @@ export default function POS() {
                   onFocus={() => clientResults.length > 0 && setShowClientResults(true)}
                   onBlur={() => setTimeout(() => setShowClientResults(false), 200)}
                   placeholder="Consumidor Final (Buscar para registrar...)"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm"
                 />
               )}
               {showClientResults && (
@@ -1128,7 +987,7 @@ export default function POS() {
           </div>
         </div>
 
-                {/* FOOTER FIJO (Total y Botón Cobrar) */}
+        {/* FOOTER FIJO (Total y Botón Cobrar) */}
         <div className="p-4 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 space-y-2">
           {/* ✅ RESUMEN DE SUBTOTAL Y DESCUENTO */}
           {discount > 0 && (
@@ -1146,7 +1005,9 @@ export default function POS() {
 
           <div className="flex justify-between items-center mb-1">
             <span className="text-sm text-slate-500 dark:text-slate-400 font-medium">Total</span>
-            <span className="text-2xl font-extrabold text-slate-900 dark:text-white">{formatCurrency(total)}</span>
+            <span className="text-2xl font-extrabold text-slate-900 dark:text-white">
+              {formatCurrency(total)}
+            </span>
           </div>
 
           {(paymentMethod === 'CASH' || (paymentMethod === 'MIXED' && change > 0)) && (
@@ -1158,24 +1019,30 @@ export default function POS() {
 
           {/* ✅ BOTÓN DE DESCUENTO Y COBRAR */}
           <div className="flex gap-2">
-            <button 
-              onClick={() => setShowDiscountModal(true)} 
+            <button
+              onClick={() => setShowDiscountModal(true)}
               disabled={cart.length === 0}
               className="px-3 py-3 bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 font-semibold rounded-xl transition-colors border border-amber-200 dark:border-amber-500/30 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               title="Aplicar Descuento"
             >
-              <Tag size={20} /> 
+              <Tag size={20} />
             </button>
-            <button 
-              onClick={handleProcess} 
-              disabled={loading || !canProcess} 
+            <button
+              onClick={handleProcess}
+              disabled={loading || !canProcess}
               className="flex-1 py-3 bg-green-600 hover:bg-green-700 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white text-lg font-bold rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2"
             >
-              {loading ? 'Procesando...' : (<><Banknote size={20} /> COBRAR</>)}
+              {loading ? (
+                'Procesando...'
+              ) : (
+                <>
+                  <Banknote size={20} /> COBRAR
+                </>
+              )}
             </button>
           </div>
         </div>
-      </div>{' '}
+      </div>
       {/* ✅ AQUÍ ESTABA FALTANDO CERRAR LA COLUMNA DERECHA */}
       {/* MODAL CREAR CLIENTE DESDE POS */}
       {isClientModalOpen && (

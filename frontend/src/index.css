@@ -28,3 +28,31 @@ body {
 .dark ::-webkit-scrollbar-thumb {
   background: #475569;
 }
+
+/* ====================================================== */
+/* 🛡️ FIX: Autocompletar del navegador en Modo Oscuro     */
+/* ====================================================== */
+
+/* Estilo para modo claro (por defecto) */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #0f172a; /* slate-900 */
+  -webkit-box-shadow: 0 0 0px 1000px #f8fafc inset; /* slate-50 */
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Estilo para modo oscuro */
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #ffffff; /* white */
+  -webkit-box-shadow: 0 0 0px 1000px #1e293b inset; /* slate-800 */
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Quitar el ícono de mostrar contraseña del navegador si lo tiene */
+::-ms-reveal,
+::-ms-clear {
+  display: none;
+}
