@@ -1,11 +1,9 @@
-// @ts-nocheck
-import { defineConfig } from 'cypress';
+import { defineConfig } from "cypress";
 
 export default defineConfig({
   e2e: {
-    // ✅ Lee la variable de entorno, si no existe, usa el puerto 5173 (local)
-    baseUrl: process.env.CYPRESS_BASE_URL || 'http://localhost:5173',
+    baseUrl: "http://127.0.0.1:4173", // ✅ Ponerlo directamente en 4173
     supportFile: false,
-    specPattern: 'cypress/e2e/**/*.cy.ts',
+    specPattern: "cypress/e2e/**/*.cy.ts",
   },
 });

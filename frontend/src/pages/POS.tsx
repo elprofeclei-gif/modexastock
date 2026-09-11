@@ -322,12 +322,15 @@ export default function POS() {
         : 0;
 
   const paidAmount = splitPayments.reduce((acc, p) => acc + p.amount, 0);
+  // ✅ Verificamos que no haya productos con cantidad 0 o vacía
+  const allItemsHaveStock = cart.every((item) => item.quantity > 0);
+
   const canProcess =
     paymentMethod === 'MIXED'
-      ? splitPayments.length > 0 && paidAmount >= total && cart.length > 0
+      ? splitPayments.length > 0 && paidAmount >= total && cart.length > 0 && allItemsHaveStock
       : paymentMethod === 'CASH'
-        ? received >= total && cart.length > 0
-        : cart.length > 0;
+        ? received >= total && cart.length > 0 && allItemsHaveStock
+        : cart.length > 0 && allItemsHaveStock;
 
   const handleProcess = async () => {
     if (paymentMethod === 'CREDIT' && !selectedClient)
@@ -597,9 +600,11 @@ export default function POS() {
   ];
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-6rem)]">
+    // ✅ En móvil usamos min-h para que crezca, en PC usamos h fija
+    <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 min-h-[calc(100vh-6rem)] lg:h-[calc(100vh-6rem)]">
       {/* COLUMNA IZQUIERDA (Carrito y Búsqueda) */}
-      <div className="flex-1 flex flex-col bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden min-h-0">
+      {/* ✅ Altura mínima en móvil para que sea visible */}
+      <div className="flex-1 flex flex-col bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden min-h-[400px] lg:min-h-0">
         <div className="p-4 border-b border-slate-100 dark:border-slate-700 flex items-center gap-4">
           <div className="relative flex-1">
             <form onSubmit={handleScanSubmit} className="flex gap-2">
@@ -665,33 +670,37 @@ export default function POS() {
             )}
           </div>
 
-          <div className="flex items-center gap-2">
+          {/* ✅ BOTONES PAUSA, RECUPERAR Y CANCELAR (Responsivos) */}
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <button
               onClick={async () => {
                 const success = await suspendCurrentSale();
                 if (success) playSound('success');
               }}
               disabled={cart.length === 0}
-              className="px-4 py-3 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-xl transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-2.5 py-2 sm:px-3 sm:py-2.5 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-lg sm:rounded-xl transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1.5"
               title="Suspender Venta"
             >
-              <Pause size={20} /> <span className="hidden md:inline">Pausar</span>
+              <Pause size={16} className="sm:w-5 sm:h-5" />{' '}
+              <span className="hidden md:inline">Pausar</span>
             </button>
 
             <button
               onClick={handleOpenSuspended}
-              className="px-4 py-3 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/30 rounded-xl transition-colors flex items-center gap-2"
+              className="px-2.5 py-2 sm:px-3 sm:py-2.5 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/30 rounded-lg sm:rounded-xl transition-colors flex items-center gap-1.5"
               title="Recuperar Venta"
             >
-              <Play size={20} /> <span className="hidden md:inline">Recuperar</span>
+              <Play size={16} className="sm:w-5 sm:h-5" />{' '}
+              <span className="hidden md:inline">Recuperar</span>
             </button>
 
             <button
               onClick={handleClearCart}
               disabled={cart.length === 0}
-              className="px-4 py-3 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-xl transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-2.5 py-2 sm:px-3 sm:py-2.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-lg sm:rounded-xl transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1.5"
             >
-              <Ban size={20} /> <span className="hidden md:inline">Cancelar</span>
+              <Ban size={16} className="sm:w-5 sm:h-5" />{' '}
+              <span className="hidden md:inline">Cancelar</span>
             </button>
           </div>
         </div>
@@ -757,9 +766,8 @@ export default function POS() {
           )}
         </div>
       </div>
-
-      {/* COLUMNA DERECHA (Cobro - Sticky para que no desaparezca) */}
-      <div className="w-full lg:w-96 flex flex-col bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden lg:sticky lg:top-20 lg:h-[calc(100vh-6rem)]">
+      {/* COLUMNA DERECHA (Cobro - Sticky para que no desaparezca en PC) */}
+      <div className="w-full lg:w-96 flex flex-col bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 lg:overflow-hidden lg:sticky lg:top-20 lg:h-[calc(100vh-6rem)]">
         <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
           <h3 className="font-bold text-slate-900 dark:text-white">Cobro</h3>
           <div className="flex items-center gap-3 text-slate-400">
@@ -795,8 +803,8 @@ export default function POS() {
           </div>
         </div>
 
-        {/* Área de contenido (Métodos de pago, atajos, cliente) - Con scroll si es muy pequeña la pantalla */}
-        <div className="flex-1 p-4 space-y-4 overflow-y-auto">
+        {/* Área de contenido - En móvil crece hacia abajo, en PC hace scroll interno */}
+        <div className="lg:flex-1 p-4 space-y-4 lg:overflow-y-auto">
           {/* MÉTODOS DE PAGO */}
           <div>
             <label className="block text-xs font-semibold text-slate-500 uppercase mb-2">
@@ -1167,12 +1175,11 @@ export default function POS() {
             </button>
           </div>
         </div>
-      </div>
-
-      {/* ✅ AQUÍ ESTABA FALTANDO CERRAR LA COLUMNA DERECHA */}
+      </div>{' '}
+      {/* ✅ CIERRE DE LA COLUMNA DERECHA AÑADIDO */}
       {/* MODAL CREAR CLIENTE DESDE POS */}
       {isClientModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 no-print">
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md p-6 border border-slate-100 dark:border-slate-700">
             <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
               <UserPlus size={20} className="text-indigo-600" /> Crear Nuevo Cliente
@@ -1258,7 +1265,7 @@ export default function POS() {
       )}
       {/* MODAL AÑADIR FONDO */}
       {isTransferModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 no-print">
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md p-6 border border-slate-100 dark:border-slate-700">
             <div className="flex items-center gap-2 mb-2">
               <Plus className="text-indigo-600" size={24} />
@@ -1357,7 +1364,7 @@ export default function POS() {
       )}
       {/* MODAL RETIRAR FONDO */}
       {isWithdrawModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 no-print">
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md p-6 border border-slate-100 dark:border-slate-700">
             <div className="flex items-center gap-2 mb-2">
               <ArrowDownToLine className="text-red-600" size={24} />
