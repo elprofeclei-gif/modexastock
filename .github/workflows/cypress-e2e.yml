@@ -58,16 +58,15 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           working-directory: frontend
-          # ✅ LA MAGIA: Inyectamos las variables directamente en el comando de inicio del backend
-          start: |
-            cd ../backend && DATABASE_URL=postgresql://postgres:password@localhost:5432/test_db?schema=public JWT_SECRET=test_secret_cypress NODE_ENV=test CLIENT_URL=http://localhost:4173 npm start
-            npm run preview
+          # ✅ LA MAGIA: Usamos 'npm --prefix' para evitar el comando 'cd'
+          # Así Cypress levanta el backend y el frontend al mismo tiempo en segundo plano
+          start: npm --prefix ../backend start, npm run preview
           wait-on: 'http://localhost:3000/api/health, http://localhost:4173'
           wait-on-timeout: 90
         env:
-          # Las dejamos aquí también por si Cypress las necesita para el test runner
+          # ✅ Pasamos las variables en el bloque 'env' del paso,
+          # el proceso 'npm start' las heredará automáticamente
           DATABASE_URL: postgresql://postgres:password@localhost:5432/test_db?schema=public
           JWT_SECRET: test_secret_cypress
           NODE_ENV: test
-          VITE_API_URL: http://localhost:3000/api
           CLIENT_URL: http://localhost:4173
