@@ -604,7 +604,7 @@ export default function POS() {
     <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 min-h-[calc(100vh-6rem)] lg:h-[calc(100vh-6rem)]">
       {/* COLUMNA IZQUIERDA (Carrito y Búsqueda) */}
       {/* ✅ Altura mínima en móvil para que sea visible */}
-      <div className="flex-1 flex flex-col bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden min-h-[400px] lg:min-h-0">
+      <div className="flex-1 flex flex-col bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden min-h-100 lg:min-h-0">
         <div className="p-4 border-b border-slate-100 dark:border-slate-700 flex items-center gap-4">
           <div className="relative flex-1">
             <form onSubmit={handleScanSubmit} className="flex gap-2">
