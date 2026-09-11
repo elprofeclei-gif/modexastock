@@ -995,7 +995,9 @@ export default function POS() {
                   }
 
                   const pending = total - paidAmount;
-                  if (amt > pending) {
+
+                  // ✅ NUEVA VALIDACIÓN: Solo bloquea el exceso si NO es efectivo
+                  if (splitMethod !== 'CASH' && amt > pending) {
                     return toast.error(`El monto excede el pendiente (${formatCurrency(pending)})`);
                   }
 
