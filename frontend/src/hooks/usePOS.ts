@@ -206,10 +206,11 @@ export const usePOS = () => {
   };
 
   const updateQuantity = (id: string, quantity: number) => {
-    if (quantity <= 0) {
-      removeFromCart(id);
-      return;
-    }
+    // ✅ Si es menor a 0, no hacemos nada (no permitimos negativos)
+    if (quantity < 0) return;
+
+    // Ya no borramos el item si es 0. Lo dejamos en 0 para que el cajero pueda escribir un número nuevo.
+    // El producto solo se borra usando el botón de la papelera (removeFromCart).
     setCart((prevCart) =>
       prevCart.map((item) =>
         item.productVariantId === id
