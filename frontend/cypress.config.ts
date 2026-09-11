@@ -1,9 +1,9 @@
-import { defineConfig } from "cypress";
+import { defineConfig } from 'cypress';
 
 export default defineConfig({
   e2e: {
-    baseUrl: "http://localhost:5173", // Tu puerto local de desarrollo
+    baseUrl: 'http://localhost:5173',
     supportFile: false,
-    specPattern: "cypress/e2e/**/*.cy.ts",
+    specPattern: 'cypress/e2e/**/*.cy.ts',
   },
 });
