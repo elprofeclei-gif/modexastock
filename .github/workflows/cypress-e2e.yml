@@ -58,14 +58,13 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           working-directory: frontend
-          # ✅ LA MAGIA: Usamos 'npm --prefix' para evitar el comando 'cd'
-          # Así Cypress levanta el backend y el frontend al mismo tiempo en segundo plano
-          start: npm --prefix ../backend start, npm run preview
+          # ✅ FORZAMOS las variables en el comando start usando 'bash -c'
+          # Esto ignora cualquier archivo .env y obliga a usar la DB de prueba
+          start: bash -c "DATABASE_URL=postgresql://postgres:password@localhost:5432/test_db?schema=public JWT_SECRET=test_secret_cypress NODE_ENV=test CLIENT_URL=http://localhost:4173 npm --prefix ../backend start", npm run preview
           wait-on: 'http://localhost:3000/api/health, http://localhost:4173'
           wait-on-timeout: 90
         env:
-          # ✅ Pasamos las variables en el bloque 'env' del paso,
-          # el proceso 'npm start' las heredará automáticamente
+          # Las dejamos aquí también por si acaso
           DATABASE_URL: postgresql://postgres:password@localhost:5432/test_db?schema=public
           JWT_SECRET: test_secret_cypress
           NODE_ENV: test
