@@ -58,12 +58,10 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           working-directory: frontend
-          # ✅ Forzamos las variables directamente en el comando de inicio del backend
-          start: bash -c "DATABASE_URL=postgresql://postgres:password@127.0.0.1:5432/test_db?schema=public JWT_SECRET=test_secret_cypress NODE_ENV=test CLIENT_URL=http://127.0.0.1:4173 npm --prefix ../backend start", npm run preview -- --host 127.0.0.1
+          start: npm --prefix ../backend start, npm run preview -- --host 127.0.0.1
           wait-on: 'http://127.0.0.1:3000/api/health, http://127.0.0.1:4173'
           wait-on-timeout: 120
         env:
-          # Las dejamos aquí también por si el test runner de Cypress las necesita
           DATABASE_URL: postgresql://postgres:password@127.0.0.1:5432/test_db?schema=public
           JWT_SECRET: test_secret_cypress
           NODE_ENV: test
