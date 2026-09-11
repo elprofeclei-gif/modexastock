@@ -75,7 +75,7 @@ export default function POS() {
   const [showDiscountModal, setShowDiscountModal] = useState(false);
   const [discountInput, setDiscountInput] = useState({ type: 'fixed', value: '' });
   const [splitPayments, setSplitPayments] = useState<any[]>([]);
-  const [splitMethod, setSplitMethod] = useState('CASH');
+  const [splitMethod, setSplitMethod] = useState('TRANSFER');
   const [splitAmount, setSplitAmount] = useState('');
   const [splitAccountId, setSplitAccountId] = useState('');
   const [splitReference, setSplitReference] = useState('');
@@ -306,7 +306,8 @@ export default function POS() {
   };
 
   const received = parseFormattedNumber(receivedAmount);
-  // ✅ Calcular cambio para Efectivo normal y para Pago Mixto
+
+  // ✅ LÓGICA DE PAGO MIXTO: Calcular cambio solo si el efectivo excede lo pendiente
   const cashPaid = splitPayments
     .filter((p) => p.method === 'CASH')
     .reduce((acc, p) => acc + p.amount, 0);
@@ -319,6 +320,7 @@ export default function POS() {
       : paymentMethod === 'MIXED'
         ? Math.max(0, cashPaid - (total - nonCashPaid))
         : 0;
+
   const paidAmount = splitPayments.reduce((acc, p) => acc + p.amount, 0);
   const canProcess =
     paymentMethod === 'MIXED'
@@ -954,7 +956,8 @@ export default function POS() {
                 />
               </div>
 
-              {splitMethod !== 'CASH' && (
+              {/* ✅ SOLO APARECEN SI ES TARJETA O TRANSFERENCIA */}
+              {(splitMethod === 'CARD' || splitMethod === 'TRANSFER') && (
                 <select
                   value={splitAccountId}
                   onChange={(e) => setSplitAccountId(e.target.value)}
@@ -968,7 +971,7 @@ export default function POS() {
                   ))}
                 </select>
               )}
-              {splitMethod !== 'CASH' && (
+              {(splitMethod === 'CARD' || splitMethod === 'TRANSFER') && (
                 <input
                   type="text"
                   value={splitReference}
