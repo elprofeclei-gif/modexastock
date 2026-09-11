@@ -9,7 +9,6 @@ jobs:
   cypress-run:
     runs-on: ubuntu-latest
 
-    # 1. Levantar una base de datos PostgreSQL temporal para las pruebas
     services:
       postgres:
         image: postgres:14
@@ -27,14 +26,13 @@ jobs:
 
     steps:
       - name: Descargar código
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4 # ✅ Actualizado a v4
 
       - name: Configar Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4 # ✅ Actualizado a v4
         with:
           node-version: 20
 
-      # 2. Configurar Backend
       - name: Instalar y migrar Backend
         run: |
           cd backend
@@ -47,7 +45,6 @@ jobs:
           JWT_SECRET: test_secret_cypress
           NODE_ENV: test
 
-      # 3. Configurar Frontend
       - name: Instalar Frontend
         run: |
           cd frontend
@@ -55,7 +52,6 @@ jobs:
         env:
           VITE_API_URL: http://localhost:3000/api
 
-      # 4. Correr Cypress
       - name: Cypress E2E
         uses: cypress-io/github-action@v6
         with:
@@ -63,3 +59,9 @@ jobs:
           start: npm --prefix ../backend start, npm run preview
           wait-on: 'http://localhost:3000/api/health, http://localhost:4173'
           wait-on-timeout: 60
+        env:
+          # ✅ AQUÍ ESTABA EL ERROR: Le pasamos las variables al backend para que pueda iniciar
+          DATABASE_URL: postgresql://postgres:password@localhost:5432/test_db?schema=public
+          JWT_SECRET: test_secret_cypress
+          NODE_ENV: test
+          VITE_API_URL: http://localhost:3000/api
