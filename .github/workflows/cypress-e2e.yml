@@ -26,10 +26,10 @@ jobs:
 
     steps:
       - name: Descargar código
-        uses: actions/checkout@v4 # ✅ Actualizado a v4
+        uses: actions/checkout@v4
 
       - name: Configar Node.js
-        uses: actions/setup-node@v4 # ✅ Actualizado a v4
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
@@ -39,16 +39,18 @@ jobs:
           npm install
           npx prisma generate
           npx prisma migrate deploy
+          npm run seed
           npm run build
         env:
           DATABASE_URL: postgresql://postgres:password@localhost:5432/test_db?schema=public
           JWT_SECRET: test_secret_cypress
           NODE_ENV: test
 
-      - name: Instalar Frontend
+      - name: Instalar y compilar Frontend
         run: |
           cd frontend
           npm install
+          npm run build
         env:
           VITE_API_URL: http://localhost:3000/api
 
@@ -56,12 +58,16 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           working-directory: frontend
-          start: npm --prefix ../backend start, npm run preview
+          # ✅ LA MAGIA: Inyectamos las variables directamente en el comando de inicio del backend
+          start: |
+            cd ../backend && DATABASE_URL=postgresql://postgres:password@localhost:5432/test_db?schema=public JWT_SECRET=test_secret_cypress NODE_ENV=test CLIENT_URL=http://localhost:4173 npm start
+            npm run preview
           wait-on: 'http://localhost:3000/api/health, http://localhost:4173'
-          wait-on-timeout: 60
+          wait-on-timeout: 90
         env:
-          # ✅ AQUÍ ESTABA EL ERROR: Le pasamos las variables al backend para que pueda iniciar
+          # Las dejamos aquí también por si Cypress las necesita para el test runner
           DATABASE_URL: postgresql://postgres:password@localhost:5432/test_db?schema=public
           JWT_SECRET: test_secret_cypress
           NODE_ENV: test
           VITE_API_URL: http://localhost:3000/api
+          CLIENT_URL: http://localhost:4173
