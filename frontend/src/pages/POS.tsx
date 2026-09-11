@@ -755,6 +755,7 @@ export default function POS() {
           )}
         </div>
       </div>
+
       {/* COLUMNA DERECHA (Cobro - Sticky para que no desaparezca) */}
       <div className="w-full lg:w-96 flex flex-col bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden lg:sticky lg:top-20 lg:h-[calc(100vh-6rem)]">
         <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
@@ -893,6 +894,125 @@ export default function POS() {
                   </option>
                 ))}
               </select>
+            </div>
+          )}
+
+          {/* ✅ PAGO MIXTO (Split Tender) */}
+          {paymentMethod === 'MIXED' && (
+            <div className="space-y-3 p-3 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700">
+              <div className="flex justify-between text-xs font-bold text-slate-900 dark:text-white">
+                <span>Total:</span>
+                <span>{formatCurrency(total)}</span>
+              </div>
+              <div className="flex justify-between text-xs text-green-600 dark:text-green-400">
+                <span>Pagado:</span>
+                <span>{formatCurrency(paidAmount)}</span>
+              </div>
+              <div className="flex justify-between text-xs font-bold text-red-500 dark:text-red-400">
+                <span>Pendiente:</span>
+                <span>{formatCurrency(Math.max(0, total - paidAmount))}</span>
+              </div>
+
+              <div className="border-t border-slate-200 dark:border-slate-700 pt-2 mt-1 space-y-2">
+                {splitPayments.map((p, idx) => (
+                  <div
+                    key={idx}
+                    className="flex justify-between items-center text-xs bg-white dark:bg-slate-800 p-2 rounded-md border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white"
+                  >
+                    <span>
+                      {p.method} - {formatCurrency(p.amount)}{' '}
+                      {p.reference ? `(Ref: ${p.reference})` : ''}
+                    </span>
+                    <button
+                      onClick={() => setSplitPayments(splitPayments.filter((_, i) => i !== idx))}
+                      className="text-red-400 hover:text-red-600"
+                    >
+                      <XCircle size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <select
+                  value={splitMethod}
+                  onChange={(e) => setSplitMethod(e.target.value)}
+                  className="px-2 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                >
+                  <option value="CASH">Efectivo</option>
+                  <option value="CARD">Tarjeta</option>
+                  <option value="TRANSFER">Transfer.</option>
+                  <option value="CREDIT">Crédito (Fiar)</option>
+                </select>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={splitAmount}
+                  onChange={(e) => setSplitAmount(formatInputNumber(e.target.value))}
+                  placeholder="Monto"
+                  className="px-2 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                />
+              </div>
+
+              {splitMethod !== 'CASH' && (
+                <select
+                  value={splitAccountId}
+                  onChange={(e) => setSplitAccountId(e.target.value)}
+                  className="w-full px-2 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                >
+                  <option value="">Cuenta...</option>
+                  {bankAccounts.map((acc) => (
+                    <option key={acc.id} value={acc.id}>
+                      {acc.name}
+                    </option>
+                  ))}
+                </select>
+              )}
+              {splitMethod !== 'CASH' && (
+                <input
+                  type="text"
+                  value={splitReference}
+                  onChange={(e) => setSplitReference(e.target.value)}
+                  placeholder="Referencia"
+                  className="w-full px-2 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                />
+              )}
+
+              <button
+                onClick={() => {
+                  const amt = parseFormattedNumber(splitAmount);
+                  if (amt <= 0) return toast.error('Ingresa un monto válido');
+                  if (splitMethod === 'CREDIT' && !selectedClient) {
+                    return toast.error(
+                      'Para fiar una parte, debes buscar y seleccionar un cliente.'
+                    );
+                  }
+                  if (splitMethod !== 'CASH' && splitMethod !== 'CREDIT' && !splitAccountId) {
+                    return toast.error('Selecciona cuenta bancaria');
+                  }
+
+                  const pending = total - paidAmount;
+                  if (amt > pending) {
+                    return toast.error(`El monto excede el pendiente (${formatCurrency(pending)})`);
+                  }
+
+                  setSplitPayments([
+                    ...splitPayments,
+                    {
+                      method: splitMethod,
+                      amount: amt,
+                      accountId: splitAccountId,
+                      reference: splitReference,
+                    },
+                  ]);
+                  setSplitAmount('');
+                  setSplitReference('');
+                  setSplitAccountId('');
+                }}
+                className="w-full py-1.5 text-xs font-bold bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg border border-indigo-200 dark:border-indigo-500/30 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors"
+              >
+                + Agregar Pago
+              </button>
             </div>
           )}
 
@@ -1043,6 +1163,7 @@ export default function POS() {
           </div>
         </div>
       </div>
+
       {/* ✅ AQUÍ ESTABA FALTANDO CERRAR LA COLUMNA DERECHA */}
       {/* MODAL CREAR CLIENTE DESDE POS */}
       {isClientModalOpen && (
