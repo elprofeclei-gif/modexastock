@@ -4,20 +4,20 @@ describe('Flujo de Autenticación', () => {
     cy.visit('/login');
 
     // 2. Verificar que estamos en la página correcta
-    cy.contains('Modexastock').should('be.visible');
+    cy.contains('ModexaStock v1.0').should('be.visible');
     cy.contains('Ingresa tus credenciales para continuar').should('be.visible');
 
     // 3. Llenar el formulario
     cy.get('input[type="email"]').type('admin@modexastock.com');
     cy.get('input[type="password"]').type('password123');
 
-    // 4. Enviar el formulario (Buscamos el botón por su texto)
+    // 4. Enviar el formulario
     cy.contains('button', 'Iniciar Sesión').click();
 
-    // 5. Verificar que fuimos redirigidos al Dashboard (URL raíz)
-    cy.url().should('eq', 'http://localhost:5173/');
+    // 5. Verificar que fuimos redirigidos al Dashboard
+    cy.url().should('eq', 'http://127.0.0.1:4173/');
 
-    // 6. Verificar que el menú del Dashboard está visible
+    // 6. Verificar que el Dashboard está visible
     cy.contains('Dashboard Gerencial').should('be.visible');
   });
 
@@ -29,7 +29,7 @@ describe('Flujo de Autenticación', () => {
 
     cy.contains('button', 'Iniciar Sesión').click();
 
-    // Verificamos que la URL siga siendo la del login (no redirigió)
+    // Verificar que la URL siga siendo la del login
     cy.url().should('include', '/login');
   });
 });
