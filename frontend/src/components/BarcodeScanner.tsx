@@ -18,9 +18,8 @@ export default function BarcodeScanner({ onScan, onClose }: BarcodeScannerProps)
         const html5QrCode = new Html5Qrcode('barcode-reader');
         scannerRef.current = html5QrCode;
 
-        // Configuración: usar cámara trasera en celulares, y webcam en PC
         await html5QrCode.start(
-          { facingMode: 'environment' },
+          { facingMode: 'environment' }, // Usa la cámara trasera
           { fps: 10, qrbox: { width: 250, height: 150 } },
           (decodedText) => {
             // Al escanear con éxito
@@ -35,41 +34,53 @@ export default function BarcodeScanner({ onScan, onClose }: BarcodeScannerProps)
               .catch((err) => console.error('Error al detener escáner:', err));
           },
           (errorMessage) => {
-            // Esto se ejecuta constantemente si no encuentra código, lo ignoramos para no llenar la consola
+            // Esto se ejecuta en cada frame si no encuentra código, lo ignoramos
           }
         );
         setIsStarting(false);
       } catch (err: any) {
         console.error('Error al iniciar cámara:', err);
-        setError('No se pudo acceder a la cámara. Asegúrate de dar permisos en el navegador.');
+        // ✅ Mensaje de error amigable para el usuario
+        if (err.toString().includes('Permission') || err.toString().includes('NotAllowedError')) {
+          setError('Permiso denegado. Debes autorizar el uso de la cámara en tu navegador.');
+        } else if (
+          window.location.protocol !== 'https:' &&
+          window.location.hostname !== 'localhost'
+        ) {
+          setError('La cámara solo funciona en conexiones seguras (HTTPS) o en localhost.');
+        } else {
+          setError(
+            'No se pudo acceder a la cámara. Asegúrate de que no esté siendo usada por otra app.'
+          );
+        }
         setIsStarting(false);
       }
     };
 
     startScanner();
 
-    // Limpieza al cerrar el componente
+    // ✅ Limpieza obligatoria al cerrar el componente
     return () => {
       if (scannerRef.current && scannerRef.current.isScanning) {
-        scannerRef.current.stop().catch(() => {});
+        scannerRef.current
+          .stop()
+          .then(() => {
+            scannerRef.current?.clear();
+          })
+          .catch(() => {});
       }
     };
   }, [onScan, onClose]);
 
   return (
-    <div className="fixed inset-0 z-60 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4 no-print">
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md border border-slate-100 dark:border-slate-700 overflow-hidden">
         <div className="flex justify-between items-center p-4 border-b border-slate-100 dark:border-slate-700">
           <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2">
             <Camera size={20} className="text-indigo-600" /> Escanear Producto
           </h3>
           <button
-            onClick={() => {
-              if (scannerRef.current && scannerRef.current.isScanning) {
-                scannerRef.current.stop().catch(() => {});
-              }
-              onClose();
-            }}
+            onClick={onClose}
             className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
           >
             <X size={24} />
@@ -78,16 +89,21 @@ export default function BarcodeScanner({ onScan, onClose }: BarcodeScannerProps)
 
         <div className="p-4">
           {error ? (
-            <div className="p-4 bg-red-50 dark:bg-red-500/10 rounded-xl text-red-600 dark:text-red-400 flex items-start gap-3">
-              <AlertTriangle size={20} className="shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-medium">Error de Cámara</p>
-                <p className="text-xs mt-1">{error}</p>
+            <div className="p-4 bg-red-50 dark:bg-red-500/10 rounded-xl text-red-600 dark:text-red-400 flex flex-col items-start gap-3">
+              <div className="flex items-start gap-3">
+                <AlertTriangle size={20} className="flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-bold">Error de Cámara</p>
+                  <p className="text-xs mt-1">{error}</p>
+                </div>
               </div>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-2">
+                * Revisa el ícono de candado o configuración de tu navegador para permitir la cámara
+                en esta página.
+              </p>
             </div>
           ) : (
             <div className="relative aspect-square w-full bg-slate-900 rounded-xl overflow-hidden flex items-center justify-center">
-              {/* Contenedor donde se inyecta el video de la cámara */}
               <div id="barcode-reader" className="w-full h-full" />
 
               {isStarting && (
