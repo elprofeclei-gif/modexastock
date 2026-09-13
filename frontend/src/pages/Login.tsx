@@ -31,7 +31,7 @@ export default function Login() {
           {/* ✅ LOGO MÁS GRANDE */}
           <img src="/logo.png" alt="Logo" className="mx-auto w-24 h-24 object-contain mb-6" />
           <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
-            Modexastock POS
+            ModexaStock v1.0
           </h1>
           <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
             Ingresa tus credenciales para continuar
