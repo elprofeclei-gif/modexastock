@@ -28,8 +28,8 @@ export default function Login() {
       <div className="w-full max-w-md space-y-8">
         {/* Cabecera Minimalista */}
         <div className="text-center">
-          {/* ✅ CAMBIAMOS LA M POR EL LOGO */}
-          <img src="/logo.png" alt="Logo" className="mx-auto w-16 h-16 object-contain mb-6" />
+          {/* ✅ LOGO MÁS GRANDE */}
+          <img src="/logo.png" alt="Logo" className="mx-auto w-24 h-24 object-contain mb-6" />
           <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
             ModexaStock v1.0
           </h1>
