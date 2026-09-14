@@ -4,6 +4,7 @@ import { loginSchema, LoginFormData } from '../schemas/authSchema';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react'; // Ícono de carga moderno
+import { LogoIcon } from '../components/LogoIcon';
 
 export default function Login() {
   const { login, loading } = useAuth();
@@ -28,8 +29,12 @@ export default function Login() {
       <div className="w-full max-w-md space-y-8">
         {/* Cabecera Minimalista */}
         <div className="text-center">
-          {/* ✅ LOGO MÁS GRANDE */}
-          <img src="/logo.png" alt="Logo" className="mx-auto w-24 h-24 object-contain mb-6" />
+          <img
+            src="/logo.png"
+            alt="Logo Modexastock"
+            // En modo claro: sombra normal. En modo oscuro: sombra más fuerte para darle profundidad
+            className="w-24 h-24 mx-auto mb-4 object-contain drop-shadow-md dark:drop-shadow-[0_0_15px_rgba(79,70,229,0.4)]"
+          />
           <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
             ModexaStock v1.0
           </h1>
