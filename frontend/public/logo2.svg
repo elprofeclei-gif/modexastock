@@ -1,0 +1,27 @@
+<svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+	<style>
+		.s0 { fill: #554ce6 } 
+		.s1 { fill: #17bb85 } 
+	</style>
+	<g id="Carpeta 1">
+		<path id="Forma 5" class="s0" d="m428 534"/>
+		<path id="Forma 6" class="s0" d=""/>
+		<path id="Forma 7" class="s0" d="m428 534l33 36 3-153-34-41z"/>
+		<path id="Forma 8" class="s0" d=""/>
+		<path id="Forma 9" class="s0" d=""/>
+		<path id="Forma 10" class="s0" d="m499 620l3-154-20-23-1 154z"/>
+		<path id="Capa 1" fill-rule="evenodd" class="s0" d="m263.18 299v425h-22.36v-425z"/>
+		<path id="Forma 1" fill-rule="evenodd" class="s0" d="m300.12 300v373h-15.24v-373z"/>
+		<path id="Forma 2" fill-rule="evenodd" class="s0" d="m330.06 299v374h-12.12v-374z"/>
+		<path id="Forma 4" class="s0" d="m409 512l3-155-10-14-1 157z"/>
+		<path id="Forma 3" class="s0" d="m353 724.36l-3-424.5h16l19 26.14-2 398.36z"/>
+		<path id="Forma 11" class="s0" d="m518 475l14-14 2 156-16 15z"/>
+		<path id="Forma 12" class="s1" d="m551 444l10-13 1 158-11 11z"/>
+		<path id="Forma 13" class="s1" d="m579 410l22-26 1 156-21 25z"/>
+		<path id="Forma 14" class="s1" d="m618 360l43-49v158l-41 49z"/>
+		<path id="Forma 15" class="s1" d="m640 545l18-21 2 200.36h-20z"/>
+		<path id="Forma 16" fill-rule="evenodd" class="s1" d="m712 299v426h-35v-426z"/>
+		<path id="Forma 17" fill-rule="evenodd" class="s0" d="m747 299v375h-20v-375z"/>
+		<path id="Forma 18" fill-rule="evenodd" class="s0" d="m788 299v426h-22v-426z"/>
+	</g>
+</svg>
