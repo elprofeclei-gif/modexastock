@@ -10,6 +10,17 @@
     <meta name="theme-color" content="#4f46e5" />
 
     <title>Modexastock</title>
+    <script>
+      // Prevenir parpadeo (FOUC) y aplicar tema guardado antes de que React cargue
+      try {
+        const theme = localStorage.getItem('theme'); // Cambia 'theme' por la key que uses en tu localStorage
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>
