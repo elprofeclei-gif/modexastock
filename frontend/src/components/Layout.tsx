@@ -37,7 +37,7 @@ interface MenuItem {
 
 export default function Layout({ children }: LayoutProps) {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(() => localStorage.getItem('theme') === 'dark');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { logout, user } = useAuth();
   const navigate = useNavigate();
@@ -64,8 +64,12 @@ export default function Layout({ children }: LayoutProps) {
   }, [user?.role, location.pathname]);
 
   useEffect(() => {
-    setIsDark(document.documentElement.classList.contains('dark'));
-  }, []);
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDark]);
 
   // Cerrar menú móvil y dropdowns al cambiar de ruta
   useEffect(() => {
