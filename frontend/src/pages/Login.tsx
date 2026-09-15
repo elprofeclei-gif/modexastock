@@ -31,7 +31,7 @@ export default function Login() {
         <div className="text-center">
           {/* ✅ LOGO MÁS GRANDE Y CENTRADO */}
           <img
-            src="/logo2.svg"
+            src="/logo.svg"
             alt="Logo Modexastock"
             // Cambiamos w-24 h-24 a w-32 h-32 (o w-40 h-40 si lo quieres gigante)
             className="w-32 h-32 mx-auto mb-6 object-contain drop-shadow-md dark:drop-shadow-[0_0_15px_rgba(79,70,229,0.4)]"
