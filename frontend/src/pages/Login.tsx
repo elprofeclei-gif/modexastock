@@ -29,11 +29,12 @@ export default function Login() {
       <div className="w-full max-w-md space-y-8">
         {/* Cabecera Minimalista */}
         <div className="text-center">
+          {/* ✅ LOGO MÁS GRANDE Y CENTRADO */}
           <img
             src="/logo.png"
             alt="Logo Modexastock"
-            // En modo claro: sombra normal. En modo oscuro: sombra más fuerte para darle profundidad
-            className="w-24 h-24 mx-auto mb-4 object-contain drop-shadow-md dark:drop-shadow-[0_0_15px_rgba(79,70,229,0.4)]"
+            // Cambiamos w-24 h-24 a w-32 h-32 (o w-40 h-40 si lo quieres gigante)
+            className="w-32 h-32 mx-auto mb-6 object-contain drop-shadow-md dark:drop-shadow-[0_0_15px_rgba(79,70,229,0.4)]"
           />
           <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
             ModexaStock v1.0
