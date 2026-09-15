@@ -166,7 +166,7 @@ export default function Layout({ children }: LayoutProps) {
               >
                 {/* ✅ CAMBIAMOS LA M POR EL LOGO */}
                 <img
-                  src="/logo.png"
+                  src="/logo2.svg"
                   alt="Logo"
                   className="w-10 h-10 object-contain dark:drop-shadow-md"
                 />
