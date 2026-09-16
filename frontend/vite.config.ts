@@ -10,7 +10,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon2.ico', 'favic.svg'],
+      includeAssets: ['favicon.ico', 'favicon.svg', 'logo.png', 'logo.svg'],
       manifest: {
         name: 'Modexastock POS',
         short_name: 'Modexastock',
@@ -27,7 +27,7 @@ export default defineConfig({
             type: 'image/png',
           },
           {
-            src: 'pwa-512x512.png',
+            src: 'pwa-512x512.png', // ✅ Asegúrate de que el archivo se llame EXACTAMENTE así en public/
             sizes: '512x512',
             type: 'image/png',
           },
@@ -41,9 +41,8 @@ export default defineConfig({
       },
     }),
   ],
-  // AQUÍ ESTÁ LA CONFIGURACIÓN PARA RED LOCAL:
   server: {
-    host: true, // Escucha en todas las interfaces de red (0.0.0.0)
-    port: 5173, // Asegura que use el puerto 5173
+    host: true, 
+    port: 5173, 
   },
 });
