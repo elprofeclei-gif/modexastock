@@ -2,18 +2,21 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/x-icon" href="/favicon2.ico" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon2.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon2.png" />
-
+    
+    <!-- ✅ FAVICONS CONFIGURADOS CORRECTAMENTE -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#4f46e5" />
 
     <title>Modexastock</title>
+    
     <script>
       // Prevenir parpadeo (FOUC) y aplicar tema guardado antes de que React cargue
       try {
-        const theme = localStorage.getItem('theme'); // Cambia 'theme' por la key que uses en tu localStorage
+        const theme = localStorage.getItem('theme');
         if (theme === 'dark') {
           document.documentElement.classList.add('dark');
         } else {
