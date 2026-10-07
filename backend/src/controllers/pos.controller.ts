@@ -131,7 +131,8 @@ export const openCashRegister = async (req: CustomRequest, res: Response) => {
           'OPENING_SHORTAGE',
           'PhysicalBox',
           box.id,
-          `Faltante de ${Math.abs(difference)} en Caja ${box.name}. Último cajero responsable: ${responsibleCashier}.`
+          `Faltante de ${Math.abs(difference)} en Caja ${box.name}. Último cajero responsable: ${responsibleCashier}.`,
+          req.ip
         );
       } else {
         await logAction(
@@ -139,7 +140,8 @@ export const openCashRegister = async (req: CustomRequest, res: Response) => {
           'OPENING_SURPLUS',
           'PhysicalBox',
           box.id,
-          `Sobrante de ${difference} en Caja ${box.name}. Origen: ${originAccountId ? 'Cuenta Bancaria/Caja Fuerte' : 'Capital'}.`
+          `Sobrante de ${difference} en Caja ${box.name}. Origen: ${originAccountId ? 'Cuenta Bancaria/Caja Fuerte' : 'Capital'}.`,
+          req.ip
         );
       }
     }
@@ -157,7 +159,8 @@ export const openCashRegister = async (req: CustomRequest, res: Response) => {
       'OPEN_CASH_REGISTER',
       'CashRegister',
       newRegister.id,
-      `Caja abierta con fondo de ${realOpeningAmount}.`
+      `Caja abierta con fondo de ${realOpeningAmount}.`,
+      req.ip
     );
 
     return res.status(201).json({ status: 'success', data: newRegister });
@@ -324,7 +327,8 @@ export const closeCashRegister = async (req: CustomRequest, res: Response) => {
       'CLOSE_CASH_REGISTER',
       'CashRegister',
       cashRegister.id,
-      `Caja cerrada. Esperado: ${expectedAmount}, Real: ${realAmount}, Diferencia: ${difference}.`
+      `Caja cerrada. Esperado: ${expectedAmount}, Real: ${realAmount}, Diferencia: ${difference}.`,
+      req.ip
     );
 
     return res.status(200).json({
@@ -361,6 +365,8 @@ export const searchProduct = async (req: CustomRequest, res: Response) => {
         OR: [
           { sku: { contains: query as string, mode: 'insensitive' } },
           { name: { contains: query as string, mode: 'insensitive' } },
+          // ✅ NUEVA LÍNEA: Busca si alguna variante tiene ese código de barras
+          { variants: { some: { sku: { equals: query as string, mode: 'insensitive' } } } },
         ],
       },
       include: { variants: { include: { size: true, color: true }, where: { stock: { gt: 0 } } } },
@@ -545,7 +551,11 @@ export const transferToCashRegister = async (req: CustomRequest, res: Response) 
         .status(403)
         .json({ status: 'error', message: 'Contraseña de autorización incorrecta.' });
 
-    const cashRegister = await prisma.cashRegister.findFirst({ where: { userId, status: 'OPEN' } });
+    // ✅ AÑADIDO: include: { physicalBox: true } para saber el nombre de la caja
+    const cashRegister = await prisma.cashRegister.findFirst({
+      where: { userId, status: 'OPEN' },
+      include: { physicalBox: true },
+    });
     if (!cashRegister)
       return res.status(400).json({ status: 'error', message: 'No hay caja abierta' });
 
@@ -559,14 +569,18 @@ export const transferToCashRegister = async (req: CustomRequest, res: Response) 
         where: { id: accountId },
         data: { balance: { decrement: parsedAmount } },
       });
+
+      // ✅ AÑADIDO: Nombre de la caja física al concepto para auditoría
+      const destName = cashRegister.physicalBox?.name || 'Caja POS';
       await tx.transaction.create({
         data: {
           amount: parsedAmount,
           type: 'WITHDRAWAL',
-          concept: `Transferencia a Caja POS (Aut: ${adminUser.name})`,
+          concept: `Transferencia a Caja POS [${destName}] (Aut: ${adminUser.name})`,
           accountId,
         },
       });
+
       const updatedReg = await tx.cashRegister.update({
         where: { id: cashRegister.id },
         data: { manualInflows: { increment: parsedAmount } },
@@ -574,6 +588,16 @@ export const transferToCashRegister = async (req: CustomRequest, res: Response) 
 
       return updatedReg;
     });
+
+    // ✅ AÑADIDO: Registro en bitácora para trazar quién autorizó la inyección
+    await logAction(
+      adminUser.id,
+      'TRANSFER_TO_CASH_REGISTER',
+      'CashRegister',
+      cashRegister.id,
+      `Inyección de ${parsedAmount} a Caja [${cashRegister.physicalBox?.name || 'N/A'}] autorizada por ${adminUser.name}.`,
+      req.ip
+    );
 
     return res.status(200).json({ status: 'success', data: result });
   } catch (error: any) {
@@ -791,7 +815,8 @@ export const forceCloseCashRegister = async (req: CustomRequest, res: Response) 
       'FORCE_CLOSE_CASH_REGISTER',
       'CashRegister',
       cashRegister.id,
-      `Caja forzosamente cerrada. Descuadre de ${difference} aplicado a la cuenta del cajero.`
+      `Caja forzosamente cerrada. Descuadre de ${difference} aplicado a la cuenta del cajero.`,
+      req.ip
     );
 
     return res.status(200).json({

@@ -17,6 +17,7 @@ import {
   Users,
   BarChart2,
   AlertTriangle,
+  Truck, // ✅ Agregado Truck
 } from 'lucide-react';
 import { playSound } from '../utils/sound';
 
@@ -471,6 +472,63 @@ export default function DataCenter() {
               onClick={() =>
                 handleDownloadFile('/data/reports/cashiers-balance', 'descuadres_cajeros.csv')
               }
+              className="w-full py-2 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 text-white text-sm font-semibold rounded-lg transition-colors mt-auto flex items-center justify-center gap-2"
+            >
+              <FileDown size={16} /> Exportar CSV
+            </button>
+          </div>
+
+          {/* ✅ NUEVO: Lista de Empleados */}
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col">
+            <div className="w-12 h-12 bg-blue-50 dark:bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-600 mb-4">
+              <Users size={24} />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+              Lista de Empleados
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 flex-1">
+              Roles, correos, estado y descuadres pendientes del personal.
+            </p>
+            <button
+              onClick={() => handleDownloadFile('/data/reports/users', 'lista_empleados.csv')}
+              className="w-full py-2 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 text-white text-sm font-semibold rounded-lg transition-colors mt-auto flex items-center justify-center gap-2"
+            >
+              <FileDown size={16} /> Exportar CSV
+            </button>
+          </div>
+
+          {/* ✅ NUEVO: Directorio de Clientes */}
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col">
+            <div className="w-12 h-12 bg-pink-50 dark:bg-pink-500/10 rounded-xl flex items-center justify-center text-pink-600 mb-4">
+              <Users size={24} />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+              Directorio de Clientes
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 flex-1">
+              Lista completa de clientes, teléfonos, direcciones y saldos.
+            </p>
+            <button
+              onClick={() => handleDownloadFile('/data/reports/clients', 'lista_clientes.csv')}
+              className="w-full py-2 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 text-white text-sm font-semibold rounded-lg transition-colors mt-auto flex items-center justify-center gap-2"
+            >
+              <FileDown size={16} /> Exportar CSV
+            </button>
+          </div>
+
+          {/* ✅ NUEVO: Compras a Proveedores */}
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col">
+            <div className="w-12 h-12 bg-cyan-50 dark:bg-cyan-500/10 rounded-xl flex items-center justify-center text-cyan-600 mb-4">
+              <Truck size={24} />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+              Compras y Proveedores
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 flex-1">
+              Historial de adquisiciones de inventario y costos.
+            </p>
+            <button
+              onClick={() => handleDownloadFile('/data/reports/purchases', 'reporte_compras.csv')}
               className="w-full py-2 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 text-white text-sm font-semibold rounded-lg transition-colors mt-auto flex items-center justify-center gap-2"
             >
               <FileDown size={16} /> Exportar CSV

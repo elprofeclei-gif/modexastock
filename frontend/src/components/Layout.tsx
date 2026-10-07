@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import axios from '../api/axios';
+import toast from 'react-hot-toast';
 import {
   User,
   Settings,
@@ -37,6 +38,7 @@ interface MenuItem {
 
 export default function Layout({ children }: LayoutProps) {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const prevAlertsCount = useRef(0);
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('theme') === 'dark';
@@ -83,6 +85,60 @@ export default function Layout({ children }: LayoutProps) {
     setMobileMenuOpen(false);
     setOpenDropdown(null);
   }, [location.pathname]);
+
+  useEffect(() => {
+    // Solo ejecutar si es Admin o Manager
+    if (user?.role === 'ADMIN' || user?.role === 'MANAGER') {
+      const checkSecurityAlerts = async () => {
+        try {
+          const res = await axios.get('/notifications');
+          const securityGroup = res.data.data.find((g: any) => g.id === 'SECURITY');
+
+          if (securityGroup) {
+            // Si hay nuevas alertas desde la última vez que revisamos
+            if (securityGroup.count > prevAlertsCount.current && prevAlertsCount.current !== 0) {
+              toast.error(`⚠️ ${securityGroup.items[0].message}`, { duration: 6000 });
+            }
+            prevAlertsCount.current = securityGroup.count;
+          }
+        } catch (error) {
+          console.error('Error polling notifications', error);
+        }
+      };
+
+      // Ejecutar inmediatamente y luego cada 60 segundos
+      checkSecurityAlerts();
+      const interval = setInterval(checkSecurityAlerts, 60000); // 1 minuto
+
+      return () => clearInterval(interval);
+    }
+  }, [user?.role]);
+
+  useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout>;
+
+    const logout = () => {
+      // Llama a tu función de logout (la que tengas en useAuth)
+      // window.location.href = '/login';
+      console.log('Sesión cerrada por inactividad');
+    };
+
+    const resetTimeout = () => {
+      clearTimeout(timeout);
+      // 15 minutos de inactividad (900,000 ms)
+      timeout = setTimeout(logout, 900000);
+    };
+
+    window.addEventListener('mousemove', resetTimeout);
+    window.addEventListener('keydown', resetTimeout);
+    resetTimeout();
+
+    return () => {
+      clearTimeout(timeout);
+      window.removeEventListener('mousemove', resetTimeout);
+      window.removeEventListener('keydown', resetTimeout);
+    };
+  }, []);
 
   const toggleTheme = () => {
     setIsDark((prev) => !prev);
@@ -403,7 +459,7 @@ export default function Layout({ children }: LayoutProps) {
                         </div>
                       )}
 
-                      {user && user.role === 'ADMIN' && (
+                      {user && (user.role === 'ADMIN' || user.role === 'MANAGER') && (
                         <div className="py-2 border-t border-slate-100 dark:border-slate-700">
                           <NavLink
                             to="/users"

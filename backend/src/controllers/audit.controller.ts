@@ -5,7 +5,7 @@ import prisma from '../config/prisma';
 // Obtener historial de la bitácora (Con filtros y paginación)
 export const getAuditLogs = async (req: CustomRequest, res: Response) => {
   try {
-    const { action, entity, page = '1', limit = '50' } = req.query;
+    const { action, entity, startDate, endDate, page = '1', limit = '50' } = req.query;
 
     const pageNum = parseInt(page as string) || 1;
     const limitNum = parseInt(limit as string) || 50;
@@ -17,6 +17,12 @@ export const getAuditLogs = async (req: CustomRequest, res: Response) => {
     }
     if (entity) {
       where.entity = entity as string;
+    }
+    if (startDate && endDate) {
+      where.createdAt = {
+        gte: new Date(startDate as string),
+        lte: new Date(new Date(endDate as string).setHours(23, 59, 59, 999)), // Incluye todo el día final
+      };
     }
 
     const [logs, total] = await Promise.all([

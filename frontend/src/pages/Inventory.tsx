@@ -10,6 +10,7 @@ import Pagination from '../components/Pagination';
 import Loader from '../components/Loader';
 import axios from '../api/axios'; // ✅ IMPORTADO PARA EXPORTAR
 import toast from 'react-hot-toast'; // ✅ IMPORTADO PARA EXPORTAR
+import PrintLabelsModal from '../components/PrintLabelsModal';
 import {
   Table2,
   ListTree,
@@ -23,6 +24,7 @@ import {
   AlertTriangle,
   XCircle,
   CheckCircle2,
+  Printer,
 } from 'lucide-react';
 
 export default function Inventory() {
@@ -36,6 +38,8 @@ export default function Inventory() {
   const [categoryFilter, setCategoryFilter] = useState('');
   const [brandFilter, setBrandFilter] = useState('');
   const [stockFilter, setStockFilter] = useState(location.state?.stockFilter || 'all');
+  const [labelModalOpen, setLabelModalOpen] = useState(false);
+  const [labelsToPrint, setLabelsToPrint] = useState<any[]>([]);
 
   // Estados de Paginación
   const [currentPage, setCurrentPage] = useState(1);
@@ -97,11 +101,29 @@ export default function Inventory() {
     [filteredProducts]
   );
 
+  // ✅ NUEVO: Aplanar productos para la vista detallada (una fila por variante)
+  const flatVariants = useMemo(() => {
+    return filteredProducts.flatMap((p) =>
+      p.variants.map((v) => ({
+        productId: p.id,
+        productName: p.name,
+        category: p.category.name,
+        brand: p.brand.name,
+        price: p.price,
+        variant: v,
+      }))
+    );
+  }, [filteredProducts]);
+
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, categoryFilter, brandFilter, stockFilter, viewMode]);
 
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  // ✅ LA PAGINACIÓN DEBE IR AQUÍ, JUSTO DESPUÉS DE flatVariants
+  const totalItemsForPagination =
+    viewMode === 'detailed' ? flatVariants.length : filteredProducts.length;
+  const totalPages = Math.ceil(totalItemsForPagination / itemsPerPage);
+
   const currentProducts = filteredProducts.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -148,6 +170,18 @@ export default function Inventory() {
     } finally {
       setIsExporting(false);
     }
+  };
+
+  const handlePrintLabels = (product: any) => {
+    // Mapeamos las variantes del producto seleccionado
+    const variantsData = product.variants.map((v: any) => ({
+      sku: v.sku,
+      productName: product.name,
+      size: v.size.name,
+      color: v.color.name,
+    }));
+    setLabelsToPrint(variantsData);
+    setLabelModalOpen(true);
   };
 
   return (
@@ -289,96 +323,114 @@ export default function Inventory() {
           {products.filter((p) => p.variants.reduce((acc, v) => acc + v.stock, 0) === 0).length})
         </button>
       </div>
-
       {/* VISTA TARJETAS */}
       {viewMode === 'cards' && (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          {loading ? (
-            <div className="col-span-full">
-              <Loader />
-            </div>
-          ) : currentProducts.length === 0 ? (
-            <div className="col-span-full text-center py-8 text-slate-400">
-              No se encontraron productos.
-            </div>
-          ) : (
-            currentProducts.map((product) => {
-              const totalStock = getTotalStock(product.variants);
-              const isLow = product.variants.some((v) => v.stock <= v.minStock);
-              return (
-                <div
-                  key={product.id}
-                  className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden flex flex-col"
-                >
-                  <div className="aspect-square bg-slate-100 dark:bg-slate-700 relative">
-                    {product.imageUrl ? (
-                      <img
-                        src={product.imageUrl}
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-slate-300">
-                        <Package size={40} />
-                      </div>
-                    )}
-                    <span
-                      className={`absolute top-2 right-2 px-2 py-1 text-[10px] font-bold rounded-full ${totalStock === 0 ? 'bg-red-500 text-white' : isLow ? 'bg-amber-500 text-white' : 'bg-green-500 text-white'}`}
-                    >
-                      {totalStock} und
-                    </span>
-                  </div>
-                  <div className="p-3 flex-1 flex flex-col">
-                    <p className="text-xs text-slate-400 uppercase font-medium">
-                      {product.brand.name}
-                    </p>
-                    <p className="text-sm font-bold text-slate-900 dark:text-white mt-1 flex-1">
-                      {product.name}
-                    </p>
-                    <p className="text-lg font-extrabold text-indigo-600 mt-2">
-                      {formatCurrency(product.price)}
-                    </p>
+        <>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {loading ? (
+              <div className="col-span-full">
+                <Loader />
+              </div>
+            ) : currentProducts.length === 0 ? (
+              <div className="col-span-full text-center py-8 text-slate-400">
+                No se encontraron productos.
+              </div>
+            ) : (
+              currentProducts.map((product) => {
+                const totalStock = getTotalStock(product.variants);
+                const isLow = product.variants.some((v) => v.stock <= v.minStock);
+                return (
+                  <div
+                    key={product.id}
+                    className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden flex flex-col"
+                  >
+                    <div className="aspect-square bg-slate-100 dark:bg-slate-700 relative">
+                      {product.imageUrl ? (
+                        <img
+                          src={product.imageUrl}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-slate-300">
+                          <Package size={40} />
+                        </div>
+                      )}
+                      <span
+                        className={`absolute top-2 right-2 px-2 py-1 text-[10px] font-bold rounded-full ${totalStock === 0 ? 'bg-red-500 text-white' : isLow ? 'bg-amber-500 text-white' : 'bg-green-500 text-white'}`}
+                      >
+                        {totalStock} und
+                      </span>
+                    </div>
+                    <div className="p-3 flex-1 flex flex-col">
+                      <p className="text-xs text-slate-400 uppercase font-medium">
+                        {product.brand.name}
+                      </p>
+                      <p className="text-sm font-bold text-slate-900 dark:text-white mt-1 flex-1">
+                        {product.name}
+                      </p>
+                      {product.variants.length === 1 && (
+                        <p className="text-[10px] font-mono text-slate-400 mb-1">
+                          {product.variants[0].sku}
+                        </p>
+                      )}
+                      <p className="text-lg font-extrabold text-indigo-600 mt-2">
+                        {formatCurrency(product.price)}
+                      </p>
 
-                    {/* ✅ Acciones rápidas en tarjetas (Solo si tiene 1 variante) */}
-                    {product.variants.length === 1 && (
-                      <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700 flex gap-2">
-                        <button
-                          onClick={() =>
-                            setAdjustingVariant({
-                              variant: product.variants[0],
-                              productName: product.name,
-                            })
-                          }
-                          className="flex-1 flex items-center justify-center gap-1 text-[10px] font-semibold text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 px-2 py-1.5 rounded-md border border-amber-200 dark:border-amber-500/30 transition-colors"
-                        >
-                          <SlidersHorizontal size={10} /> Ajustar
-                        </button>
-                        <button
-                          onClick={() =>
-                            setKardexVariant({
-                              variant: product.variants[0],
-                              productName: product.name,
-                            })
-                          }
-                          className="flex-1 flex items-center justify-center gap-1 text-[10px] font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 px-2 py-1.5 rounded-md border border-slate-200 dark:border-slate-600 transition-colors"
-                        >
-                          <History size={10} /> Kardex
-                        </button>
-                      </div>
-                    )}
+                      {/* ✅ Acciones rápidas en tarjetas (Solo si tiene 1 variante) */}
+                      {product.variants.length === 1 && (
+                        <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700 flex gap-2">
+                          <button
+                            onClick={() =>
+                              setAdjustingVariant({
+                                variant: product.variants[0],
+                                productName: product.name,
+                              })
+                            }
+                            className="flex-1 flex items-center justify-center gap-1 text-[10px] font-semibold text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 px-2 py-1.5 rounded-md border border-amber-200 dark:border-amber-500/30 transition-colors"
+                          >
+                            <SlidersHorizontal size={10} /> Ajustar
+                          </button>
+                          <button
+                            onClick={() =>
+                              setKardexVariant({
+                                variant: product.variants[0],
+                                productName: product.name,
+                              })
+                            }
+                            className="flex-1 flex items-center justify-center gap-1 text-[10px] font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 px-2 py-1.5 rounded-md border border-slate-200 dark:border-slate-600 transition-colors"
+                          >
+                            <History size={10} /> Kardex
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              );
-            })
-          )}
-        </div>
+                );
+              })
+            )}
+          </div>
+
+          {/* ✅ PAGINACIÓN PARA TARJETAS */}
+          <div className="mt-6">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalItemsForPagination}
+              itemsPerPage={itemsPerPage}
+              onPageChange={setCurrentPage}
+              extraInfo={`${totalVariants} variantes | ${globalTotalStock} unidades en total`}
+            />
+          </div>
+        </>
       )}
 
       {/* VISTA TABLAS (GENERAL Y DETALLADA) */}
       {(viewMode === 'general' || viewMode === 'detailed') && (
         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-[800px] w-full text-sm divide-y divide-slate-100 dark:divide-slate-700">
+            <table className="min-w-200 w-full text-sm divide-y divide-slate-100 dark:divide-slate-700">
               <thead className="bg-slate-50 dark:bg-slate-800/50">
                 <tr>
                   {viewMode === 'detailed' && <th className="w-10 px-4 py-3"></th>}
@@ -388,6 +440,16 @@ export default function Inventory() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                     SKU
                   </th>
+                  {viewMode === 'detailed' && (
+                    <>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                        Talla
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                        Color
+                      </th>
+                    </>
+                  )}
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                     Categoría
                   </th>
@@ -398,7 +460,7 @@ export default function Inventory() {
                     Precio
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                    Stock Total
+                    Stock
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">
                     Acciones
@@ -408,53 +470,56 @@ export default function Inventory() {
               <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-100 dark:divide-slate-700">
                 {loading ? (
                   <tr>
-                    <td colSpan={viewMode === 'detailed' ? 8 : 7} className="px-6 py-8">
+                    <td colSpan={viewMode === 'detailed' ? 9 : 7} className="px-6 py-8">
                       <Loader />
                     </td>
                   </tr>
                 ) : error ? (
                   <tr>
                     <td
-                      colSpan={viewMode === 'detailed' ? 8 : 7}
+                      colSpan={viewMode === 'detailed' ? 9 : 7}
                       className="px-6 py-8 text-center text-red-500"
                     >
                       {error}
                     </td>
                   </tr>
-                ) : currentProducts.length === 0 ? (
+                ) : viewMode === 'general' && filteredProducts.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan={viewMode === 'detailed' ? 8 : 7}
-                      className="px-6 py-8 text-center text-slate-400"
-                    >
-                      No se encontraron productos con estos filtros.
+                    <td colSpan={7} className="px-6 py-8 text-center text-slate-400">
+                      No se encontraron productos.
                     </td>
                   </tr>
-                ) : (
-                  currentProducts.map((product) => {
-                    const totalStock = getTotalStock(product.variants);
-                    const isLow = product.variants.some((v) => v.stock <= v.minStock);
-                    const isExpanded = expandedRows.includes(product.id);
-
-                    return (
-                      <React.Fragment key={product.id}>
+                ) : viewMode === 'detailed' && flatVariants.length === 0 ? (
+                  <tr>
+                    <td colSpan={9} className="px-6 py-8 text-center text-slate-400">
+                      No se encontraron variantes.
+                    </td>
+                  </tr>
+                ) : viewMode === 'general' ? (
+                  // 🔹 VISTA GENERAL (Resumen de producto padre)
+                  filteredProducts
+                    .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                    .map((product) => {
+                      const totalStock = getTotalStock(product.variants);
+                      const isLow = product.variants.some((v) => v.stock <= v.minStock);
+                      return (
                         <tr
-                          className={`${viewMode === 'detailed' ? 'cursor-pointer' : ''} hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors`}
-                          onClick={() => viewMode === 'detailed' && toggleRow(product.id)}
+                          key={product.id}
+                          className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
                         >
-                          {viewMode === 'detailed' && (
-                            <td className="px-4 py-4 text-slate-400">
-                              <ChevronDown
-                                size={16}
-                                className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                              />
-                            </td>
-                          )}
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900 dark:text-white">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-900 dark:text-white">
                             {product.name}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                            {product.sku}
+                          <td className="px-6 py-4 whitespace-nowrap text-sm">
+                            {product.variants.length === 1 ? (
+                              <span className="font-mono text-indigo-600 dark:text-indigo-400 font-medium bg-indigo-50 dark:bg-indigo-500/10 px-2 py-1 rounded">
+                                {product.variants[0].sku}
+                              </span>
+                            ) : (
+                              <span className="text-xs italic text-slate-400">
+                                {product.variants.length} Variantes
+                              </span>
+                            )}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                             {product.category.name}
@@ -462,145 +527,129 @@ export default function Inventory() {
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                             {product.brand.name}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900 dark:text-white">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900 dark:text-white">
                             {formatCurrency(product.price)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm">
                             <span
-                              className={`px-2.5 py-1 inline-flex text-xs font-semibold rounded-md ${totalStock === 0 ? 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400' : isLow ? 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400' : 'bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400'}`}
+                              className={`px-2.5 py-1 inline-flex text-xs font-bold rounded-md ${totalStock === 0 ? 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400' : isLow ? 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400' : 'bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400'}`}
                             >
-                              {totalStock} unidades
+                              {totalStock} und
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            {viewMode === 'detailed' ? (
-                              <span className="text-slate-400 text-xs italic">
-                                Click para ver variantes
-                              </span>
-                            ) : product.variants.length === 1 ? (
-                              <div className="flex items-center justify-end gap-2">
-                                <button
-                                  onClick={() =>
-                                    setAdjustingVariant({
-                                      variant: product.variants[0],
-                                      productName: product.name,
-                                    })
-                                  }
-                                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-200 dark:border-amber-500/30 transition-colors"
-                                >
-                                  <SlidersHorizontal size={12} /> Ajustar
-                                </button>
-                                <button
-                                  onClick={() =>
-                                    setKardexVariant({
-                                      variant: product.variants[0],
-                                      productName: product.name,
-                                    })
-                                  }
-                                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 transition-colors"
-                                >
-                                  <History size={12} /> Kardex
-                                </button>
-                              </div>
-                            ) : (
-                              <span className="text-slate-400 text-xs">Usa vista detallada</span>
-                            )}
+                            {/* ✅ BOTÓN IMPRIMIR ETIQUETAS */}
+                            <button
+                              onClick={() => handlePrintLabels(product)}
+                              className="text-purple-600 hover:text-purple-900 dark:text-purple-400 inline-flex items-center gap-1 mr-2"
+                              title="Imprimir Etiquetas de Variantes"
+                            >
+                              <Printer size={14} /> Etiquetas
+                            </button>
+                            <button
+                              onClick={() => setIsModalOpen(true)}
+                              className="text-xs text-indigo-600 hover:text-indigo-800 font-medium"
+                            >
+                              Editar
+                            </button>
                           </td>
                         </tr>
-
-                        {/* ✅ FILAS EXPANDIDAS CON FILTRO DE VARIANTES APLICADO */}
-                        {viewMode === 'detailed' &&
-                          isExpanded &&
-                          // Aplicamos el filtro de stock a las variantes individuales
-                          product.variants
-                            .filter((v: Variant) => {
-                              const totalStock = getTotalStock(product.variants);
-                              const hasLowStock = v.stock <= v.minStock;
-
-                              if (stockFilter === 'in') return totalStock > 0 && !hasLowStock;
-                              if (stockFilter === 'low') return hasLowStock && v.stock > 0;
-                              if (stockFilter === 'out') return totalStock === 0;
-                              return true; // Si es 'all', muestra todas
-                            })
-                            .map((v: Variant) => (
-                              <tr
-                                key={v.id}
-                                className="bg-slate-50 dark:bg-slate-900/30 border-l-4 border-indigo-200 dark:border-indigo-500/50"
+                      );
+                    })
+                ) : (
+                  // 🔹 VISTA DETALLADA (Una fila por cada Talla/Color)
+                  flatVariants
+                    .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                    .map(({ productId, productName, category, brand, price, variant: v }) => {
+                      const isLow = v.stock <= v.minStock;
+                      return (
+                        <tr
+                          key={v.id}
+                          className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors border-l-4 border-transparent hover:border-indigo-400"
+                        >
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-900 dark:text-white">
+                            {productName}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm">
+                            <span className="font-mono text-indigo-600 dark:text-indigo-400 font-medium bg-indigo-50 dark:bg-indigo-500/10 px-2 py-1 rounded">
+                              {v.sku || 'N/A'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-400 font-medium">
+                            {v.size.name}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-400 font-medium">
+                            {v.color.name}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                            {category}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                            {brand}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900 dark:text-white">
+                            {formatCurrency(price)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm">
+                            <span
+                              className={`px-2.5 py-1 inline-flex text-xs font-bold rounded-md ${v.stock === 0 ? 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400' : isLow ? 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400' : 'bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400'}`}
+                            >
+                              {v.stock} und
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <div className="flex items-center justify-end gap-2">
+                              <button
+                                onClick={() =>
+                                  setAdjustingVariant({ variant: v, productName: productName })
+                                }
+                                className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-200 dark:border-amber-500/30 transition-colors"
                               >
-                                <td
-                                  colSpan={2}
-                                  className="px-6 py-3 text-right text-xs text-slate-400 uppercase"
-                                >
-                                  Variante:
-                                </td>
-                                <td className="px-6 py-3 text-xs text-slate-500 font-medium">
-                                  {v.size.name} / {v.color.name}
-                                </td>
-                                <td colSpan={2} className="px-6 py-3 text-xs text-slate-500">
-                                  Mínimo: {v.minStock}
-                                </td>
-                                <td className="px-6 py-3 text-xs">
-                                  <span
-                                    className={`px-2 py-0.5 inline-flex text-[10px] font-medium rounded ${v.stock <= v.minStock ? 'bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400' : 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200'}`}
-                                  >
-                                    Stock: {v.stock}
-                                  </span>
-                                </td>
-                                <td className="px-6 py-3 text-right">
-                                  <div className="flex items-center justify-end gap-2">
-                                    <button
-                                      onClick={() =>
-                                        setAdjustingVariant({
-                                          variant: v,
-                                          productName: product.name,
-                                        })
-                                      }
-                                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-500/20 px-3 py-1.5 rounded-lg border border-amber-200 dark:border-amber-500/30 transition-colors"
-                                    >
-                                      <SlidersHorizontal size={12} /> Ajustar
-                                    </button>
-                                    <button
-                                      onClick={() =>
-                                        setKardexVariant({ variant: v, productName: product.name })
-                                      }
-                                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 transition-colors"
-                                    >
-                                      <History size={12} /> Historial
-                                    </button>
-                                  </div>
-                                </td>
-                              </tr>
-                            ))}
-                      </React.Fragment>
-                    );
-                  })
+                                <SlidersHorizontal size={12} /> Ajustar
+                              </button>
+                              <button
+                                onClick={() =>
+                                  setKardexVariant({ variant: v, productName: productName })
+                                }
+                                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 transition-colors"
+                              >
+                                <History size={12} /> Kardex
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
                 )}
               </tbody>
 
-              {!loading && currentProducts.length > 0 && (
-                <tfoot className="bg-slate-50 dark:bg-slate-800/50 border-t-2 border-slate-200 dark:border-slate-700">
-                  <tr>
-                    <td
-                      colSpan={viewMode === 'detailed' ? 6 : 5}
-                      className="px-6 py-4 text-right text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider"
-                    >
-                      Total Unidades (Página):
-                    </td>
-                    <td colSpan={2} className="px-6 py-4 text-left">
-                      <span className="px-2.5 py-1 inline-flex text-sm font-bold rounded-md bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300">
-                        {pageTotalStock} unidades
-                      </span>
-                    </td>
-                  </tr>
-                </tfoot>
-              )}
+              {!loading &&
+                (viewMode === 'general'
+                  ? filteredProducts.length > 0
+                  : flatVariants.length > 0) && (
+                  <tfoot className="bg-slate-50 dark:bg-slate-800/50 border-t-2 border-slate-200 dark:border-slate-700">
+                    <tr>
+                      <td
+                        colSpan={viewMode === 'detailed' ? 7 : 5}
+                        className="px-6 py-4 text-right text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider"
+                      >
+                        Total Unidades (Página):
+                      </td>
+                      <td colSpan={2} className="px-6 py-4 text-left">
+                        <span className="px-2.5 py-1 inline-flex text-sm font-bold rounded-md bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300">
+                          {pageTotalStock} unidades
+                        </span>
+                      </td>
+                    </tr>
+                  </tfoot>
+                )}
             </table>
           </div>
 
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
-            totalItems={filteredProducts.length}
+            totalItems={totalItemsForPagination} // ✅ ACTUALIZADO AQUÍ
             itemsPerPage={itemsPerPage}
             onPageChange={setCurrentPage}
             extraInfo={`${totalVariants} variantes | ${globalTotalStock} unidades en total`}
@@ -613,6 +662,13 @@ export default function Inventory() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         createProduct={createProduct}
+      />
+
+      {/* MODAL IMPRESIÓN ETIQUETAS */}
+      <PrintLabelsModal
+        isOpen={labelModalOpen}
+        onClose={() => setLabelModalOpen(false)}
+        variants={labelsToPrint}
       />
 
       {adjustingVariant && (

@@ -194,7 +194,8 @@ export default function POS() {
   const handleScanSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchResults.length > 0) {
-      handleSelectProduct(searchResults[0]);
+      // ✅ LE PASAMOS EL CÓDIGO ESCANEADO (scannerInput) A LA FUNCIÓN
+      handleSelectProduct(searchResults[0], scannerInput);
     } else {
       searchAndAddProduct(scannerInput);
     }
@@ -209,10 +210,20 @@ export default function POS() {
     inputRef.current?.focus();
   };
 
-  const handleSelectProduct = (product: any) => {
-    if (product.variants.length === 1) {
+  const handleSelectProduct = (product: any, scannedBarcode?: string) => {
+    // ✅ NUEVA LÓGICA: Si escaneaste un código, busca la variante exacta
+    const exactVariant = scannedBarcode
+      ? product.variants.find((v: any) => v.sku === scannedBarcode)
+      : null;
+
+    if (exactVariant) {
+      // Si el código pertenece a una variante, la agrega directo (¡Sin modal!)
+      addToCart(product, exactVariant);
+    } else if (product.variants.length === 1) {
+      // Si el producto solo tiene 1 variante, la agrega (tu lógica original)
       addToCart(product, product.variants[0]);
     } else {
+      // Si no encuentra el SKU de la variante, abre el modal (tu lógica original)
       setProductForVariant(product);
     }
     setScannerInput('');

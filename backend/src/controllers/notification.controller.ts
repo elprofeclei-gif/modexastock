@@ -108,6 +108,37 @@ export const getMyNotifications = async (req: CustomRequest, res: Response) => {
           })),
         });
       }
+
+      // 5. GRUPO DE ALERTAS DE SEGURIDAD (BITÁCORA CRÍTICA DE HOY)
+      const criticalActions = [
+        'FORCE_CLOSE_CASH_REGISTER',
+        'VOID_SALE',
+        'DELETE_USER',
+        'RESET_USER_PASSWORD',
+      ];
+      const criticalLogs = await prisma.auditLog.findMany({
+        where: {
+          action: { in: criticalActions },
+          createdAt: { gte: new Date(new Date().setHours(0, 0, 0, 0)) }, // Solo las de hoy
+        },
+        include: { user: { select: { name: true } } },
+        take: 5,
+        orderBy: { createdAt: 'desc' },
+      });
+
+      if (criticalLogs.length > 0) {
+        totalAlerts += criticalLogs.length;
+        groups.push({
+          id: 'SECURITY',
+          title: 'Alertas de Seguridad (Hoy)',
+          icon: 'ShieldAlert',
+          color: 'red',
+          count: criticalLogs.length,
+          items: criticalLogs.map((log) => ({
+            message: `${log.user?.name || 'Sistema'} realizó: ${log.action.replace(/_/g, ' ')}`,
+          })),
+        });
+      }
     }
 
     // 4. ALERTA PERSONAL PARA EL CAJERO

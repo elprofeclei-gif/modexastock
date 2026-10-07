@@ -152,16 +152,28 @@ export const usePOS = () => {
         return;
       }
 
-      const product = products.find((p: any) => p.sku === query) || products[0];
+      // ✅ Buscamos si el producto o alguna variante tiene el SKU escaneado
+      const product =
+        products.find(
+          (p: any) => p.sku === query || p.variants.some((v: any) => v.sku === query)
+        ) || products[0];
 
       if (product.variants.length === 0) {
         toast.error('Producto sin stock disponible');
         return;
       }
 
-      if (product.variants.length === 1) {
+      // ✅ NUEVA LÓGICA: Si el código escaneado pertenece a una variante exacta, la agregamos directo
+      const exactVariant = product.variants.find((v: any) => v.sku === query);
+
+      if (exactVariant) {
+        // Agrega directo al carrito (¡Sin abrir el modal!)
+        addToCart(product, exactVariant);
+      } else if (product.variants.length === 1) {
+        // Si solo hay una variante, la agrega (tu lógica original)
         addToCart(product, product.variants[0]);
       } else {
+        // Si no encuentra el SKU de la variante, abre el modal (tu lógica original)
         setProductForVariant(product);
       }
     } catch (error) {

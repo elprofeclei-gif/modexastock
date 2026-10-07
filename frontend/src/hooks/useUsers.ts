@@ -9,6 +9,7 @@ export interface User {
   role: string;
   isActive: boolean;
   createdAt: string;
+  balance: number;
 }
 
 export const useUsers = () => {
@@ -54,6 +55,17 @@ export const useUsers = () => {
     }
   };
 
+  const resetUserPassword = async (id: string, newPassword: string) => {
+    try {
+      const res = await axios.patch(`/users/${id}/reset-password`, { newPassword });
+      toast.success(res.data.message);
+      return true;
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Error al restablecer contraseña');
+      return false;
+    }
+  };
+
   const deleteUser = async (id: string, adminEmail: string, adminPassword: string) => {
     try {
       await axios.delete(`/users/${id}`, { data: { adminEmail, adminPassword } });
@@ -78,6 +90,39 @@ export const useUsers = () => {
     }
   };
 
+  const settleBalance = async (
+    userId: string,
+    amount: number,
+    paymentMethod: string,
+    accountId?: string,
+    physicalBoxId?: string
+  ) => {
+    try {
+      await axios.post(`/users/${userId}/settle-balance`, {
+        amount,
+        paymentMethod,
+        accountId,
+        physicalBoxId,
+      });
+      toast.success('Descuadre cobrado correctamente');
+      fetchUsers(); // Refresca la lista
+      return true;
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Error al cobrar descuadre');
+      return false;
+    }
+  };
+
   // ✅ Devolvemos fetchUsers para poder refrescar la lista al crear/editar
-  return { users, loading, fetchUsers, createUser, updateUser, deleteUser, toggleStatus };
+  return {
+    users,
+    loading,
+    fetchUsers,
+    createUser,
+    updateUser,
+    resetUserPassword,
+    deleteUser,
+    toggleStatus,
+    settleBalance,
+  };
 };

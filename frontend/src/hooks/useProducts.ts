@@ -9,6 +9,7 @@ export interface Variant {
   minStock: number;
   size: { name: string };
   color: { name: string; hex: string };
+  sku?: string;
 }
 
 export interface Product {

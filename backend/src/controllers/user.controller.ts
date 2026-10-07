@@ -13,7 +13,8 @@ export const getUsers = async (req: CustomRequest, res: Response) => {
         email: true,
         role: true,
         createdAt: true,
-        isActive: true, // <-- AÑADE ESTO
+        isActive: true,
+        balance: true,
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -68,19 +69,32 @@ export const createUser = async (req: CustomRequest, res: Response) => {
       .json({ status: 'error', message: error.message || 'Error interno del servidor' });
   }
 };
-// Actualizar usuario (ej. cambiar rol)
+// Actualizar usuario (ej. cambiar rol o email)
 export const updateUser = async (req: CustomRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const { name, role } = req.body;
+    const { name, role, email } = req.body; // ✅ AGREGADO 'email'
+
+    // ✅ Validar que el email no exista ya en otro usuario
+    if (email) {
+      const existingEmail = await prisma.user.findFirst({
+        where: { email, NOT: { id } },
+      });
+      if (existingEmail) {
+        return res
+          .status(400)
+          .json({ status: 'error', message: 'El correo ya está registrado por otro usuario' });
+      }
+    }
 
     const updatedUser = await prisma.user.update({
       where: { id },
       data: {
         name: name || undefined,
         role: role || undefined,
+        email: email || undefined, // ✅ ACTUALIZAR EMAIL
       },
-      select: { id: true, name: true, email: true, role: true },
+      select: { id: true, name: true, email: true, role: true, isActive: true },
     });
 
     return res.status(200).json({ status: 'success', data: updatedUser });
@@ -239,7 +253,8 @@ export const settleUserBalance = async (req: CustomRequest, res: Response) => {
       'SETTLE_USER_BALANCE',
       'User',
       id,
-      `Descuadre cobrado a ${user.name}. Monto: ${parsedAmount}. Nuevo balance: ${newBalance}.`
+      `Descuadre cobrado a ${user.name}. Monto: ${parsedAmount}. Nuevo balance: ${newBalance}.`,
+      req.ip
     );
 
     return res.status(200).json({ status: 'success', message: 'Descuadre cobrado correctamente.' });
@@ -257,17 +272,22 @@ export const updateMyProfile = async (req: CustomRequest, res: Response) => {
     const userId = req.user?.id!;
     const { name, phone, email } = req.body;
 
-    if (!name) return res.status(400).json({ status: 'error', message: 'El nombre es obligatorio' });
+    if (!name)
+      return res.status(400).json({ status: 'error', message: 'El nombre es obligatorio' });
 
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: { name, phone, email },
-      select: { id: true, name: true, email: true, phone: true, role: true }
+      select: { id: true, name: true, email: true, phone: true, role: true },
     });
 
-    return res.status(200).json({ status: 'success', data: updatedUser, message: 'Perfil actualizado correctamente' });
+    return res
+      .status(200)
+      .json({ status: 'success', data: updatedUser, message: 'Perfil actualizado correctamente' });
   } catch (error: any) {
-    return res.status(500).json({ status: 'error', message: error.message || 'Error interno del servidor' });
+    return res
+      .status(500)
+      .json({ status: 'error', message: error.message || 'Error interno del servidor' });
   }
 };
 
@@ -278,11 +298,15 @@ export const changeMyPassword = async (req: CustomRequest, res: Response) => {
     const { currentPassword, newPassword } = req.body;
 
     if (!currentPassword || !newPassword) {
-      return res.status(400).json({ status: 'error', message: 'Debes proporcionar la contraseña actual y la nueva' });
+      return res
+        .status(400)
+        .json({ status: 'error', message: 'Debes proporcionar la contraseña actual y la nueva' });
     }
 
     if (newPassword.length < 6) {
-      return res.status(400).json({ status: 'error', message: 'La nueva contraseña debe tener al menos 6 caracteres' });
+      return res
+        .status(400)
+        .json({ status: 'error', message: 'La nueva contraseña debe tener al menos 6 caracteres' });
     }
 
     const user = await prisma.user.findUnique({ where: { id: userId } });
@@ -291,7 +315,9 @@ export const changeMyPassword = async (req: CustomRequest, res: Response) => {
     // Verificar que la contraseña actual sea correcta
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
-      return res.status(403).json({ status: 'error', message: 'La contraseña actual es incorrecta' });
+      return res
+        .status(403)
+        .json({ status: 'error', message: 'La contraseña actual es incorrecta' });
     }
 
     // Encriptar y guardar la nueva
@@ -300,14 +326,64 @@ export const changeMyPassword = async (req: CustomRequest, res: Response) => {
 
     await prisma.user.update({
       where: { id: userId },
-      data: { password: hashedPassword }
+      data: { password: hashedPassword },
     });
 
     // Registro en bitácora
-    await logAction(userId, 'CHANGE_PASSWORD', 'User', userId, 'El usuario cambió su propia contraseña.');
+    await logAction(
+      userId,
+      'CHANGE_PASSWORD',
+      'User',
+      userId,
+      'El usuario cambió su propia contraseña.',
+      req.ip
+    );
 
-    return res.status(200).json({ status: 'success', message: 'Contraseña actualizada correctamente' });
+    return res
+      .status(200)
+      .json({ status: 'success', message: 'Contraseña actualizada correctamente' });
   } catch (error: any) {
-    return res.status(500).json({ status: 'error', message: error.message || 'Error interno del servidor' });
+    return res
+      .status(500)
+      .json({ status: 'error', message: error.message || 'Error interno del servidor' });
+  }
+};
+
+// RESTABLECER CONTRASEÑA (Solo Admin)
+export const resetUserPassword = async (req: CustomRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { newPassword } = req.body;
+    const adminId = req.user?.id!;
+
+    if (!newPassword || newPassword.length < 6) {
+      return res
+        .status(400)
+        .json({ status: 'error', message: 'La nueva contraseña debe tener al menos 6 caracteres' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    await prisma.user.update({
+      where: { id },
+      data: { password: hashedPassword },
+    });
+
+    // ✅ Registro en bitácora
+    await logAction(
+      adminId,
+      'RESET_USER_PASSWORD',
+      'User',
+      id,
+      `El administrador restableció la contraseña del usuario.`,
+      req.ip
+    );
+
+    return res
+      .status(200)
+      .json({ status: 'success', message: 'Contraseña restablecida correctamente' });
+  } catch (error) {
+    return res.status(500).json({ status: 'error', message: 'Error al restablecer contraseña' });
   }
 };
