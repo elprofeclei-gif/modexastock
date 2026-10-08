@@ -99,7 +99,8 @@ export const createExpense = async (req: CustomRequest, res: Response) => {
       'CREATE_EXPENSE',
       'Expense',
       result.id,
-      `Gasto registrado por ${parsedAmount}. Concepto: ${concept}.`
+      `Gasto registrado por ${parsedAmount}. Concepto: ${concept}.`,
+      req.ip
     );
 
     return res.status(201).json({ status: 'success', data: result });
@@ -189,7 +190,8 @@ export const createManualTransaction = async (req: CustomRequest, res: Response)
       'CREATE_MANUAL_TRANSACTION',
       'Transaction',
       result.id,
-      `Movimiento manual de Tesorería (${type}) por ${parsedAmount}. Concepto: ${concept}.`
+      `Movimiento manual de Tesorería (${type}) por ${parsedAmount}. Concepto: ${concept}.`,
+      req.ip
     );
 
     return res.status(201).json({ status: 'success', data: result });

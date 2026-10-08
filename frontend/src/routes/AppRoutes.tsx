@@ -39,53 +39,197 @@ export default function AppRoutes() {
         <Route path="/login" element={<Login />} />
 
         {/* Rutas accesibles para todos los logueados */}
-        <Route path="/" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
-        <Route path="/pos" element={<ProtectedRoute><Layout><POS /></Layout></ProtectedRoute>} />
-        <Route path="/sales" element={<ProtectedRoute><Layout><Sales /></Layout></ProtectedRoute>} />
-        <Route path="/profile" element={<ProtectedRoute><Layout><Profile /></Layout></ProtectedRoute>} />
-        
-        <Route path="/clients" element={
-          <ProtectedRoute><Layout><RoleRoute roles={['ADMIN', 'MANAGER', 'USER']}><Clients /></RoleRoute></Layout></ProtectedRoute>
-        } />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <Dashboard />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/pos"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <POS />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/sales"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <Sales />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <Profile />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/clients"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <RoleRoute roles={['ADMIN', 'MANAGER', 'USER']}>
+                  <Clients />
+                </RoleRoute>
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
 
         {/* Rutas SOLO para Admin y Manager */}
-        <Route path="/purchases" element={
-          <ProtectedRoute><Layout><RoleRoute roles={['ADMIN', 'MANAGER']}><Purchases /></RoleRoute></Layout></ProtectedRoute>
-        } />
-        <Route path="/purchases/history" element={
-          <ProtectedRoute><Layout><RoleRoute roles={['ADMIN', 'MANAGER']}><PurchaseHistory /></RoleRoute></Layout></ProtectedRoute>
-        } />
-        <Route path="/treasury" element={
-          <ProtectedRoute><Layout><RoleRoute roles={['ADMIN', 'MANAGER']}><Treasury /></RoleRoute></Layout></ProtectedRoute>
-        } />
-        <Route path="/cash-history" element={
-          <ProtectedRoute><Layout><RoleRoute roles={['ADMIN', 'MANAGER']}><CashHistory /></RoleRoute></Layout></ProtectedRoute>
-        } />
-        <Route path="/inventory" element={
-          <ProtectedRoute><Layout><RoleRoute roles={['ADMIN', 'MANAGER']}><Inventory /></RoleRoute></Layout></ProtectedRoute>
-        } />
-        <Route path="/data-center" element={
-          <ProtectedRoute><Layout><RoleRoute roles={['ADMIN', 'MANAGER']}><DataCenter /></RoleRoute></Layout></ProtectedRoute>
-        } />
-        <Route path="/settings" element={
-          <ProtectedRoute><Layout><RoleRoute roles={['ADMIN', 'MANAGER']}><Settings /></RoleRoute></Layout></ProtectedRoute>
-        } />
-        
+        <Route
+          path="/purchases"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <RoleRoute roles={['ADMIN', 'MANAGER']}>
+                  <Purchases />
+                </RoleRoute>
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/purchases/history"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <RoleRoute roles={['ADMIN', 'MANAGER']}>
+                  <PurchaseHistory />
+                </RoleRoute>
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/treasury"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <RoleRoute roles={['ADMIN', 'MANAGER']}>
+                  <Treasury />
+                </RoleRoute>
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/cash-history"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <RoleRoute roles={['ADMIN', 'MANAGER']}>
+                  <CashHistory />
+                </RoleRoute>
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/inventory"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <RoleRoute roles={['ADMIN', 'MANAGER']}>
+                  <Inventory />
+                </RoleRoute>
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/data-center"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <RoleRoute roles={['ADMIN', 'MANAGER']}>
+                  <DataCenter />
+                </RoleRoute>
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <RoleRoute roles={['ADMIN', 'MANAGER']}>
+                  <Settings />
+                </RoleRoute>
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
         {/* ✅ NUEVAS RUTAS AÑADIDAS Y ENVUELTAS EN LAYOUT */}
-        <Route path="/audit-logs" element={
-          <ProtectedRoute><Layout><RoleRoute roles={['ADMIN', 'MANAGER']}><AuditLogs /></RoleRoute></Layout></ProtectedRoute>
-        } />
-        <Route path="/profit-loss" element={
-          <ProtectedRoute><Layout><RoleRoute roles={['ADMIN', 'MANAGER']}><ProfitLoss /></RoleRoute></Layout></ProtectedRoute>
-        } />
-        <Route path="/settlements" element={
-          <ProtectedRoute><Layout><RoleRoute roles={['ADMIN', 'MANAGER']}><Settlements /></RoleRoute></Layout></ProtectedRoute>
-        } />
+        <Route
+          path="/audit-logs"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <RoleRoute roles={['ADMIN', 'MANAGER']}>
+                  <AuditLogs />
+                </RoleRoute>
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profit-loss"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <RoleRoute roles={['ADMIN', 'MANAGER']}>
+                  <ProfitLoss />
+                </RoleRoute>
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settlements"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <RoleRoute roles={['ADMIN', 'MANAGER']}>
+                  <Settlements />
+                </RoleRoute>
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
 
         {/* Ruta SOLO para Admin */}
-        <Route path="/users" element={
-          <ProtectedRoute><Layout><RoleRoute roles={['ADMIN']}><Users /></RoleRoute></Layout></ProtectedRoute>
-        } />
+        <Route
+          path="/users"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <RoleRoute roles={['ADMIN', 'MANAGER']}>
+                  <Users />
+                </RoleRoute>
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

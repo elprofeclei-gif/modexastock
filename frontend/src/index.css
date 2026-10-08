@@ -56,3 +56,32 @@ input:-webkit-autofill:focus {
 ::-ms-clear {
   display: none;
 }
+
+/* ✅ CSS PARA IMPRESIÓN DE ETIQUETAS */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+  .print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: white !important;
+  }
+  .label-box {
+    border: 1px dashed #ccc !important;
+    page-break-inside: avoid;
+  }
+}

@@ -58,6 +58,7 @@ export default function Dashboard() {
     address: '',
     phone: '',
   });
+  const [isEditingCompany, setIsEditingCompany] = useState(false);
 
   useEffect(() => {
     if (settings) {
@@ -141,20 +142,32 @@ export default function Dashboard() {
   const handleSaveCompany = async (e: React.FormEvent) => {
     e.preventDefault();
     const success = await updateSettings(companyForm);
-    if (success) playSound('success');
-    else playSound('error');
+    if (success) {
+      playSound('success');
+      setIsEditingCompany(false);
+    } else {
+      playSound('error');
+    }
   };
 
-  const KpiCard = ({ icon: Icon, label, value, sublabel, variation }: any) => (
-    <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col justify-between">
-      <div className="flex justify-between items-start mb-2">
+  const today = new Date().toLocaleDateString('es-ES', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+
+  const KpiCard = ({ icon: Icon, label, value, sublabel, variation, iconColor }: any) => (
+    <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+      <div className="flex justify-between items-center mb-3">
         <p className="text-xs font-medium text-slate-500 dark:text-slate-400">{label}</p>
-        <Icon className="text-slate-400 shrink-0" size={16} />
+        <div className={`p-1.5 rounded-lg ${iconColor || 'bg-slate-100 dark:bg-slate-700'}`}>
+          <Icon className="text-slate-600 dark:text-slate-300" size={14} />
+        </div>
       </div>
       {loading ? (
         <Loader />
       ) : (
-        // ✅ whitespace-nowrap obliga a que se quede en una sola línea
         <p className="text-lg lg:text-xl font-bold text-slate-900 dark:text-white tracking-tight whitespace-nowrap">
           {value}
         </p>
@@ -165,9 +178,9 @@ export default function Dashboard() {
             className={`flex items-center text-xs font-semibold ${variation >= 0 ? 'text-green-600' : 'text-red-600'}`}
           >
             {variation >= 0 ? (
-              <TrendingUp size={14} className="mr-1" />
+              <TrendingUp size={12} className="mr-1" />
             ) : (
-              <TrendingDown size={14} className="mr-1" />
+              <TrendingDown size={12} className="mr-1" />
             )}
             {Math.abs(variation).toFixed(1)}%
           </div>
@@ -182,12 +195,18 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Dashboard Gerencial</h1>
-        <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">
-          Resumen financiero, operativo y de auditoría.
-        </p>
+    <div className="space-y-6">
+      {/* Encabezado Dinámico */}
+      <div className="flex flex-col md:flex-row justify-between md:items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Dashboard Gerencial</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm capitalize">{today}</p>
+        </div>
+        <div className="flex items-center gap-2 mt-4 md:mt-0">
+          <span className="px-3 py-1.5 bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 text-xs font-bold rounded-full border border-green-200 dark:border-green-500/30 flex items-center gap-1.5">
+            <Activity size={12} /> Sistema Operativo
+          </span>
+        </div>
       </div>
 
       {/* Onboarding Limpio */}
@@ -197,8 +216,9 @@ export default function Dashboard() {
             <FileUp size={20} /> Configuración Inicial
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* 1. Datos de la Empresa */}
             <div
-              className={`flex flex-col p-4 bg-white dark:bg-slate-800 rounded-lg ${hasCompanyData ? 'opacity-50' : ''}`}
+              className={`flex flex-col p-4 bg-white dark:bg-slate-800 rounded-lg ${hasCompanyData && !isEditingCompany ? 'opacity-50' : ''}`}
             >
               <div className="flex items-center space-x-3 mb-3">
                 {hasCompanyData ? (
@@ -210,7 +230,7 @@ export default function Dashboard() {
                   1. Datos de la Empresa
                 </p>
               </div>
-              {!hasCompanyData ? (
+              {!hasCompanyData || isEditingCompany ? (
                 <form onSubmit={handleSaveCompany} className="space-y-2">
                   <input
                     type="text"
@@ -243,18 +263,37 @@ export default function Dashboard() {
                     onChange={(e) => setCompanyForm({ ...companyForm, phone: e.target.value })}
                     className="w-full text-xs px-2 py-1.5 border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 rounded-md outline-none"
                   />
-                  <button
-                    type="submit"
-                    className="text-xs px-3 py-1.5 bg-indigo-600 text-white rounded-md font-medium w-full"
-                  >
-                    Guardar
-                  </button>
+                  <div className="flex gap-2">
+                    {isEditingCompany && (
+                      <button
+                        type="button"
+                        onClick={() => setIsEditingCompany(false)}
+                        className="text-xs px-3 py-1.5 bg-slate-200 text-slate-700 rounded-md font-medium w-full"
+                      >
+                        Cancelar
+                      </button>
+                    )}
+                    <button
+                      type="submit"
+                      className="text-xs px-3 py-1.5 bg-indigo-600 text-white rounded-md font-medium w-full"
+                    >
+                      Guardar
+                    </button>
+                  </div>
                 </form>
               ) : (
-                <div className="text-xs text-green-600 font-medium">Configurado.</div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-green-600 font-medium">Configurado.</span>
+                  <button
+                    onClick={() => setIsEditingCompany(true)}
+                    className="text-xs text-indigo-600 hover:text-indigo-800 font-medium"
+                  >
+                    Editar
+                  </button>
+                </div>
               )}
             </div>
-
+            {/* 2. Inyectar Capital */}
             <div
               className={`flex flex-col p-4 bg-white dark:bg-slate-800 rounded-lg ${hasFunds ? 'opacity-50' : ''}`}
             >
@@ -297,7 +336,7 @@ export default function Dashboard() {
                 </form>
               )}
             </div>
-
+            {/* 3. Cargar Inventario */}
             <div
               className={`flex flex-col p-4 bg-white dark:bg-slate-800 rounded-lg ${hasInventory ? 'opacity-50' : ''}`}
             >
@@ -324,128 +363,130 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Fila 1: KPIs Financieros (6 columnas) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3">
+      {/* Fila 1: KPIs Financieros */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         <KpiCard
           icon={Receipt}
-          label="Ventas de Hoy"
+          label="Ventas Hoy"
           value={formatCurrency(stats?.todaySalesTotal)}
           variation={stats?.salesVariation}
           sublabel={`Ticket: ${formatCurrency(stats?.avgTicket)}`}
+          iconColor="bg-indigo-50 dark:bg-indigo-500/10"
         />
         <KpiCard
           icon={TrendingUp}
-          label="Utilidad Neta Hoy"
+          label="Utilidad Neta"
           value={formatCurrency(stats?.netProfit || 0)}
           sublabel={`Costo: ${formatCurrency(stats?.todayCOGS || 0)}`}
+          iconColor="bg-green-50 dark:bg-green-500/10"
         />
         <KpiCard
           icon={Wallet}
-          label="Efectivo en Cajas"
+          label="Efectivo Cajas"
           value={formatCurrency(stats?.openCashRegister)}
-          sublabel={`${stats?.activeCashiers || 0} cajeros activos`}
+          sublabel={`${stats?.activeCashiers || 0} cajeros`}
+          iconColor="bg-amber-50 dark:bg-amber-500/10"
         />
         <KpiCard
           icon={Landmark}
-          label="Saldo en Bancos"
+          label="Saldo Bancos"
           value={formatCurrency(stats?.bankBalance)}
-          sublabel="Cuentas de Tesorería"
+          sublabel="Tesorería"
+          iconColor="bg-cyan-50 dark:bg-cyan-500/10"
         />
         <KpiCard
           icon={TrendingDown}
-          label="Gastos de Hoy"
+          label="Gastos Hoy"
           value={`-${formatCurrency(stats?.todayExpenses)}`}
-          sublabel="Egresos operativos"
+          sublabel="Egresos"
+          iconColor="bg-red-50 dark:bg-red-500/10"
         />
-
-        {/* ✅ TARJETA DE ALERTA DE ANULACIONES */}
         <div
-          className={`p-5 rounded-xl border shadow-sm flex flex-col justify-between ${stats?.voidedSalesToday && stats.voidedSalesToday > 0 ? 'bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/30' : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700'}`}
+          className={`p-4 rounded-xl border shadow-sm flex flex-col justify-between ${stats?.voidedSalesToday && stats.voidedSalesToday > 0 ? 'bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/30' : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700'}`}
         >
-          <div className="flex justify-between items-start mb-2">
-            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-              Anulaciones Hoy
-            </p>
-            <Ban
-              className={
-                stats?.voidedSalesToday && stats.voidedSalesToday > 0
-                  ? 'text-red-600'
-                  : 'text-slate-400'
-              }
-              size={18}
-            />
+          <div className="flex justify-between items-center mb-3">
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Anulaciones</p>
+            <div
+              className={`p-1.5 rounded-lg ${stats?.voidedSalesToday && stats.voidedSalesToday > 0 ? 'bg-red-100 dark:bg-red-500/20' : 'bg-slate-100 dark:bg-slate-700'}`}
+            >
+              <Ban
+                className={
+                  stats?.voidedSalesToday && stats.voidedSalesToday > 0
+                    ? 'text-red-600'
+                    : 'text-slate-600 dark:text-slate-300'
+                }
+                size={14}
+              />
+            </div>
           </div>
           {loading ? (
             <Loader />
           ) : (
             <p
-              className={`text-2xl font-bold tracking-tight ${stats?.voidedSalesToday && stats.voidedSalesToday > 0 ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-white'}`}
+              className={`text-lg lg:text-xl font-bold whitespace-nowrap ${stats?.voidedSalesToday && stats.voidedSalesToday > 0 ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-white'}`}
             >
               {stats?.voidedSalesToday || 0}
             </p>
           )}
-          <div className="flex items-center justify-between mt-2">
-            <p className="text-xs text-slate-400 dark:text-slate-500 text-right">
-              {stats?.voidedSalesToday && stats.voidedSalesToday > 0
-                ? '¡Revisar Bitácora!'
-                : 'Sin novedades'}
-            </p>
-          </div>
+          <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-2">
+            {stats?.voidedSalesToday && stats.voidedSalesToday > 0 ? '¡Revisar!' : 'Sin novedades'}
+          </p>
         </div>
       </div>
 
-      {/* ✅ Fila 2: KPIs Operativos (6 columnas) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3">
+      {/* Fila 2: KPIs Operativos */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         <KpiCard
           icon={Package}
-          label="Modelos y Variantes"
-          value={`${stats?.totalProducts || 0} / ${stats?.totalVariants || 0}`}
+          label="Modelos/Variantes"
+          value={`${(stats?.totalProducts || 0).toLocaleString('es-ES')} / ${(stats?.totalVariants || 0).toLocaleString('es-ES')}`}
           sublabel="SKUs / Variantes"
+          iconColor="bg-purple-50 dark:bg-purple-500/10"
         />
         <KpiCard
           icon={Package}
-          label="Unidades en Stock"
-          value={`${stats?.totalStockUnits || 0}`}
+          label="Unidades Stock"
+          value={`${(stats?.totalStockUnits || 0).toLocaleString('es-ES')}`}
           sublabel="Prendas físicas"
+          iconColor="bg-indigo-50 dark:bg-indigo-500/10"
         />
         <KpiCard
           icon={Landmark}
           label="Valor Inventario"
           value={formatCurrency(stats?.inventoryValue)}
-          sublabel="Precio de venta total"
+          sublabel="Precio venta total"
+          iconColor="bg-green-50 dark:bg-green-500/10"
         />
         <KpiCard
           icon={Users}
-          label="Cuentas por Cobrar"
+          label="Cuentas Cobrar"
           value={formatCurrency(stats?.accountsReceivable)}
-          sublabel="Créditos a clientes"
+          sublabel="Créditos clientes"
+          iconColor="bg-amber-50 dark:bg-amber-500/10"
         />
-
-        {/* ✅ NUEVA TARJETA DE CUENTAS POR PAGAR */}
         <KpiCard
           icon={Landmark}
-          label="Cuentas por Pagar"
+          label="Cuentas Pagar"
           value={formatCurrency(stats?.accountsPayable || 0)}
-          sublabel="Deudas a proveedores"
+          sublabel="Deudas proveedores"
+          iconColor="bg-red-50 dark:bg-red-500/10"
         />
-
         <KpiCard
           icon={Users}
           label="Total Clientes"
-          value={`${stats?.totalClients || 0}`}
-          sublabel="Registrados en sistema"
+          value={`${(stats?.totalClients || 0).toLocaleString('es-ES')}`}
+          sublabel="Registrados"
+          iconColor="bg-cyan-50 dark:bg-cyan-500/10"
         />
       </div>
 
-      {/* Fila 3: GRÁFICAS DE TENDENCIA (Ventas y Top 5) */}
+      {/* Fila 3: Gráficas principales */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Gráfica de Ventas (Toma 2 columnas) */}
         <div className="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
           <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
             <Activity size={18} className="text-indigo-600" /> Tendencia de Ventas
           </h3>
           <p className="text-xs text-slate-500 mb-6">Ingresos diarios de los últimos 7 días.</p>
-
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
@@ -488,14 +529,11 @@ export default function Dashboard() {
             </ResponsiveContainer>
           </div>
         </div>
-
-        {/* Top 5 Productos con Gráfica de Barras (Toma 1 columna) */}
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
           <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
             <Crown size={18} className="text-amber-500" /> Top 5 Productos
           </h3>
           <p className="text-xs text-slate-500 mb-6">Más vendidos históricamente.</p>
-
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
@@ -541,185 +579,185 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ✅ Fila 4: Ventas por Categoría (Dona) */}
-      <div className="grid grid-cols-1 gap-6">
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
-          <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
-            <Package size={18} className="text-indigo-600" /> Ventas por Categoría
-          </h3>
-          <p className="text-xs text-slate-500 mb-6">Ingresos generados por pasillo.</p>
-
-          <div className="h-64 w-full flex items-center justify-center">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={stats?.salesByCategory || []}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={90}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {stats?.salesByCategory?.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#1e293b',
-                    border: 'none',
-                    borderRadius: '8px',
-                    color: '#fff',
-                    fontSize: '12px',
-                  }}
-                  formatter={(value: any) => [formatCurrency(value), 'Ingresos']}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="flex flex-wrap justify-center gap-3 mt-4">
-            {stats?.salesByCategory?.map((cat, idx) => (
-              <div
-                key={idx}
-                className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400"
+      {/* Fila 4: Ventas por Categoría (Dona) */}
+      <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+        <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
+          <Package size={18} className="text-indigo-600" /> Ventas por Categoría
+        </h3>
+        <p className="text-xs text-slate-500 mb-6">Ingresos generados por pasillo.</p>
+        <div className="h-64 w-full flex items-center justify-center">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={stats?.salesByCategory || []}
+                cx="50%"
+                cy="50%"
+                innerRadius={60}
+                outerRadius={90}
+                paddingAngle={5}
+                dataKey="value"
               >
-                <span
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: COLORS[idx % COLORS.length] }}
-                ></span>
-                {cat.name}
-              </div>
-            ))}
-          </div>
+                {stats?.salesByCategory?.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: '#1e293b',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: '#fff',
+                  fontSize: '12px',
+                }}
+                formatter={(value: any) => [formatCurrency(value), 'Ingresos']}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="flex flex-wrap justify-center gap-3 mt-4">
+          {stats?.salesByCategory?.map((cat, idx) => (
+            <div
+              key={idx}
+              className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400"
+            >
+              <span
+                className="w-3 h-3 rounded-full"
+                style={{ backgroundColor: COLORS[idx % COLORS.length] }}
+              ></span>
+              {cat.name}
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Fila 5: Cajeros en Turno (Tabla) */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden">
-        <div className="p-5 border-b border-slate-100 dark:border-slate-700">
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white">Cajeros en Turno</h3>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-100 dark:divide-slate-700">
-            <thead className="bg-slate-50 dark:bg-slate-800/50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">
-                  Cajero
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase">
-                  N° Ventas
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase">
-                  Efectivo en Caja
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-100 dark:divide-slate-700">
-              {loading ? (
+      {/* ✅ Fila 5: Cajeros y Alertas en 2 columnas para ahorrar espacio */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Cajeros en Turno */}
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden">
+          <div className="p-5 border-b border-slate-100 dark:border-slate-700">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Cajeros en Turno</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-slate-100 dark:divide-slate-700">
+              <thead className="bg-slate-50 dark:bg-slate-800/50">
                 <tr>
-                  <td colSpan={3} className="px-6 py-8">
-                    <Loader />
-                  </td>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">
+                    Cajero
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase">
+                    N° Ventas
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase">
+                    Efectivo
+                  </th>
                 </tr>
-              ) : stats?.cashiersData && stats.cashiersData.length > 0 ? (
-                stats.cashiersData.map((c, idx) => (
-                  <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-slate-700/30">
-                    <td className="px-6 py-4 text-sm font-medium text-slate-900 dark:text-white">
-                      {c.name}
-                      <p className="text-xs text-slate-400 font-normal">
-                        Inicio:{' '}
-                        {new Date(c.startTime).toLocaleTimeString('es-ES', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </p>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-slate-900 dark:text-white text-right">
-                      {c.totalSales}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-green-600 text-right font-bold">
-                      {formatCurrency(c.cashInDrawer)}
+              </thead>
+              <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-100 dark:divide-slate-700">
+                {loading ? (
+                  <tr>
+                    <td colSpan={3} className="px-6 py-8">
+                      <Loader />
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={3} className="px-6 py-8 text-center text-slate-400">
-                    No hay cajeros activos.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Fila 6: Alertas de Inventario */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <AlertTriangle size={20} className="text-red-500" /> Alertas de Inventario
-          </h3>
-          <button
-            onClick={() => navigate('/inventory', { state: { stockFilter: 'low' } })}
-            className="text-sm text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1"
-          >
-            Ver inventario <ArrowRight size={14} />
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div className="p-4 bg-red-50 dark:bg-red-500/10 rounded-xl flex items-center gap-3">
-            <div className="p-2 bg-red-100 dark:bg-red-500/20 rounded-lg">
-              <AlertTriangle className="text-red-600" size={20} />
-            </div>
-            <div>
-              <p className="text-sm text-red-600 font-medium">Crítico (≤ 2)</p>
-              <p className="text-xl font-bold text-red-600">{stats?.criticalCount || 0}</p>
-            </div>
-          </div>
-          <div className="p-4 bg-amber-50 dark:bg-amber-500/10 rounded-xl flex items-center gap-3">
-            <div className="p-2 bg-amber-100 dark:bg-amber-500/20 rounded-lg">
-              <AlertTriangle className="text-amber-600" size={20} />
-            </div>
-            <div>
-              <p className="text-sm text-amber-600 font-medium">Bajo (≤ 10)</p>
-              <p className="text-xl font-bold text-amber-600">{stats?.lowCount || 0}</p>
-            </div>
+                ) : stats?.cashiersData && stats.cashiersData.length > 0 ? (
+                  stats.cashiersData.map((c, idx) => (
+                    <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-slate-700/30">
+                      <td className="px-6 py-4 text-sm font-medium text-slate-900 dark:text-white">
+                        {c.name}
+                        <p className="text-xs text-slate-400 font-normal">
+                          Inicio:{' '}
+                          {new Date(c.startTime).toLocaleTimeString('es-ES', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </p>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-slate-900 dark:text-white text-right">
+                        {c.totalSales}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-green-600 text-right font-bold">
+                        {formatCurrency(c.cashInDrawer)}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={3} className="px-6 py-8 text-center text-slate-400">
+                      No hay cajeros activos.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
 
-        <div className="space-y-2">
-          {loading ? (
-            <Loader />
-          ) : stats?.lowStockVariants && stats.lowStockVariants.length > 0 ? (
-            stats.lowStockVariants.slice(0, 5).map((v) => (
-              <div
-                key={v.id}
-                className="flex items-center justify-between p-3 border border-slate-100 dark:border-slate-700 rounded-lg"
-              >
-                <div className="flex items-center gap-3">
-                  <span
-                    className={`w-2 h-2 rounded-full ${v.severity === 'critical' ? 'bg-red-500' : 'bg-amber-500'}`}
-                  ></span>
-                  <div>
-                    <p className="text-sm font-medium text-slate-900 dark:text-white">{v.name}</p>
-                    <p className="text-xs text-slate-500">
-                      Talla: {v.size} / Color: {v.color}
-                    </p>
-                  </div>
-                </div>
-                <span
-                  className={`px-2 py-1 text-xs font-bold rounded-md ${v.severity === 'critical' ? 'bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400'}`}
-                >
-                  {v.stock} und.
-                </span>
+        {/* Alertas de Inventario */}
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <AlertTriangle size={20} className="text-red-500" /> Alertas de Inventario
+            </h3>
+            <button
+              onClick={() => navigate('/inventory', { state: { stockFilter: 'low' } })}
+              className="text-sm text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1"
+            >
+              Ver inventario <ArrowRight size={14} />
+            </button>
+          </div>
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="p-4 bg-red-50 dark:bg-red-500/10 rounded-xl flex items-center gap-3">
+              <div className="p-2 bg-red-100 dark:bg-red-500/20 rounded-lg">
+                <AlertTriangle className="text-red-600" size={20} />
               </div>
-            ))
-          ) : (
-            <p className="text-sm text-slate-400 text-center py-4">No hay alertas de inventario.</p>
-          )}
+              <div>
+                <p className="text-sm text-red-600 font-medium">Crítico (≤ 2)</p>
+                <p className="text-xl font-bold text-red-600">{stats?.criticalCount || 0}</p>
+              </div>
+            </div>
+            <div className="p-4 bg-amber-50 dark:bg-amber-500/10 rounded-xl flex items-center gap-3">
+              <div className="p-2 bg-amber-100 dark:bg-amber-500/20 rounded-lg">
+                <AlertTriangle className="text-amber-600" size={20} />
+              </div>
+              <div>
+                <p className="text-sm text-amber-600 font-medium">Bajo (≤ 10)</p>
+                <p className="text-xl font-bold text-amber-600">{stats?.lowCount || 0}</p>
+              </div>
+            </div>
+          </div>
+          <div className="space-y-2">
+            {loading ? (
+              <Loader />
+            ) : stats?.lowStockVariants && stats.lowStockVariants.length > 0 ? (
+              stats.lowStockVariants.slice(0, 4).map((v) => (
+                <div
+                  key={v.id}
+                  className="flex items-center justify-between p-3 border border-slate-100 dark:border-slate-700 rounded-lg"
+                >
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`w-2 h-2 rounded-full ${v.severity === 'critical' ? 'bg-red-500' : 'bg-amber-500'}`}
+                    ></span>
+                    <div>
+                      <p className="text-sm font-medium text-slate-900 dark:text-white">{v.name}</p>
+                      <p className="text-xs text-slate-500">
+                        Talla: {v.size} / Color: {v.color}
+                      </p>
+                    </div>
+                  </div>
+                  <span
+                    className={`px-2 py-1 text-xs font-bold rounded-md ${v.severity === 'critical' ? 'bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400'}`}
+                  >
+                    {v.stock} und.
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-slate-400 text-center py-4">
+                No hay alertas de inventario.
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -42,7 +42,14 @@ export default defineConfig({
     }),
   ],
   server: {
-    host: true, 
-    port: 5173, 
+    host: true, // Escucha en todas las redes
+    port: 5173,
+    // ✅ PROXY: Redirige /api a tu backend local
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+      },
+    },
   },
 });

@@ -100,58 +100,14 @@ async function main() {
     ],
   });
 
+  // ✅ SE OMITEN LOS CATÁLOGOS BASE PARA QUE SE CREEN SOLO DESDE EL CSV
+  /*
   console.log('🏷️ Creando catálogos base (Categorías, Marcas, Tallas, Colores)...');
-  await prisma.category.createMany({
-    data: [
-      { name: 'Sin Categoría', isActive: true },
-      { name: 'Ropa', isActive: true },
-      { name: 'Calzado', isActive: true },
-      { name: 'Accesorios', isActive: true },
-    ],
-    skipDuplicates: true,
-  });
-
-  await prisma.brand.createMany({
-    data: [
-      { name: 'Sin Marca', isActive: true },
-      { name: 'Nike', isActive: true },
-      { name: 'Adidas', isActive: true },
-      { name: 'Puma', isActive: true },
-      { name: 'Generica', isActive: true },
-    ],
-    skipDuplicates: true,
-  });
-
-  await prisma.size.createMany({
-    data: [
-      { name: 'Única' },
-      { name: 'XS' },
-      { name: 'S' },
-      { name: 'M' },
-      { name: 'L' },
-      { name: 'XL' },
-      { name: 'XXL' },
-      { name: '38' },
-      { name: '39' },
-      { name: '40' },
-      { name: '41' },
-      { name: '42' },
-    ],
-    skipDuplicates: true,
-  });
-
-  await prisma.color.createMany({
-    data: [
-      { name: 'Único', hex: '#808080' },
-      { name: 'Negro', hex: '#000000' },
-      { name: 'Blanco', hex: '#FFFFFF' },
-      { name: 'Rojo', hex: '#FF0000' },
-      { name: 'Azul', hex: '#0000FF' },
-      { name: 'Gris', hex: '#808080' },
-      { name: 'Beige', hex: '#F5F5DC' },
-    ],
-    skipDuplicates: true,
-  });
+  await prisma.category.createMany({ data: [...] });
+  await prisma.brand.createMany({ data: [...] });
+  await prisma.size.createMany({ data: [...] });
+  await prisma.color.createMany({ data: [...] });
+  */
 
   console.log('💰 Creando categorías de gastos para Tesorería...');
   await prisma.expenseCategory.createMany({
@@ -180,7 +136,7 @@ async function main() {
     ],
   });
 
-  console.log('✅ ¡Base de datos inicializada con entorno profesional!');
+  console.log('✅ ¡Base de datos inicializada y lista para importar el CSV!');
   console.log('👉 Credenciales de prueba: admin@modexastock.com / password123');
 }
 

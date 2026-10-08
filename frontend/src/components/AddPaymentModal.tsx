@@ -74,7 +74,8 @@ export default function AddPaymentModal({
           <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl">
             <p className="text-sm font-medium text-slate-900 dark:text-white">{client.name}</p>
             <div className="flex justify-between items-center mt-2">
-              <span className="text-xs text-slate-500">Deuda Actual:</span>
+              {/* ✅ CORREGIDO: dark:text-slate-400 */}
+              <span className="text-xs text-slate-500 dark:text-slate-400">Deuda Actual:</span>
               <span className="text-lg font-bold text-red-600 dark:text-red-400">
                 {formatCurrency(client.balance)}
               </span>
@@ -83,12 +84,12 @@ export default function AddPaymentModal({
 
           {/* Monto del Abono */}
           <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5">
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1.5">
               Monto del Abono
             </label>
             <div className="relative">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl font-bold">
-                $
+                ${' '}
               </span>
               <input
                 type="text"
@@ -103,7 +104,7 @@ export default function AddPaymentModal({
 
           {/* Método de Pago */}
           <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase mb-2">
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-2">
               Método de Pago
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -121,7 +122,7 @@ export default function AddPaymentModal({
                     className={`flex flex-col items-center justify-center gap-1 py-2 rounded-lg transition-colors ${
                       paymentMethod === method.id
                         ? 'bg-indigo-600 text-white'
-                        : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
+                        : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                     }`}
                   >
                     <Icon size={18} />
@@ -135,21 +136,29 @@ export default function AddPaymentModal({
           {/* Campos Condicionales */}
           {(paymentMethod === 'CARD' || paymentMethod === 'TRANSFER') && (
             <div className="space-y-2">
+              {/* ✅ CORREGIDO: text-slate-900 dark:text-white */}
               <input
                 type="text"
                 value={reference}
                 onChange={(e) => setReference(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                 placeholder="Referencia (Ej: Transferencia Bancaria)"
               />
+              {/* ✅ CORREGIDO: text-slate-900 dark:text-white */}
               <select
                 value={selectedBankAccount}
                 onChange={(e) => setSelectedBankAccount(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
               >
-                <option value="">Selecciona cuenta destino...</option>
+                <option value="" className="text-slate-900 dark:bg-slate-900 dark:text-white">
+                  Selecciona cuenta destino...
+                </option>
                 {bankAccounts.map((acc) => (
-                  <option key={acc.id} value={acc.id}>
+                  <option
+                    key={acc.id}
+                    value={acc.id}
+                    className="text-slate-900 dark:bg-slate-900 dark:text-white"
+                  >
                     {acc.name}
                   </option>
                 ))}
@@ -161,7 +170,7 @@ export default function AddPaymentModal({
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-green-600 hover:bg-green-700 disabled:bg-slate-400 text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2"
+            className="w-full py-3 bg-green-600 hover:bg-green-700 disabled:bg-slate-400 dark:disabled:bg-slate-700 text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2"
           >
             {loading ? <Loader2 className="animate-spin" size={20} /> : <Wallet size={20} />}
             Registrar Pago

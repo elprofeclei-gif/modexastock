@@ -9,6 +9,7 @@ import {
   settleUserBalance,
   updateMyProfile,
   changeMyPassword,
+  resetUserPassword,
 } from '../controllers/user.controller';
 import { authMiddleware, roleMiddleware } from '../middlewares/auth.middleware';
 
@@ -81,7 +82,7 @@ router.post('/:id/settle-balance', roleMiddleware(['ADMIN', 'MANAGER']), settleU
  *     security:
  *       - bearerAuth: []
  */
-router.get('/', roleMiddleware(['ADMIN']), getUsers);
+router.get('/', roleMiddleware(['ADMIN', 'MANAGER']), getUsers);
 router.post('/', roleMiddleware(['ADMIN']), createUser);
 
 /**
@@ -117,6 +118,32 @@ router.put('/:id', roleMiddleware(['ADMIN']), updateUser);
  *           type: string
  */
 router.put('/:id/toggle-status', roleMiddleware(['ADMIN']), toggleUserStatus);
+
+/**
+ * @swagger
+ * /users/{id}/reset-password:
+ *   patch:
+ *     summary: Restablecer contraseña de usuario
+ *    description: Permite a un administrador o gerente restablecer la contraseña de un usuario. Requiere rol ADMIN o MANAGER.
+ *    security:
+ *      - bearerAuth: []
+ *   parameters:
+ *    - in: path
+ *    name: id
+ *    required: true
+ *   schema:
+ *    type: string
+ *  requestBody:
+ *    required: true
+ *    content:
+ *     application/json:
+ *     schema:
+ *      type: object
+ *     properties:
+ *     newPassword:
+ *     type: string
+ */
+router.patch('/:id/reset-password', roleMiddleware(['ADMIN', 'MANAGER']), resetUserPassword);
 
 /**
  * @swagger

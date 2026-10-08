@@ -1,0 +1,801 @@
+nombre;sku;descripcion;categoria;marca;talla;color;costo;stock;precio;stock_minimo
+Camiseta Dri-Fit Essential;NK-CAM-NEG-S-01;Camiseta deportiva de tejido transpirable;Camisetas;Nike;S;Negro;135000;35;199900;3
+Camiseta Dri-Fit Essential;NK-CAM-BLA-S-01;Camiseta deportiva de tejido transpirable;Camisetas;Nike;S;Blanco;135000;36;199900;3
+Camiseta Dri-Fit Essential;NK-CAM-ROJ-S-01;Camiseta deportiva de tejido transpirable;Camisetas;Nike;S;Rojo;135000;34;199900;3
+Camiseta Dri-Fit Essential;NK-CAM-AZU-S-01;Camiseta deportiva de tejido transpirable;Camisetas;Nike;S;Azul;135000;34;199900;3
+Camiseta Dri-Fit Essential;NK-CAM-NEG-M-01;Camiseta deportiva de tejido transpirable;Camisetas;Nike;M;Negro;135000;35;199900;3
+Camiseta Dri-Fit Essential;NK-CAM-BLA-M-01;Camiseta deportiva de tejido transpirable;Camisetas;Nike;M;Blanco;135000;36;199900;3
+Camiseta Dri-Fit Essential;NK-CAM-ROJ-M-01;Camiseta deportiva de tejido transpirable;Camisetas;Nike;M;Rojo;135000;34;199900;3
+Camiseta Dri-Fit Essential;NK-CAM-AZU-M-01;Camiseta deportiva de tejido transpirable;Camisetas;Nike;M;Azul;135000;34;199900;3
+Camiseta Dri-Fit Essential;NK-CAM-NEG-L-01;Camiseta deportiva de tejido transpirable;Camisetas;Nike;L;Negro;135000;35;199900;3
+Camiseta Dri-Fit Essential;NK-CAM-BLA-L-01;Camiseta deportiva de tejido transpirable;Camisetas;Nike;L;Blanco;135000;36;199900;3
+Camiseta Dri-Fit Essential;NK-CAM-ROJ-L-01;Camiseta deportiva de tejido transpirable;Camisetas;Nike;L;Rojo;135000;34;199900;3
+Camiseta Dri-Fit Essential;NK-CAM-AZU-L-01;Camiseta deportiva de tejido transpirable;Camisetas;Nike;L;Azul;135000;34;199900;3
+Camiseta Dri-Fit Essential;NK-CAM-NEG-XL-01;Camiseta deportiva de tejido transpirable;Camisetas;Nike;XL;Negro;135000;38;199900;3
+Camiseta Dri-Fit Essential;NK-CAM-BLA-XL-01;Camiseta deportiva de tejido transpirable;Camisetas;Nike;XL;Blanco;135000;39;199900;3
+Camiseta Dri-Fit Essential;NK-CAM-ROJ-XL-01;Camiseta deportiva de tejido transpirable;Camisetas;Nike;XL;Rojo;135000;37;199900;3
+Camiseta Dri-Fit Essential;NK-CAM-AZU-XL-01;Camiseta deportiva de tejido transpirable;Camisetas;Nike;XL;Azul;135000;37;199900;3
+Camiseta Sportswear Club;NK-CAM-NEG-S-02;Camiseta casual de algodón;Camisetas;Nike;S;Negro;125000;42;189900;3
+Camiseta Sportswear Club;NK-CAM-BLA-S-02;Camiseta casual de algodón;Camisetas;Nike;S;Blanco;125000;43;189900;3
+Camiseta Sportswear Club;NK-CAM-ROJ-S-02;Camiseta casual de algodón;Camisetas;Nike;S;Rojo;125000;41;189900;3
+Camiseta Sportswear Club;NK-CAM-AZU-S-02;Camiseta casual de algodón;Camisetas;Nike;S;Azul;125000;41;189900;3
+Camiseta Sportswear Club;NK-CAM-NEG-M-02;Camiseta casual de algodón;Camisetas;Nike;M;Negro;125000;42;189900;3
+Camiseta Sportswear Club;NK-CAM-BLA-M-02;Camiseta casual de algodón;Camisetas;Nike;M;Blanco;125000;43;189900;3
+Camiseta Sportswear Club;NK-CAM-ROJ-M-02;Camiseta casual de algodón;Camisetas;Nike;M;Rojo;125000;41;189900;3
+Camiseta Sportswear Club;NK-CAM-AZU-M-02;Camiseta casual de algodón;Camisetas;Nike;M;Azul;125000;41;189900;3
+Camiseta Sportswear Club;NK-CAM-NEG-L-02;Camiseta casual de algodón;Camisetas;Nike;L;Negro;125000;42;189900;3
+Camiseta Sportswear Club;NK-CAM-BLA-L-02;Camiseta casual de algodón;Camisetas;Nike;L;Blanco;125000;43;189900;3
+Camiseta Sportswear Club;NK-CAM-ROJ-L-02;Camiseta casual de algodón;Camisetas;Nike;L;Rojo;125000;41;189900;3
+Camiseta Sportswear Club;NK-CAM-AZU-L-02;Camiseta casual de algodón;Camisetas;Nike;L;Azul;125000;41;189900;3
+Camiseta Sportswear Club;NK-CAM-NEG-XL-02;Camiseta casual de algodón;Camisetas;Nike;XL;Negro;125000;45;189900;3
+Camiseta Sportswear Club;NK-CAM-BLA-XL-02;Camiseta casual de algodón;Camisetas;Nike;XL;Blanco;125000;46;189900;3
+Camiseta Sportswear Club;NK-CAM-ROJ-XL-02;Camiseta casual de algodón;Camisetas;Nike;XL;Rojo;125000;44;189900;3
+Camiseta Sportswear Club;NK-CAM-AZU-XL-02;Camiseta casual de algodón;Camisetas;Nike;XL;Azul;125000;44;189900;3
+Camiseta Academy Pro;NK-CAM-NEG-S-03;Camiseta deportiva de secado rápido;Camisetas;Nike;S;Negro;145000;49;219900;3
+Camiseta Academy Pro;NK-CAM-BLA-S-03;Camiseta deportiva de secado rápido;Camisetas;Nike;S;Blanco;145000;50;219900;3
+Camiseta Academy Pro;NK-CAM-ROJ-S-03;Camiseta deportiva de secado rápido;Camisetas;Nike;S;Rojo;145000;48;219900;3
+Camiseta Academy Pro;NK-CAM-AZU-S-03;Camiseta deportiva de secado rápido;Camisetas;Nike;S;Azul;145000;48;219900;3
+Camiseta Academy Pro;NK-CAM-NEG-M-03;Camiseta deportiva de secado rápido;Camisetas;Nike;M;Negro;145000;49;219900;3
+Camiseta Academy Pro;NK-CAM-BLA-M-03;Camiseta deportiva de secado rápido;Camisetas;Nike;M;Blanco;145000;50;219900;3
+Camiseta Academy Pro;NK-CAM-ROJ-M-03;Camiseta deportiva de secado rápido;Camisetas;Nike;M;Rojo;145000;48;219900;3
+Camiseta Academy Pro;NK-CAM-AZU-M-03;Camiseta deportiva de secado rápido;Camisetas;Nike;M;Azul;145000;48;219900;3
+Camiseta Academy Pro;NK-CAM-NEG-L-03;Camiseta deportiva de secado rápido;Camisetas;Nike;L;Negro;145000;49;219900;3
+Camiseta Academy Pro;NK-CAM-BLA-L-03;Camiseta deportiva de secado rápido;Camisetas;Nike;L;Blanco;145000;50;219900;3
+Camiseta Academy Pro;NK-CAM-ROJ-L-03;Camiseta deportiva de secado rápido;Camisetas;Nike;L;Rojo;145000;48;219900;3
+Camiseta Academy Pro;NK-CAM-AZU-L-03;Camiseta deportiva de secado rápido;Camisetas;Nike;L;Azul;145000;48;219900;3
+Camiseta Academy Pro;NK-CAM-NEG-XL-03;Camiseta deportiva de secado rápido;Camisetas;Nike;XL;Negro;145000;52;219900;3
+Camiseta Academy Pro;NK-CAM-BLA-XL-03;Camiseta deportiva de secado rápido;Camisetas;Nike;XL;Blanco;145000;53;219900;3
+Camiseta Academy Pro;NK-CAM-ROJ-XL-03;Camiseta deportiva de secado rápido;Camisetas;Nike;XL;Rojo;145000;51;219900;3
+Camiseta Academy Pro;NK-CAM-AZU-XL-03;Camiseta deportiva de secado rápido;Camisetas;Nike;XL;Azul;145000;51;219900;3
+Camiseta Run Division;NK-CAM-NEG-S-04;Camiseta ligera para running;Camisetas;Nike;S;Negro;155000;56;239900;3
+Camiseta Run Division;NK-CAM-BLA-S-04;Camiseta ligera para running;Camisetas;Nike;S;Blanco;155000;57;239900;3
+Camiseta Run Division;NK-CAM-ROJ-S-04;Camiseta ligera para running;Camisetas;Nike;S;Rojo;155000;55;239900;3
+Camiseta Run Division;NK-CAM-AZU-S-04;Camiseta ligera para running;Camisetas;Nike;S;Azul;155000;55;239900;3
+Camiseta Run Division;NK-CAM-NEG-M-04;Camiseta ligera para running;Camisetas;Nike;M;Negro;155000;56;239900;3
+Camiseta Run Division;NK-CAM-BLA-M-04;Camiseta ligera para running;Camisetas;Nike;M;Blanco;155000;57;239900;3
+Camiseta Run Division;NK-CAM-ROJ-M-04;Camiseta ligera para running;Camisetas;Nike;M;Rojo;155000;55;239900;3
+Camiseta Run Division;NK-CAM-AZU-M-04;Camiseta ligera para running;Camisetas;Nike;M;Azul;155000;55;239900;3
+Camiseta Run Division;NK-CAM-NEG-L-04;Camiseta ligera para running;Camisetas;Nike;L;Negro;155000;56;239900;3
+Camiseta Run Division;NK-CAM-BLA-L-04;Camiseta ligera para running;Camisetas;Nike;L;Blanco;155000;57;239900;3
+Camiseta Run Division;NK-CAM-ROJ-L-04;Camiseta ligera para running;Camisetas;Nike;L;Rojo;155000;55;239900;3
+Camiseta Run Division;NK-CAM-AZU-L-04;Camiseta ligera para running;Camisetas;Nike;L;Azul;155000;55;239900;3
+Camiseta Run Division;NK-CAM-NEG-XL-04;Camiseta ligera para running;Camisetas;Nike;XL;Negro;155000;59;239900;3
+Camiseta Run Division;NK-CAM-BLA-XL-04;Camiseta ligera para running;Camisetas;Nike;XL;Blanco;155000;60;239900;3
+Camiseta Run Division;NK-CAM-ROJ-XL-04;Camiseta ligera para running;Camisetas;Nike;XL;Rojo;155000;58;239900;3
+Camiseta Run Division;NK-CAM-AZU-XL-04;Camiseta ligera para running;Camisetas;Nike;XL;Azul;155000;58;239900;3
+Camiseta Performance Basic;NK-CAM-NEG-S-05;Camiseta deportiva de alto rendimiento;Camisetas;Nike;S;Negro;150000;63;229900;3
+Camiseta Performance Basic;NK-CAM-BLA-S-05;Camiseta deportiva de alto rendimiento;Camisetas;Nike;S;Blanco;150000;64;229900;3
+Camiseta Performance Basic;NK-CAM-ROJ-S-05;Camiseta deportiva de alto rendimiento;Camisetas;Nike;S;Rojo;150000;62;229900;3
+Camiseta Performance Basic;NK-CAM-AZU-S-05;Camiseta deportiva de alto rendimiento;Camisetas;Nike;S;Azul;150000;62;229900;3
+Camiseta Performance Basic;NK-CAM-NEG-M-05;Camiseta deportiva de alto rendimiento;Camisetas;Nike;M;Negro;150000;63;229900;3
+Camiseta Performance Basic;NK-CAM-BLA-M-05;Camiseta deportiva de alto rendimiento;Camisetas;Nike;M;Blanco;150000;64;229900;3
+Camiseta Performance Basic;NK-CAM-ROJ-M-05;Camiseta deportiva de alto rendimiento;Camisetas;Nike;M;Rojo;150000;62;229900;3
+Camiseta Performance Basic;NK-CAM-AZU-M-05;Camiseta deportiva de alto rendimiento;Camisetas;Nike;M;Azul;150000;62;229900;3
+Camiseta Performance Basic;NK-CAM-NEG-L-05;Camiseta deportiva de alto rendimiento;Camisetas;Nike;L;Negro;150000;63;229900;3
+Camiseta Performance Basic;NK-CAM-BLA-L-05;Camiseta deportiva de alto rendimiento;Camisetas;Nike;L;Blanco;150000;64;229900;3
+Camiseta Performance Basic;NK-CAM-ROJ-L-05;Camiseta deportiva de alto rendimiento;Camisetas;Nike;L;Rojo;150000;62;229900;3
+Camiseta Performance Basic;NK-CAM-AZU-L-05;Camiseta deportiva de alto rendimiento;Camisetas;Nike;L;Azul;150000;62;229900;3
+Camiseta Performance Basic;NK-CAM-NEG-XL-05;Camiseta deportiva de alto rendimiento;Camisetas;Nike;XL;Negro;150000;66;229900;3
+Camiseta Performance Basic;NK-CAM-BLA-XL-05;Camiseta deportiva de alto rendimiento;Camisetas;Nike;XL;Blanco;150000;67;229900;3
+Camiseta Performance Basic;NK-CAM-ROJ-XL-05;Camiseta deportiva de alto rendimiento;Camisetas;Nike;XL;Rojo;150000;65;229900;3
+Camiseta Performance Basic;NK-CAM-AZU-XL-05;Camiseta deportiva de alto rendimiento;Camisetas;Nike;XL;Azul;150000;65;229900;3
+Camiseta Essentials Logo;AD-CAM-NEG-S-06;Camiseta clásica con logo frontal;Camisetas;Adidas;S;Negro;110000;70;169900;3
+Camiseta Essentials Logo;AD-CAM-BLA-S-06;Camiseta clásica con logo frontal;Camisetas;Adidas;S;Blanco;110000;71;169900;3
+Camiseta Essentials Logo;AD-CAM-ROJ-S-06;Camiseta clásica con logo frontal;Camisetas;Adidas;S;Rojo;110000;69;169900;3
+Camiseta Essentials Logo;AD-CAM-AZU-S-06;Camiseta clásica con logo frontal;Camisetas;Adidas;S;Azul;110000;69;169900;3
+Camiseta Essentials Logo;AD-CAM-NEG-M-06;Camiseta clásica con logo frontal;Camisetas;Adidas;M;Negro;110000;70;169900;3
+Camiseta Essentials Logo;AD-CAM-BLA-M-06;Camiseta clásica con logo frontal;Camisetas;Adidas;M;Blanco;110000;71;169900;3
+Camiseta Essentials Logo;AD-CAM-ROJ-M-06;Camiseta clásica con logo frontal;Camisetas;Adidas;M;Rojo;110000;69;169900;3
+Camiseta Essentials Logo;AD-CAM-AZU-M-06;Camiseta clásica con logo frontal;Camisetas;Adidas;M;Azul;110000;69;169900;3
+Camiseta Essentials Logo;AD-CAM-NEG-L-06;Camiseta clásica con logo frontal;Camisetas;Adidas;L;Negro;110000;70;169900;3
+Camiseta Essentials Logo;AD-CAM-BLA-L-06;Camiseta clásica con logo frontal;Camisetas;Adidas;L;Blanco;110000;71;169900;3
+Camiseta Essentials Logo;AD-CAM-ROJ-L-06;Camiseta clásica con logo frontal;Camisetas;Adidas;L;Rojo;110000;69;169900;3
+Camiseta Essentials Logo;AD-CAM-AZU-L-06;Camiseta clásica con logo frontal;Camisetas;Adidas;L;Azul;110000;69;169900;3
+Camiseta Essentials Logo;AD-CAM-NEG-XL-06;Camiseta clásica con logo frontal;Camisetas;Adidas;XL;Negro;110000;73;169900;3
+Camiseta Essentials Logo;AD-CAM-BLA-XL-06;Camiseta clásica con logo frontal;Camisetas;Adidas;XL;Blanco;110000;74;169900;3
+Camiseta Essentials Logo;AD-CAM-ROJ-XL-06;Camiseta clásica con logo frontal;Camisetas;Adidas;XL;Rojo;110000;72;169900;3
+Camiseta Essentials Logo;AD-CAM-AZU-XL-06;Camiseta clásica con logo frontal;Camisetas;Adidas;XL;Azul;110000;72;169900;3
+Camiseta Aeroready;AD-CAM-NEG-S-07;Camiseta deportiva con tecnología Aeroready;Camisetas;Adidas;S;Negro;120000;77;179900;3
+Camiseta Aeroready;AD-CAM-BLA-S-07;Camiseta deportiva con tecnología Aeroready;Camisetas;Adidas;S;Blanco;120000;78;179900;3
+Camiseta Aeroready;AD-CAM-ROJ-S-07;Camiseta deportiva con tecnología Aeroready;Camisetas;Adidas;S;Rojo;120000;76;179900;3
+Camiseta Aeroready;AD-CAM-AZU-S-07;Camiseta deportiva con tecnología Aeroready;Camisetas;Adidas;S;Azul;120000;76;179900;3
+Camiseta Aeroready;AD-CAM-NEG-M-07;Camiseta deportiva con tecnología Aeroready;Camisetas;Adidas;M;Negro;120000;77;179900;3
+Camiseta Aeroready;AD-CAM-BLA-M-07;Camiseta deportiva con tecnología Aeroready;Camisetas;Adidas;M;Blanco;120000;78;179900;3
+Camiseta Aeroready;AD-CAM-ROJ-M-07;Camiseta deportiva con tecnología Aeroready;Camisetas;Adidas;M;Rojo;120000;76;179900;3
+Camiseta Aeroready;AD-CAM-AZU-M-07;Camiseta deportiva con tecnología Aeroready;Camisetas;Adidas;M;Azul;120000;76;179900;3
+Camiseta Aeroready;AD-CAM-NEG-L-07;Camiseta deportiva con tecnología Aeroready;Camisetas;Adidas;L;Negro;120000;77;179900;3
+Camiseta Aeroready;AD-CAM-BLA-L-07;Camiseta deportiva con tecnología Aeroready;Camisetas;Adidas;L;Blanco;120000;78;179900;3
+Camiseta Aeroready;AD-CAM-ROJ-L-07;Camiseta deportiva con tecnología Aeroready;Camisetas;Adidas;L;Rojo;120000;76;179900;3
+Camiseta Aeroready;AD-CAM-AZU-L-07;Camiseta deportiva con tecnología Aeroready;Camisetas;Adidas;L;Azul;120000;76;179900;3
+Camiseta Aeroready;AD-CAM-NEG-XL-07;Camiseta deportiva con tecnología Aeroready;Camisetas;Adidas;XL;Negro;120000;80;179900;3
+Camiseta Aeroready;AD-CAM-BLA-XL-07;Camiseta deportiva con tecnología Aeroready;Camisetas;Adidas;XL;Blanco;120000;20;179900;3
+Camiseta Aeroready;AD-CAM-ROJ-XL-07;Camiseta deportiva con tecnología Aeroready;Camisetas;Adidas;XL;Rojo;120000;79;179900;3
+Camiseta Aeroready;AD-CAM-AZU-XL-07;Camiseta deportiva con tecnología Aeroready;Camisetas;Adidas;XL;Azul;120000;79;179900;3
+Camiseta Badge of Sport;AD-CAM-NEG-S-08;Camiseta deportiva de algodón;Camisetas;Adidas;S;Negro;115000;23;174900;3
+Camiseta Badge of Sport;AD-CAM-BLA-S-08;Camiseta deportiva de algodón;Camisetas;Adidas;S;Blanco;115000;24;174900;3
+Camiseta Badge of Sport;AD-CAM-ROJ-S-08;Camiseta deportiva de algodón;Camisetas;Adidas;S;Rojo;115000;22;174900;3
+Camiseta Badge of Sport;AD-CAM-AZU-S-08;Camiseta deportiva de algodón;Camisetas;Adidas;S;Azul;115000;22;174900;3
+Camiseta Badge of Sport;AD-CAM-NEG-M-08;Camiseta deportiva de algodón;Camisetas;Adidas;M;Negro;115000;23;174900;3
+Camiseta Badge of Sport;AD-CAM-BLA-M-08;Camiseta deportiva de algodón;Camisetas;Adidas;M;Blanco;115000;24;174900;3
+Camiseta Badge of Sport;AD-CAM-ROJ-M-08;Camiseta deportiva de algodón;Camisetas;Adidas;M;Rojo;115000;22;174900;3
+Camiseta Badge of Sport;AD-CAM-AZU-M-08;Camiseta deportiva de algodón;Camisetas;Adidas;M;Azul;115000;22;174900;3
+Camiseta Badge of Sport;AD-CAM-NEG-L-08;Camiseta deportiva de algodón;Camisetas;Adidas;L;Negro;115000;23;174900;3
+Camiseta Badge of Sport;AD-CAM-BLA-L-08;Camiseta deportiva de algodón;Camisetas;Adidas;L;Blanco;115000;24;174900;3
+Camiseta Badge of Sport;AD-CAM-ROJ-L-08;Camiseta deportiva de algodón;Camisetas;Adidas;L;Rojo;115000;22;174900;3
+Camiseta Badge of Sport;AD-CAM-AZU-L-08;Camiseta deportiva de algodón;Camisetas;Adidas;L;Azul;115000;22;174900;3
+Camiseta Badge of Sport;AD-CAM-NEG-XL-08;Camiseta deportiva de algodón;Camisetas;Adidas;XL;Negro;115000;26;174900;3
+Camiseta Badge of Sport;AD-CAM-BLA-XL-08;Camiseta deportiva de algodón;Camisetas;Adidas;XL;Blanco;115000;27;174900;3
+Camiseta Badge of Sport;AD-CAM-ROJ-XL-08;Camiseta deportiva de algodón;Camisetas;Adidas;XL;Rojo;115000;25;174900;3
+Camiseta Badge of Sport;AD-CAM-AZU-XL-08;Camiseta deportiva de algodón;Camisetas;Adidas;XL;Azul;115000;25;174900;3
+Camiseta Training Pro;AD-CAM-NEG-S-09;Camiseta para entrenamiento;Camisetas;Adidas;S;Negro;125000;30;189900;3
+Camiseta Training Pro;AD-CAM-BLA-S-09;Camiseta para entrenamiento;Camisetas;Adidas;S;Blanco;125000;31;189900;3
+Camiseta Training Pro;AD-CAM-ROJ-S-09;Camiseta para entrenamiento;Camisetas;Adidas;S;Rojo;125000;29;189900;3
+Camiseta Training Pro;AD-CAM-AZU-S-09;Camiseta para entrenamiento;Camisetas;Adidas;S;Azul;125000;29;189900;3
+Camiseta Training Pro;AD-CAM-NEG-M-09;Camiseta para entrenamiento;Camisetas;Adidas;M;Negro;125000;30;189900;3
+Camiseta Training Pro;AD-CAM-BLA-M-09;Camiseta para entrenamiento;Camisetas;Adidas;M;Blanco;125000;31;189900;3
+Camiseta Training Pro;AD-CAM-ROJ-M-09;Camiseta para entrenamiento;Camisetas;Adidas;M;Rojo;125000;29;189900;3
+Camiseta Training Pro;AD-CAM-AZU-M-09;Camiseta para entrenamiento;Camisetas;Adidas;M;Azul;125000;29;189900;3
+Camiseta Training Pro;AD-CAM-NEG-L-09;Camiseta para entrenamiento;Camisetas;Adidas;L;Negro;125000;30;189900;3
+Camiseta Training Pro;AD-CAM-BLA-L-09;Camiseta para entrenamiento;Camisetas;Adidas;L;Blanco;125000;31;189900;3
+Camiseta Training Pro;AD-CAM-ROJ-L-09;Camiseta para entrenamiento;Camisetas;Adidas;L;Rojo;125000;29;189900;3
+Camiseta Training Pro;AD-CAM-AZU-L-09;Camiseta para entrenamiento;Camisetas;Adidas;L;Azul;125000;29;189900;3
+Camiseta Training Pro;AD-CAM-NEG-XL-09;Camiseta para entrenamiento;Camisetas;Adidas;XL;Negro;125000;33;189900;3
+Camiseta Training Pro;AD-CAM-BLA-XL-09;Camiseta para entrenamiento;Camisetas;Adidas;XL;Blanco;125000;34;189900;3
+Camiseta Training Pro;AD-CAM-ROJ-XL-09;Camiseta para entrenamiento;Camisetas;Adidas;XL;Rojo;125000;32;189900;3
+Camiseta Training Pro;AD-CAM-AZU-XL-09;Camiseta para entrenamiento;Camisetas;Adidas;XL;Azul;125000;32;189900;3
+Camiseta Essentials Premium;AD-CAM-NEG-S-10;Camiseta premium de corte regular;Camisetas;Adidas;S;Negro;135000;37;199900;3
+Camiseta Essentials Premium;AD-CAM-BLA-S-10;Camiseta premium de corte regular;Camisetas;Adidas;S;Blanco;135000;38;199900;3
+Camiseta Essentials Premium;AD-CAM-ROJ-S-10;Camiseta premium de corte regular;Camisetas;Adidas;S;Rojo;135000;36;199900;3
+Camiseta Essentials Premium;AD-CAM-AZU-S-10;Camiseta premium de corte regular;Camisetas;Adidas;S;Azul;135000;36;199900;3
+Camiseta Essentials Premium;AD-CAM-NEG-M-10;Camiseta premium de corte regular;Camisetas;Adidas;M;Negro;135000;37;199900;3
+Camiseta Essentials Premium;AD-CAM-BLA-M-10;Camiseta premium de corte regular;Camisetas;Adidas;M;Blanco;135000;38;199900;3
+Camiseta Essentials Premium;AD-CAM-ROJ-M-10;Camiseta premium de corte regular;Camisetas;Adidas;M;Rojo;135000;36;199900;3
+Camiseta Essentials Premium;AD-CAM-AZU-M-10;Camiseta premium de corte regular;Camisetas;Adidas;M;Azul;135000;36;199900;3
+Camiseta Essentials Premium;AD-CAM-NEG-L-10;Camiseta premium de corte regular;Camisetas;Adidas;L;Negro;135000;37;199900;3
+Camiseta Essentials Premium;AD-CAM-BLA-L-10;Camiseta premium de corte regular;Camisetas;Adidas;L;Blanco;135000;38;199900;3
+Camiseta Essentials Premium;AD-CAM-ROJ-L-10;Camiseta premium de corte regular;Camisetas;Adidas;L;Rojo;135000;36;199900;3
+Camiseta Essentials Premium;AD-CAM-AZU-L-10;Camiseta premium de corte regular;Camisetas;Adidas;L;Azul;135000;36;199900;3
+Camiseta Essentials Premium;AD-CAM-NEG-XL-10;Camiseta premium de corte regular;Camisetas;Adidas;XL;Negro;135000;40;199900;3
+Camiseta Essentials Premium;AD-CAM-BLA-XL-10;Camiseta premium de corte regular;Camisetas;Adidas;XL;Blanco;135000;41;199900;3
+Camiseta Essentials Premium;AD-CAM-ROJ-XL-10;Camiseta premium de corte regular;Camisetas;Adidas;XL;Rojo;135000;39;199900;3
+Camiseta Essentials Premium;AD-CAM-AZU-XL-10;Camiseta premium de corte regular;Camisetas;Adidas;XL;Azul;135000;39;199900;3
+Camiseta Essentials Cat;PM-CAM-NEG-S-11;Camiseta casual con logo Puma;Camisetas;Puma;S;Negro;95000;44;149900;3
+Camiseta Essentials Cat;PM-CAM-BLA-S-11;Camiseta casual con logo Puma;Camisetas;Puma;S;Blanco;95000;45;149900;3
+Camiseta Essentials Cat;PM-CAM-ROJ-S-11;Camiseta casual con logo Puma;Camisetas;Puma;S;Rojo;95000;43;149900;3
+Camiseta Essentials Cat;PM-CAM-AZU-S-11;Camiseta casual con logo Puma;Camisetas;Puma;S;Azul;95000;43;149900;3
+Camiseta Essentials Cat;PM-CAM-NEG-M-11;Camiseta casual con logo Puma;Camisetas;Puma;M;Negro;95000;44;149900;3
+Camiseta Essentials Cat;PM-CAM-BLA-M-11;Camiseta casual con logo Puma;Camisetas;Puma;M;Blanco;95000;45;149900;3
+Camiseta Essentials Cat;PM-CAM-ROJ-M-11;Camiseta casual con logo Puma;Camisetas;Puma;M;Rojo;95000;43;149900;3
+Camiseta Essentials Cat;PM-CAM-AZU-M-11;Camiseta casual con logo Puma;Camisetas;Puma;M;Azul;95000;43;149900;3
+Camiseta Essentials Cat;PM-CAM-NEG-L-11;Camiseta casual con logo Puma;Camisetas;Puma;L;Negro;95000;44;149900;3
+Camiseta Essentials Cat;PM-CAM-BLA-L-11;Camiseta casual con logo Puma;Camisetas;Puma;L;Blanco;95000;45;149900;3
+Camiseta Essentials Cat;PM-CAM-ROJ-L-11;Camiseta casual con logo Puma;Camisetas;Puma;L;Rojo;95000;43;149900;3
+Camiseta Essentials Cat;PM-CAM-AZU-L-11;Camiseta casual con logo Puma;Camisetas;Puma;L;Azul;95000;43;149900;3
+Camiseta Essentials Cat;PM-CAM-NEG-XL-11;Camiseta casual con logo Puma;Camisetas;Puma;XL;Negro;95000;47;149900;3
+Camiseta Essentials Cat;PM-CAM-BLA-XL-11;Camiseta casual con logo Puma;Camisetas;Puma;XL;Blanco;95000;48;149900;3
+Camiseta Essentials Cat;PM-CAM-ROJ-XL-11;Camiseta casual con logo Puma;Camisetas;Puma;XL;Rojo;95000;46;149900;3
+Camiseta Essentials Cat;PM-CAM-AZU-XL-11;Camiseta casual con logo Puma;Camisetas;Puma;XL;Azul;95000;46;149900;3
+Camiseta Active;PM-CAM-NEG-S-12;Camiseta deportiva ligera;Camisetas;Puma;S;Negro;105000;51;159900;3
+Camiseta Active;PM-CAM-BLA-S-12;Camiseta deportiva ligera;Camisetas;Puma;S;Blanco;105000;52;159900;3
+Camiseta Active;PM-CAM-ROJ-S-12;Camiseta deportiva ligera;Camisetas;Puma;S;Rojo;105000;50;159900;3
+Camiseta Active;PM-CAM-AZU-S-12;Camiseta deportiva ligera;Camisetas;Puma;S;Azul;105000;50;159900;3
+Camiseta Active;PM-CAM-NEG-M-12;Camiseta deportiva ligera;Camisetas;Puma;M;Negro;105000;51;159900;3
+Camiseta Active;PM-CAM-BLA-M-12;Camiseta deportiva ligera;Camisetas;Puma;M;Blanco;105000;52;159900;3
+Camiseta Active;PM-CAM-ROJ-M-12;Camiseta deportiva ligera;Camisetas;Puma;M;Rojo;105000;50;159900;3
+Camiseta Active;PM-CAM-AZU-M-12;Camiseta deportiva ligera;Camisetas;Puma;M;Azul;105000;50;159900;3
+Camiseta Active;PM-CAM-NEG-L-12;Camiseta deportiva ligera;Camisetas;Puma;L;Negro;105000;51;159900;3
+Camiseta Active;PM-CAM-BLA-L-12;Camiseta deportiva ligera;Camisetas;Puma;L;Blanco;105000;52;159900;3
+Camiseta Active;PM-CAM-ROJ-L-12;Camiseta deportiva ligera;Camisetas;Puma;L;Rojo;105000;50;159900;3
+Camiseta Active;PM-CAM-AZU-L-12;Camiseta deportiva ligera;Camisetas;Puma;L;Azul;105000;50;159900;3
+Camiseta Active;PM-CAM-NEG-XL-12;Camiseta deportiva ligera;Camisetas;Puma;XL;Negro;105000;54;159900;3
+Camiseta Active;PM-CAM-BLA-XL-12;Camiseta deportiva ligera;Camisetas;Puma;XL;Blanco;105000;55;159900;3
+Camiseta Active;PM-CAM-ROJ-XL-12;Camiseta deportiva ligera;Camisetas;Puma;XL;Rojo;105000;53;159900;3
+Camiseta Active;PM-CAM-AZU-XL-12;Camiseta deportiva ligera;Camisetas;Puma;XL;Azul;105000;53;159900;3
+Camiseta Teamfinal;PM-CAM-NEG-S-13;Camiseta de entrenamiento deportivo;Camisetas;Puma;S;Negro;115000;58;179900;3
+Camiseta Teamfinal;PM-CAM-BLA-S-13;Camiseta de entrenamiento deportivo;Camisetas;Puma;S;Blanco;115000;59;179900;3
+Camiseta Teamfinal;PM-CAM-ROJ-S-13;Camiseta de entrenamiento deportivo;Camisetas;Puma;S;Rojo;115000;57;179900;3
+Camiseta Teamfinal;PM-CAM-AZU-S-13;Camiseta de entrenamiento deportivo;Camisetas;Puma;S;Azul;115000;57;179900;3
+Camiseta Teamfinal;PM-CAM-NEG-M-13;Camiseta de entrenamiento deportivo;Camisetas;Puma;M;Negro;115000;58;179900;3
+Camiseta Teamfinal;PM-CAM-BLA-M-13;Camiseta de entrenamiento deportivo;Camisetas;Puma;M;Blanco;115000;59;179900;3
+Camiseta Teamfinal;PM-CAM-ROJ-M-13;Camiseta de entrenamiento deportivo;Camisetas;Puma;M;Rojo;115000;57;179900;3
+Camiseta Teamfinal;PM-CAM-AZU-M-13;Camiseta de entrenamiento deportivo;Camisetas;Puma;M;Azul;115000;57;179900;3
+Camiseta Teamfinal;PM-CAM-NEG-L-13;Camiseta de entrenamiento deportivo;Camisetas;Puma;L;Negro;115000;58;179900;3
+Camiseta Teamfinal;PM-CAM-BLA-L-13;Camiseta de entrenamiento deportivo;Camisetas;Puma;L;Blanco;115000;59;179900;3
+Camiseta Teamfinal;PM-CAM-ROJ-L-13;Camiseta de entrenamiento deportivo;Camisetas;Puma;L;Rojo;115000;57;179900;3
+Camiseta Teamfinal;PM-CAM-AZU-L-13;Camiseta de entrenamiento deportivo;Camisetas;Puma;L;Azul;115000;57;179900;3
+Camiseta Teamfinal;PM-CAM-NEG-XL-13;Camiseta de entrenamiento deportivo;Camisetas;Puma;XL;Negro;115000;61;179900;3
+Camiseta Teamfinal;PM-CAM-BLA-XL-13;Camiseta de entrenamiento deportivo;Camisetas;Puma;XL;Blanco;115000;62;179900;3
+Camiseta Teamfinal;PM-CAM-ROJ-XL-13;Camiseta de entrenamiento deportivo;Camisetas;Puma;XL;Rojo;115000;60;179900;3
+Camiseta Teamfinal;PM-CAM-AZU-XL-13;Camiseta de entrenamiento deportivo;Camisetas;Puma;XL;Azul;115000;60;179900;3
+Camiseta Modern Basics;PM-CAM-NEG-S-14;Camiseta básica de algodón;Camisetas;Puma;S;Negro;100000;65;154900;3
+Camiseta Modern Basics;PM-CAM-BLA-S-14;Camiseta básica de algodón;Camisetas;Puma;S;Blanco;100000;66;154900;3
+Camiseta Modern Basics;PM-CAM-ROJ-S-14;Camiseta básica de algodón;Camisetas;Puma;S;Rojo;100000;64;154900;3
+Camiseta Modern Basics;PM-CAM-AZU-S-14;Camiseta básica de algodón;Camisetas;Puma;S;Azul;100000;64;154900;3
+Camiseta Modern Basics;PM-CAM-NEG-M-14;Camiseta básica de algodón;Camisetas;Puma;M;Negro;100000;65;154900;3
+Camiseta Modern Basics;PM-CAM-BLA-M-14;Camiseta básica de algodón;Camisetas;Puma;M;Blanco;100000;66;154900;3
+Camiseta Modern Basics;PM-CAM-ROJ-M-14;Camiseta básica de algodón;Camisetas;Puma;M;Rojo;100000;64;154900;3
+Camiseta Modern Basics;PM-CAM-AZU-M-14;Camiseta básica de algodón;Camisetas;Puma;M;Azul;100000;64;154900;3
+Camiseta Modern Basics;PM-CAM-NEG-L-14;Camiseta básica de algodón;Camisetas;Puma;L;Negro;100000;65;154900;3
+Camiseta Modern Basics;PM-CAM-BLA-L-14;Camiseta básica de algodón;Camisetas;Puma;L;Blanco;100000;66;154900;3
+Camiseta Modern Basics;PM-CAM-ROJ-L-14;Camiseta básica de algodón;Camisetas;Puma;L;Rojo;100000;64;154900;3
+Camiseta Modern Basics;PM-CAM-AZU-L-14;Camiseta básica de algodón;Camisetas;Puma;L;Azul;100000;64;154900;3
+Camiseta Modern Basics;PM-CAM-NEG-XL-14;Camiseta básica de algodón;Camisetas;Puma;XL;Negro;100000;68;154900;3
+Camiseta Modern Basics;PM-CAM-BLA-XL-14;Camiseta básica de algodón;Camisetas;Puma;XL;Blanco;100000;69;154900;3
+Camiseta Modern Basics;PM-CAM-ROJ-XL-14;Camiseta básica de algodón;Camisetas;Puma;XL;Rojo;100000;67;154900;3
+Camiseta Modern Basics;PM-CAM-AZU-XL-14;Camiseta básica de algodón;Camisetas;Puma;XL;Azul;100000;67;154900;3
+Camiseta Graphic Sport;PM-CAM-NEG-S-15;Camiseta deportiva estampada;Camisetas;Puma;S;Negro;110000;72;169900;3
+Camiseta Graphic Sport;PM-CAM-BLA-S-15;Camiseta deportiva estampada;Camisetas;Puma;S;Blanco;110000;73;169900;3
+Camiseta Graphic Sport;PM-CAM-ROJ-S-15;Camiseta deportiva estampada;Camisetas;Puma;S;Rojo;110000;71;169900;3
+Camiseta Graphic Sport;PM-CAM-AZU-S-15;Camiseta deportiva estampada;Camisetas;Puma;S;Azul;110000;71;169900;3
+Camiseta Graphic Sport;PM-CAM-NEG-M-15;Camiseta deportiva estampada;Camisetas;Puma;M;Negro;110000;72;169900;3
+Camiseta Graphic Sport;PM-CAM-BLA-M-15;Camiseta deportiva estampada;Camisetas;Puma;M;Blanco;110000;73;169900;3
+Camiseta Graphic Sport;PM-CAM-ROJ-M-15;Camiseta deportiva estampada;Camisetas;Puma;M;Rojo;110000;71;169900;3
+Camiseta Graphic Sport;PM-CAM-AZU-M-15;Camiseta deportiva estampada;Camisetas;Puma;M;Azul;110000;71;169900;3
+Camiseta Graphic Sport;PM-CAM-NEG-L-15;Camiseta deportiva estampada;Camisetas;Puma;L;Negro;110000;72;169900;3
+Camiseta Graphic Sport;PM-CAM-BLA-L-15;Camiseta deportiva estampada;Camisetas;Puma;L;Blanco;110000;73;169900;3
+Camiseta Graphic Sport;PM-CAM-ROJ-L-15;Camiseta deportiva estampada;Camisetas;Puma;L;Rojo;110000;71;169900;3
+Camiseta Graphic Sport;PM-CAM-AZU-L-15;Camiseta deportiva estampada;Camisetas;Puma;L;Azul;110000;71;169900;3
+Camiseta Graphic Sport;PM-CAM-NEG-XL-15;Camiseta deportiva estampada;Camisetas;Puma;XL;Negro;110000;75;169900;3
+Camiseta Graphic Sport;PM-CAM-BLA-XL-15;Camiseta deportiva estampada;Camisetas;Puma;XL;Blanco;110000;76;169900;3
+Camiseta Graphic Sport;PM-CAM-ROJ-XL-15;Camiseta deportiva estampada;Camisetas;Puma;XL;Rojo;110000;74;169900;3
+Camiseta Graphic Sport;PM-CAM-AZU-XL-15;Camiseta deportiva estampada;Camisetas;Puma;XL;Azul;110000;74;169900;3
+Camiseta Original Housemark;LV-CAM-NEG-S-16;Camiseta clásica de algodón;Camisetas;Levi's;S;Negro;105000;79;159900;3
+Camiseta Original Housemark;LV-CAM-BLA-S-16;Camiseta clásica de algodón;Camisetas;Levi's;S;Blanco;105000;80;159900;3
+Camiseta Original Housemark;LV-CAM-ROJ-S-16;Camiseta clásica de algodón;Camisetas;Levi's;S;Rojo;105000;78;159900;3
+Camiseta Original Housemark;LV-CAM-AZU-S-16;Camiseta clásica de algodón;Camisetas;Levi's;S;Azul;105000;78;159900;3
+Camiseta Original Housemark;LV-CAM-NEG-M-16;Camiseta clásica de algodón;Camisetas;Levi's;M;Negro;105000;79;159900;3
+Camiseta Original Housemark;LV-CAM-BLA-M-16;Camiseta clásica de algodón;Camisetas;Levi's;M;Blanco;105000;80;159900;3
+Camiseta Original Housemark;LV-CAM-ROJ-M-16;Camiseta clásica de algodón;Camisetas;Levi's;M;Rojo;105000;78;159900;3
+Camiseta Original Housemark;LV-CAM-AZU-M-16;Camiseta clásica de algodón;Camisetas;Levi's;M;Azul;105000;78;159900;3
+Camiseta Original Housemark;LV-CAM-NEG-L-16;Camiseta clásica de algodón;Camisetas;Levi's;L;Negro;105000;79;159900;3
+Camiseta Original Housemark;LV-CAM-BLA-L-16;Camiseta clásica de algodón;Camisetas;Levi's;L;Blanco;105000;80;159900;3
+Camiseta Original Housemark;LV-CAM-ROJ-L-16;Camiseta clásica de algodón;Camisetas;Levi's;L;Rojo;105000;78;159900;3
+Camiseta Original Housemark;LV-CAM-AZU-L-16;Camiseta clásica de algodón;Camisetas;Levi's;L;Azul;105000;78;159900;3
+Camiseta Original Housemark;LV-CAM-NEG-XL-16;Camiseta clásica de algodón;Camisetas;Levi's;XL;Negro;105000;21;159900;3
+Camiseta Original Housemark;LV-CAM-BLA-XL-16;Camiseta clásica de algodón;Camisetas;Levi's;XL;Blanco;105000;22;159900;3
+Camiseta Original Housemark;LV-CAM-ROJ-XL-16;Camiseta clásica de algodón;Camisetas;Levi's;XL;Rojo;105000;20;159900;3
+Camiseta Original Housemark;LV-CAM-AZU-XL-16;Camiseta clásica de algodón;Camisetas;Levi's;XL;Azul;105000;20;159900;3
+Camiseta Perfect Tee;LV-CAM-NEG-S-17;Camiseta de corte clásico;Camisetas;Levi's;S;Negro;110000;25;169900;3
+Camiseta Perfect Tee;LV-CAM-BLA-S-17;Camiseta de corte clásico;Camisetas;Levi's;S;Blanco;110000;26;169900;3
+Camiseta Perfect Tee;LV-CAM-ROJ-S-17;Camiseta de corte clásico;Camisetas;Levi's;S;Rojo;110000;24;169900;3
+Camiseta Perfect Tee;LV-CAM-AZU-S-17;Camiseta de corte clásico;Camisetas;Levi's;S;Azul;110000;24;169900;3
+Camiseta Perfect Tee;LV-CAM-NEG-M-17;Camiseta de corte clásico;Camisetas;Levi's;M;Negro;110000;25;169900;3
+Camiseta Perfect Tee;LV-CAM-BLA-M-17;Camiseta de corte clásico;Camisetas;Levi's;M;Blanco;110000;26;169900;3
+Camiseta Perfect Tee;LV-CAM-ROJ-M-17;Camiseta de corte clásico;Camisetas;Levi's;M;Rojo;110000;24;169900;3
+Camiseta Perfect Tee;LV-CAM-AZU-M-17;Camiseta de corte clásico;Camisetas;Levi's;M;Azul;110000;24;169900;3
+Camiseta Perfect Tee;LV-CAM-NEG-L-17;Camiseta de corte clásico;Camisetas;Levi's;L;Negro;110000;25;169900;3
+Camiseta Perfect Tee;LV-CAM-BLA-L-17;Camiseta de corte clásico;Camisetas;Levi's;L;Blanco;110000;26;169900;3
+Camiseta Perfect Tee;LV-CAM-ROJ-L-17;Camiseta de corte clásico;Camisetas;Levi's;L;Rojo;110000;24;169900;3
+Camiseta Perfect Tee;LV-CAM-AZU-L-17;Camiseta de corte clásico;Camisetas;Levi's;L;Azul;110000;24;169900;3
+Camiseta Perfect Tee;LV-CAM-NEG-XL-17;Camiseta de corte clásico;Camisetas;Levi's;XL;Negro;110000;28;169900;3
+Camiseta Perfect Tee;LV-CAM-BLA-XL-17;Camiseta de corte clásico;Camisetas;Levi's;XL;Blanco;110000;29;169900;3
+Camiseta Perfect Tee;LV-CAM-ROJ-XL-17;Camiseta de corte clásico;Camisetas;Levi's;XL;Rojo;110000;27;169900;3
+Camiseta Perfect Tee;LV-CAM-AZU-XL-17;Camiseta de corte clásico;Camisetas;Levi's;XL;Azul;110000;27;169900;3
+Camiseta Relaxed Logo;LV-CAM-NEG-S-18;Camiseta casual de corte relajado;Camisetas;Levi's;S;Negro;115000;32;179900;3
+Camiseta Relaxed Logo;LV-CAM-BLA-S-18;Camiseta casual de corte relajado;Camisetas;Levi's;S;Blanco;115000;33;179900;3
+Camiseta Relaxed Logo;LV-CAM-ROJ-S-18;Camiseta casual de corte relajado;Camisetas;Levi's;S;Rojo;115000;31;179900;3
+Camiseta Relaxed Logo;LV-CAM-AZU-S-18;Camiseta casual de corte relajado;Camisetas;Levi's;S;Azul;115000;31;179900;3
+Camiseta Relaxed Logo;LV-CAM-NEG-M-18;Camiseta casual de corte relajado;Camisetas;Levi's;M;Negro;115000;32;179900;3
+Camiseta Relaxed Logo;LV-CAM-BLA-M-18;Camiseta casual de corte relajado;Camisetas;Levi's;M;Blanco;115000;33;179900;3
+Camiseta Relaxed Logo;LV-CAM-ROJ-M-18;Camiseta casual de corte relajado;Camisetas;Levi's;M;Rojo;115000;31;179900;3
+Camiseta Relaxed Logo;LV-CAM-AZU-M-18;Camiseta casual de corte relajado;Camisetas;Levi's;M;Azul;115000;31;179900;3
+Camiseta Relaxed Logo;LV-CAM-NEG-L-18;Camiseta casual de corte relajado;Camisetas;Levi's;L;Negro;115000;32;179900;3
+Camiseta Relaxed Logo;LV-CAM-BLA-L-18;Camiseta casual de corte relajado;Camisetas;Levi's;L;Blanco;115000;33;179900;3
+Camiseta Relaxed Logo;LV-CAM-ROJ-L-18;Camiseta casual de corte relajado;Camisetas;Levi's;L;Rojo;115000;31;179900;3
+Camiseta Relaxed Logo;LV-CAM-AZU-L-18;Camiseta casual de corte relajado;Camisetas;Levi's;L;Azul;115000;31;179900;3
+Camiseta Relaxed Logo;LV-CAM-NEG-XL-18;Camiseta casual de corte relajado;Camisetas;Levi's;XL;Negro;115000;35;179900;3
+Camiseta Relaxed Logo;LV-CAM-BLA-XL-18;Camiseta casual de corte relajado;Camisetas;Levi's;XL;Blanco;115000;36;179900;3
+Camiseta Relaxed Logo;LV-CAM-ROJ-XL-18;Camiseta casual de corte relajado;Camisetas;Levi's;XL;Rojo;115000;34;179900;3
+Camiseta Relaxed Logo;LV-CAM-AZU-XL-18;Camiseta casual de corte relajado;Camisetas;Levi's;XL;Azul;115000;34;179900;3
+Camiseta Graphic Standard;LV-CAM-NEG-S-19;Camiseta con estampado frontal;Camisetas;Levi's;S;Negro;120000;39;189900;3
+Camiseta Graphic Standard;LV-CAM-BLA-S-19;Camiseta con estampado frontal;Camisetas;Levi's;S;Blanco;120000;40;189900;3
+Camiseta Graphic Standard;LV-CAM-ROJ-S-19;Camiseta con estampado frontal;Camisetas;Levi's;S;Rojo;120000;38;189900;3
+Camiseta Graphic Standard;LV-CAM-AZU-S-19;Camiseta con estampado frontal;Camisetas;Levi's;S;Azul;120000;38;189900;3
+Camiseta Graphic Standard;LV-CAM-NEG-M-19;Camiseta con estampado frontal;Camisetas;Levi's;M;Negro;120000;39;189900;3
+Camiseta Graphic Standard;LV-CAM-BLA-M-19;Camiseta con estampado frontal;Camisetas;Levi's;M;Blanco;120000;40;189900;3
+Camiseta Graphic Standard;LV-CAM-ROJ-M-19;Camiseta con estampado frontal;Camisetas;Levi's;M;Rojo;120000;38;189900;3
+Camiseta Graphic Standard;LV-CAM-AZU-M-19;Camiseta con estampado frontal;Camisetas;Levi's;M;Azul;120000;38;189900;3
+Camiseta Graphic Standard;LV-CAM-NEG-L-19;Camiseta con estampado frontal;Camisetas;Levi's;L;Negro;120000;39;189900;3
+Camiseta Graphic Standard;LV-CAM-BLA-L-19;Camiseta con estampado frontal;Camisetas;Levi's;L;Blanco;120000;40;189900;3
+Camiseta Graphic Standard;LV-CAM-ROJ-L-19;Camiseta con estampado frontal;Camisetas;Levi's;L;Rojo;120000;38;189900;3
+Camiseta Graphic Standard;LV-CAM-AZU-L-19;Camiseta con estampado frontal;Camisetas;Levi's;L;Azul;120000;38;189900;3
+Camiseta Graphic Standard;LV-CAM-NEG-XL-19;Camiseta con estampado frontal;Camisetas;Levi's;XL;Negro;120000;42;189900;3
+Camiseta Graphic Standard;LV-CAM-BLA-XL-19;Camiseta con estampado frontal;Camisetas;Levi's;XL;Blanco;120000;43;189900;3
+Camiseta Graphic Standard;LV-CAM-ROJ-XL-19;Camiseta con estampado frontal;Camisetas;Levi's;XL;Rojo;120000;41;189900;3
+Camiseta Graphic Standard;LV-CAM-AZU-XL-19;Camiseta con estampado frontal;Camisetas;Levi's;XL;Azul;120000;41;189900;3
+Camiseta Housemark Premium;LV-CAM-NEG-S-20;Camiseta premium de algodón;Camisetas;Levi's;S;Negro;125000;46;199900;3
+Camiseta Housemark Premium;LV-CAM-BLA-S-20;Camiseta premium de algodón;Camisetas;Levi's;S;Blanco;125000;47;199900;3
+Camiseta Housemark Premium;LV-CAM-ROJ-S-20;Camiseta premium de algodón;Camisetas;Levi's;S;Rojo;125000;45;199900;3
+Camiseta Housemark Premium;LV-CAM-AZU-S-20;Camiseta premium de algodón;Camisetas;Levi's;S;Azul;125000;45;199900;3
+Camiseta Housemark Premium;LV-CAM-NEG-M-20;Camiseta premium de algodón;Camisetas;Levi's;M;Negro;125000;46;199900;3
+Camiseta Housemark Premium;LV-CAM-BLA-M-20;Camiseta premium de algodón;Camisetas;Levi's;M;Blanco;125000;47;199900;3
+Camiseta Housemark Premium;LV-CAM-ROJ-M-20;Camiseta premium de algodón;Camisetas;Levi's;M;Rojo;125000;45;199900;3
+Camiseta Housemark Premium;LV-CAM-AZU-M-20;Camiseta premium de algodón;Camisetas;Levi's;M;Azul;125000;45;199900;3
+Camiseta Housemark Premium;LV-CAM-NEG-L-20;Camiseta premium de algodón;Camisetas;Levi's;L;Negro;125000;46;199900;3
+Camiseta Housemark Premium;LV-CAM-BLA-L-20;Camiseta premium de algodón;Camisetas;Levi's;L;Blanco;125000;47;199900;3
+Camiseta Housemark Premium;LV-CAM-ROJ-L-20;Camiseta premium de algodón;Camisetas;Levi's;L;Rojo;125000;45;199900;3
+Camiseta Housemark Premium;LV-CAM-AZU-L-20;Camiseta premium de algodón;Camisetas;Levi's;L;Azul;125000;45;199900;3
+Camiseta Housemark Premium;LV-CAM-NEG-XL-20;Camiseta premium de algodón;Camisetas;Levi's;XL;Negro;125000;49;199900;3
+Camiseta Housemark Premium;LV-CAM-BLA-XL-20;Camiseta premium de algodón;Camisetas;Levi's;XL;Blanco;125000;50;199900;3
+Camiseta Housemark Premium;LV-CAM-ROJ-XL-20;Camiseta premium de algodón;Camisetas;Levi's;XL;Rojo;125000;48;199900;3
+Camiseta Housemark Premium;LV-CAM-AZU-XL-20;Camiseta premium de algodón;Camisetas;Levi's;XL;Azul;125000;48;199900;3
+Pantalón Dri-Fit Academy;NK-PAN-NEG-S-21;Pantalón deportivo de entrenamiento;Pantalones;Nike;S;Negro;190000;53;289900;3
+Pantalón Dri-Fit Academy;NK-PAN-BLA-S-21;Pantalón deportivo de entrenamiento;Pantalones;Nike;S;Blanco;190000;54;289900;3
+Pantalón Dri-Fit Academy;NK-PAN-ROJ-S-21;Pantalón deportivo de entrenamiento;Pantalones;Nike;S;Rojo;190000;52;289900;3
+Pantalón Dri-Fit Academy;NK-PAN-AZU-S-21;Pantalón deportivo de entrenamiento;Pantalones;Nike;S;Azul;190000;52;289900;3
+Pantalón Dri-Fit Academy;NK-PAN-NEG-M-21;Pantalón deportivo de entrenamiento;Pantalones;Nike;M;Negro;190000;53;289900;3
+Pantalón Dri-Fit Academy;NK-PAN-BLA-M-21;Pantalón deportivo de entrenamiento;Pantalones;Nike;M;Blanco;190000;54;289900;3
+Pantalón Dri-Fit Academy;NK-PAN-ROJ-M-21;Pantalón deportivo de entrenamiento;Pantalones;Nike;M;Rojo;190000;52;289900;3
+Pantalón Dri-Fit Academy;NK-PAN-AZU-M-21;Pantalón deportivo de entrenamiento;Pantalones;Nike;M;Azul;190000;52;289900;3
+Pantalón Dri-Fit Academy;NK-PAN-NEG-L-21;Pantalón deportivo de entrenamiento;Pantalones;Nike;L;Negro;190000;53;289900;3
+Pantalón Dri-Fit Academy;NK-PAN-BLA-L-21;Pantalón deportivo de entrenamiento;Pantalones;Nike;L;Blanco;190000;54;289900;3
+Pantalón Dri-Fit Academy;NK-PAN-ROJ-L-21;Pantalón deportivo de entrenamiento;Pantalones;Nike;L;Rojo;190000;52;289900;3
+Pantalón Dri-Fit Academy;NK-PAN-AZU-L-21;Pantalón deportivo de entrenamiento;Pantalones;Nike;L;Azul;190000;52;289900;3
+Pantalón Dri-Fit Academy;NK-PAN-NEG-XL-21;Pantalón deportivo de entrenamiento;Pantalones;Nike;XL;Negro;190000;56;289900;3
+Pantalón Dri-Fit Academy;NK-PAN-BLA-XL-21;Pantalón deportivo de entrenamiento;Pantalones;Nike;XL;Blanco;190000;57;289900;3
+Pantalón Dri-Fit Academy;NK-PAN-ROJ-XL-21;Pantalón deportivo de entrenamiento;Pantalones;Nike;XL;Rojo;190000;55;289900;3
+Pantalón Dri-Fit Academy;NK-PAN-AZU-XL-21;Pantalón deportivo de entrenamiento;Pantalones;Nike;XL;Azul;190000;55;289900;3
+Pantalón Sportswear Club;NK-PAN-NEG-S-22;Pantalón casual de algodón;Pantalones;Nike;S;Negro;180000;60;269900;3
+Pantalón Sportswear Club;NK-PAN-BLA-S-22;Pantalón casual de algodón;Pantalones;Nike;S;Blanco;180000;61;269900;3
+Pantalón Sportswear Club;NK-PAN-ROJ-S-22;Pantalón casual de algodón;Pantalones;Nike;S;Rojo;180000;59;269900;3
+Pantalón Sportswear Club;NK-PAN-AZU-S-22;Pantalón casual de algodón;Pantalones;Nike;S;Azul;180000;59;269900;3
+Pantalón Sportswear Club;NK-PAN-NEG-M-22;Pantalón casual de algodón;Pantalones;Nike;M;Negro;180000;60;269900;3
+Pantalón Sportswear Club;NK-PAN-BLA-M-22;Pantalón casual de algodón;Pantalones;Nike;M;Blanco;180000;61;269900;3
+Pantalón Sportswear Club;NK-PAN-ROJ-M-22;Pantalón casual de algodón;Pantalones;Nike;M;Rojo;180000;59;269900;3
+Pantalón Sportswear Club;NK-PAN-AZU-M-22;Pantalón casual de algodón;Pantalones;Nike;M;Azul;180000;59;269900;3
+Pantalón Sportswear Club;NK-PAN-NEG-L-22;Pantalón casual de algodón;Pantalones;Nike;L;Negro;180000;60;269900;3
+Pantalón Sportswear Club;NK-PAN-BLA-L-22;Pantalón casual de algodón;Pantalones;Nike;L;Blanco;180000;61;269900;3
+Pantalón Sportswear Club;NK-PAN-ROJ-L-22;Pantalón casual de algodón;Pantalones;Nike;L;Rojo;180000;59;269900;3
+Pantalón Sportswear Club;NK-PAN-AZU-L-22;Pantalón casual de algodón;Pantalones;Nike;L;Azul;180000;59;269900;3
+Pantalón Sportswear Club;NK-PAN-NEG-XL-22;Pantalón casual de algodón;Pantalones;Nike;XL;Negro;180000;63;269900;3
+Pantalón Sportswear Club;NK-PAN-BLA-XL-22;Pantalón casual de algodón;Pantalones;Nike;XL;Blanco;180000;64;269900;3
+Pantalón Sportswear Club;NK-PAN-ROJ-XL-22;Pantalón casual de algodón;Pantalones;Nike;XL;Rojo;180000;62;269900;3
+Pantalón Sportswear Club;NK-PAN-AZU-XL-22;Pantalón casual de algodón;Pantalones;Nike;XL;Azul;180000;62;269900;3
+Pantalón Tech Fleece;NK-PAN-NEG-S-23;Pantalón premium de tejido técnico;Pantalones;Nike;S;Negro;280000;67;419900;3
+Pantalón Tech Fleece;NK-PAN-BLA-S-23;Pantalón premium de tejido técnico;Pantalones;Nike;S;Blanco;280000;68;419900;3
+Pantalón Tech Fleece;NK-PAN-ROJ-S-23;Pantalón premium de tejido técnico;Pantalones;Nike;S;Rojo;280000;66;419900;3
+Pantalón Tech Fleece;NK-PAN-AZU-S-23;Pantalón premium de tejido técnico;Pantalones;Nike;S;Azul;280000;66;419900;3
+Pantalón Tech Fleece;NK-PAN-NEG-M-23;Pantalón premium de tejido técnico;Pantalones;Nike;M;Negro;280000;67;419900;3
+Pantalón Tech Fleece;NK-PAN-BLA-M-23;Pantalón premium de tejido técnico;Pantalones;Nike;M;Blanco;280000;68;419900;3
+Pantalón Tech Fleece;NK-PAN-ROJ-M-23;Pantalón premium de tejido técnico;Pantalones;Nike;M;Rojo;280000;66;419900;3
+Pantalón Tech Fleece;NK-PAN-AZU-M-23;Pantalón premium de tejido técnico;Pantalones;Nike;M;Azul;280000;66;419900;3
+Pantalón Tech Fleece;NK-PAN-NEG-L-23;Pantalón premium de tejido técnico;Pantalones;Nike;L;Negro;280000;67;419900;3
+Pantalón Tech Fleece;NK-PAN-BLA-L-23;Pantalón premium de tejido técnico;Pantalones;Nike;L;Blanco;280000;68;419900;3
+Pantalón Tech Fleece;NK-PAN-ROJ-L-23;Pantalón premium de tejido técnico;Pantalones;Nike;L;Rojo;280000;66;419900;3
+Pantalón Tech Fleece;NK-PAN-AZU-L-23;Pantalón premium de tejido técnico;Pantalones;Nike;L;Azul;280000;66;419900;3
+Pantalón Tech Fleece;NK-PAN-NEG-XL-23;Pantalón premium de tejido técnico;Pantalones;Nike;XL;Negro;280000;70;419900;3
+Pantalón Tech Fleece;NK-PAN-BLA-XL-23;Pantalón premium de tejido técnico;Pantalones;Nike;XL;Blanco;280000;71;419900;3
+Pantalón Tech Fleece;NK-PAN-ROJ-XL-23;Pantalón premium de tejido técnico;Pantalones;Nike;XL;Rojo;280000;69;419900;3
+Pantalón Tech Fleece;NK-PAN-AZU-XL-23;Pantalón premium de tejido técnico;Pantalones;Nike;XL;Azul;280000;69;419900;3
+Pantalón Running Challenger;NK-PAN-NEG-S-24;Pantalón ligero para running;Pantalones;Nike;S;Negro;195000;74;299900;3
+Pantalón Running Challenger;NK-PAN-BLA-S-24;Pantalón ligero para running;Pantalones;Nike;S;Blanco;195000;75;299900;3
+Pantalón Running Challenger;NK-PAN-ROJ-S-24;Pantalón ligero para running;Pantalones;Nike;S;Rojo;195000;73;299900;3
+Pantalón Running Challenger;NK-PAN-AZU-S-24;Pantalón ligero para running;Pantalones;Nike;S;Azul;195000;73;299900;3
+Pantalón Running Challenger;NK-PAN-NEG-M-24;Pantalón ligero para running;Pantalones;Nike;M;Negro;195000;74;299900;3
+Pantalón Running Challenger;NK-PAN-BLA-M-24;Pantalón ligero para running;Pantalones;Nike;M;Blanco;195000;75;299900;3
+Pantalón Running Challenger;NK-PAN-ROJ-M-24;Pantalón ligero para running;Pantalones;Nike;M;Rojo;195000;73;299900;3
+Pantalón Running Challenger;NK-PAN-AZU-M-24;Pantalón ligero para running;Pantalones;Nike;M;Azul;195000;73;299900;3
+Pantalón Running Challenger;NK-PAN-NEG-L-24;Pantalón ligero para running;Pantalones;Nike;L;Negro;195000;74;299900;3
+Pantalón Running Challenger;NK-PAN-BLA-L-24;Pantalón ligero para running;Pantalones;Nike;L;Blanco;195000;75;299900;3
+Pantalón Running Challenger;NK-PAN-ROJ-L-24;Pantalón ligero para running;Pantalones;Nike;L;Rojo;195000;73;299900;3
+Pantalón Running Challenger;NK-PAN-AZU-L-24;Pantalón ligero para running;Pantalones;Nike;L;Azul;195000;73;299900;3
+Pantalón Running Challenger;NK-PAN-NEG-XL-24;Pantalón ligero para running;Pantalones;Nike;XL;Negro;195000;77;299900;3
+Pantalón Running Challenger;NK-PAN-BLA-XL-24;Pantalón ligero para running;Pantalones;Nike;XL;Blanco;195000;78;299900;3
+Pantalón Running Challenger;NK-PAN-ROJ-XL-24;Pantalón ligero para running;Pantalones;Nike;XL;Rojo;195000;76;299900;3
+Pantalón Running Challenger;NK-PAN-AZU-XL-24;Pantalón ligero para running;Pantalones;Nike;XL;Azul;195000;76;299900;3
+Pantalón Club Woven;NK-PAN-NEG-S-25;Pantalón deportivo tejido;Pantalones;Nike;S;Negro;185000;20;279900;3
+Pantalón Club Woven;NK-PAN-BLA-S-25;Pantalón deportivo tejido;Pantalones;Nike;S;Blanco;185000;21;279900;3
+Pantalón Club Woven;NK-PAN-ROJ-S-25;Pantalón deportivo tejido;Pantalones;Nike;S;Rojo;185000;80;279900;3
+Pantalón Club Woven;NK-PAN-AZU-S-25;Pantalón deportivo tejido;Pantalones;Nike;S;Azul;185000;80;279900;3
+Pantalón Club Woven;NK-PAN-NEG-M-25;Pantalón deportivo tejido;Pantalones;Nike;M;Negro;185000;20;279900;3
+Pantalón Club Woven;NK-PAN-BLA-M-25;Pantalón deportivo tejido;Pantalones;Nike;M;Blanco;185000;21;279900;3
+Pantalón Club Woven;NK-PAN-ROJ-M-25;Pantalón deportivo tejido;Pantalones;Nike;M;Rojo;185000;80;279900;3
+Pantalón Club Woven;NK-PAN-AZU-M-25;Pantalón deportivo tejido;Pantalones;Nike;M;Azul;185000;80;279900;3
+Pantalón Club Woven;NK-PAN-NEG-L-25;Pantalón deportivo tejido;Pantalones;Nike;L;Negro;185000;20;279900;3
+Pantalón Club Woven;NK-PAN-BLA-L-25;Pantalón deportivo tejido;Pantalones;Nike;L;Blanco;185000;21;279900;3
+Pantalón Club Woven;NK-PAN-ROJ-L-25;Pantalón deportivo tejido;Pantalones;Nike;L;Rojo;185000;80;279900;3
+Pantalón Club Woven;NK-PAN-AZU-L-25;Pantalón deportivo tejido;Pantalones;Nike;L;Azul;185000;80;279900;3
+Pantalón Club Woven;NK-PAN-NEG-XL-25;Pantalón deportivo tejido;Pantalones;Nike;XL;Negro;185000;23;279900;3
+Pantalón Club Woven;NK-PAN-BLA-XL-25;Pantalón deportivo tejido;Pantalones;Nike;XL;Blanco;185000;24;279900;3
+Pantalón Club Woven;NK-PAN-ROJ-XL-25;Pantalón deportivo tejido;Pantalones;Nike;XL;Rojo;185000;22;279900;3
+Pantalón Club Woven;NK-PAN-AZU-XL-25;Pantalón deportivo tejido;Pantalones;Nike;XL;Azul;185000;22;279900;3
+Pantalón Tiro 23;AD-PAN-NEG-S-26;Pantalón deportivo de entrenamiento;Pantalones;Adidas;S;Negro;175000;27;269900;3
+Pantalón Tiro 23;AD-PAN-BLA-S-26;Pantalón deportivo de entrenamiento;Pantalones;Adidas;S;Blanco;175000;28;269900;3
+Pantalón Tiro 23;AD-PAN-ROJ-S-26;Pantalón deportivo de entrenamiento;Pantalones;Adidas;S;Rojo;175000;26;269900;3
+Pantalón Tiro 23;AD-PAN-AZU-S-26;Pantalón deportivo de entrenamiento;Pantalones;Adidas;S;Azul;175000;26;269900;3
+Pantalón Tiro 23;AD-PAN-NEG-M-26;Pantalón deportivo de entrenamiento;Pantalones;Adidas;M;Negro;175000;27;269900;3
+Pantalón Tiro 23;AD-PAN-BLA-M-26;Pantalón deportivo de entrenamiento;Pantalones;Adidas;M;Blanco;175000;28;269900;3
+Pantalón Tiro 23;AD-PAN-ROJ-M-26;Pantalón deportivo de entrenamiento;Pantalones;Adidas;M;Rojo;175000;26;269900;3
+Pantalón Tiro 23;AD-PAN-AZU-M-26;Pantalón deportivo de entrenamiento;Pantalones;Adidas;M;Azul;175000;26;269900;3
+Pantalón Tiro 23;AD-PAN-NEG-L-26;Pantalón deportivo de entrenamiento;Pantalones;Adidas;L;Negro;175000;27;269900;3
+Pantalón Tiro 23;AD-PAN-BLA-L-26;Pantalón deportivo de entrenamiento;Pantalones;Adidas;L;Blanco;175000;28;269900;3
+Pantalón Tiro 23;AD-PAN-ROJ-L-26;Pantalón deportivo de entrenamiento;Pantalones;Adidas;L;Rojo;175000;26;269900;3
+Pantalón Tiro 23;AD-PAN-AZU-L-26;Pantalón deportivo de entrenamiento;Pantalones;Adidas;L;Azul;175000;26;269900;3
+Pantalón Tiro 23;AD-PAN-NEG-XL-26;Pantalón deportivo de entrenamiento;Pantalones;Adidas;XL;Negro;175000;30;269900;3
+Pantalón Tiro 23;AD-PAN-BLA-XL-26;Pantalón deportivo de entrenamiento;Pantalones;Adidas;XL;Blanco;175000;31;269900;3
+Pantalón Tiro 23;AD-PAN-ROJ-XL-26;Pantalón deportivo de entrenamiento;Pantalones;Adidas;XL;Rojo;175000;29;269900;3
+Pantalón Tiro 23;AD-PAN-AZU-XL-26;Pantalón deportivo de entrenamiento;Pantalones;Adidas;XL;Azul;175000;29;269900;3
+Pantalón Essentials Fleece;AD-PAN-NEG-S-27;Pantalón de felpa para uso diario;Pantalones;Adidas;S;Negro;180000;34;279900;3
+Pantalón Essentials Fleece;AD-PAN-BLA-S-27;Pantalón de felpa para uso diario;Pantalones;Adidas;S;Blanco;180000;35;279900;3
+Pantalón Essentials Fleece;AD-PAN-ROJ-S-27;Pantalón de felpa para uso diario;Pantalones;Adidas;S;Rojo;180000;33;279900;3
+Pantalón Essentials Fleece;AD-PAN-AZU-S-27;Pantalón de felpa para uso diario;Pantalones;Adidas;S;Azul;180000;33;279900;3
+Pantalón Essentials Fleece;AD-PAN-NEG-M-27;Pantalón de felpa para uso diario;Pantalones;Adidas;M;Negro;180000;34;279900;3
+Pantalón Essentials Fleece;AD-PAN-BLA-M-27;Pantalón de felpa para uso diario;Pantalones;Adidas;M;Blanco;180000;35;279900;3
+Pantalón Essentials Fleece;AD-PAN-ROJ-M-27;Pantalón de felpa para uso diario;Pantalones;Adidas;M;Rojo;180000;33;279900;3
+Pantalón Essentials Fleece;AD-PAN-AZU-M-27;Pantalón de felpa para uso diario;Pantalones;Adidas;M;Azul;180000;33;279900;3
+Pantalón Essentials Fleece;AD-PAN-NEG-L-27;Pantalón de felpa para uso diario;Pantalones;Adidas;L;Negro;180000;34;279900;3
+Pantalón Essentials Fleece;AD-PAN-BLA-L-27;Pantalón de felpa para uso diario;Pantalones;Adidas;L;Blanco;180000;35;279900;3
+Pantalón Essentials Fleece;AD-PAN-ROJ-L-27;Pantalón de felpa para uso diario;Pantalones;Adidas;L;Rojo;180000;33;279900;3
+Pantalón Essentials Fleece;AD-PAN-AZU-L-27;Pantalón de felpa para uso diario;Pantalones;Adidas;L;Azul;180000;33;279900;3
+Pantalón Essentials Fleece;AD-PAN-NEG-XL-27;Pantalón de felpa para uso diario;Pantalones;Adidas;XL;Negro;180000;37;279900;3
+Pantalón Essentials Fleece;AD-PAN-BLA-XL-27;Pantalón de felpa para uso diario;Pantalones;Adidas;XL;Blanco;180000;38;279900;3
+Pantalón Essentials Fleece;AD-PAN-ROJ-XL-27;Pantalón de felpa para uso diario;Pantalones;Adidas;XL;Rojo;180000;36;279900;3
+Pantalón Essentials Fleece;AD-PAN-AZU-XL-27;Pantalón de felpa para uso diario;Pantalones;Adidas;XL;Azul;180000;36;279900;3
+Pantalón Aeroready;AD-PAN-NEG-S-28;Pantalón deportivo transpirable;Pantalones;Adidas;S;Negro;190000;41;289900;3
+Pantalón Aeroready;AD-PAN-BLA-S-28;Pantalón deportivo transpirable;Pantalones;Adidas;S;Blanco;190000;42;289900;3
+Pantalón Aeroready;AD-PAN-ROJ-S-28;Pantalón deportivo transpirable;Pantalones;Adidas;S;Rojo;190000;40;289900;3
+Pantalón Aeroready;AD-PAN-AZU-S-28;Pantalón deportivo transpirable;Pantalones;Adidas;S;Azul;190000;40;289900;3
+Pantalón Aeroready;AD-PAN-NEG-M-28;Pantalón deportivo transpirable;Pantalones;Adidas;M;Negro;190000;41;289900;3
+Pantalón Aeroready;AD-PAN-BLA-M-28;Pantalón deportivo transpirable;Pantalones;Adidas;M;Blanco;190000;42;289900;3
+Pantalón Aeroready;AD-PAN-ROJ-M-28;Pantalón deportivo transpirable;Pantalones;Adidas;M;Rojo;190000;40;289900;3
+Pantalón Aeroready;AD-PAN-AZU-M-28;Pantalón deportivo transpirable;Pantalones;Adidas;M;Azul;190000;40;289900;3
+Pantalón Aeroready;AD-PAN-NEG-L-28;Pantalón deportivo transpirable;Pantalones;Adidas;L;Negro;190000;41;289900;3
+Pantalón Aeroready;AD-PAN-BLA-L-28;Pantalón deportivo transpirable;Pantalones;Adidas;L;Blanco;190000;42;289900;3
+Pantalón Aeroready;AD-PAN-ROJ-L-28;Pantalón deportivo transpirable;Pantalones;Adidas;L;Rojo;190000;40;289900;3
+Pantalón Aeroready;AD-PAN-AZU-L-28;Pantalón deportivo transpirable;Pantalones;Adidas;L;Azul;190000;40;289900;3
+Pantalón Aeroready;AD-PAN-NEG-XL-28;Pantalón deportivo transpirable;Pantalones;Adidas;XL;Negro;190000;44;289900;3
+Pantalón Aeroready;AD-PAN-BLA-XL-28;Pantalón deportivo transpirable;Pantalones;Adidas;XL;Blanco;190000;45;289900;3
+Pantalón Aeroready;AD-PAN-ROJ-XL-28;Pantalón deportivo transpirable;Pantalones;Adidas;XL;Rojo;190000;43;289900;3
+Pantalón Aeroready;AD-PAN-AZU-XL-28;Pantalón deportivo transpirable;Pantalones;Adidas;XL;Azul;190000;43;289900;3
+Pantalón Own The Run;AD-PAN-NEG-S-29;Pantalón ligero para running;Pantalones;Adidas;S;Negro;200000;48;299900;3
+Pantalón Own The Run;AD-PAN-BLA-S-29;Pantalón ligero para running;Pantalones;Adidas;S;Blanco;200000;49;299900;3
+Pantalón Own The Run;AD-PAN-ROJ-S-29;Pantalón ligero para running;Pantalones;Adidas;S;Rojo;200000;47;299900;3
+Pantalón Own The Run;AD-PAN-AZU-S-29;Pantalón ligero para running;Pantalones;Adidas;S;Azul;200000;47;299900;3
+Pantalón Own The Run;AD-PAN-NEG-M-29;Pantalón ligero para running;Pantalones;Adidas;M;Negro;200000;48;299900;3
+Pantalón Own The Run;AD-PAN-BLA-M-29;Pantalón ligero para running;Pantalones;Adidas;M;Blanco;200000;49;299900;3
+Pantalón Own The Run;AD-PAN-ROJ-M-29;Pantalón ligero para running;Pantalones;Adidas;M;Rojo;200000;47;299900;3
+Pantalón Own The Run;AD-PAN-AZU-M-29;Pantalón ligero para running;Pantalones;Adidas;M;Azul;200000;47;299900;3
+Pantalón Own The Run;AD-PAN-NEG-L-29;Pantalón ligero para running;Pantalones;Adidas;L;Negro;200000;48;299900;3
+Pantalón Own The Run;AD-PAN-BLA-L-29;Pantalón ligero para running;Pantalones;Adidas;L;Blanco;200000;49;299900;3
+Pantalón Own The Run;AD-PAN-ROJ-L-29;Pantalón ligero para running;Pantalones;Adidas;L;Rojo;200000;47;299900;3
+Pantalón Own The Run;AD-PAN-AZU-L-29;Pantalón ligero para running;Pantalones;Adidas;L;Azul;200000;47;299900;3
+Pantalón Own The Run;AD-PAN-NEG-XL-29;Pantalón ligero para running;Pantalones;Adidas;XL;Negro;200000;51;299900;3
+Pantalón Own The Run;AD-PAN-BLA-XL-29;Pantalón ligero para running;Pantalones;Adidas;XL;Blanco;200000;52;299900;3
+Pantalón Own The Run;AD-PAN-ROJ-XL-29;Pantalón ligero para running;Pantalones;Adidas;XL;Rojo;200000;50;299900;3
+Pantalón Own The Run;AD-PAN-AZU-XL-29;Pantalón ligero para running;Pantalones;Adidas;XL;Azul;200000;50;299900;3
+Pantalón Z.N.E.;AD-PAN-NEG-S-30;Pantalón premium de corte moderno;Pantalones;Adidas;S;Negro;270000;55;399900;3
+Pantalón Z.N.E.;AD-PAN-BLA-S-30;Pantalón premium de corte moderno;Pantalones;Adidas;S;Blanco;270000;56;399900;3
+Pantalón Z.N.E.;AD-PAN-ROJ-S-30;Pantalón premium de corte moderno;Pantalones;Adidas;S;Rojo;270000;54;399900;3
+Pantalón Z.N.E.;AD-PAN-AZU-S-30;Pantalón premium de corte moderno;Pantalones;Adidas;S;Azul;270000;54;399900;3
+Pantalón Z.N.E.;AD-PAN-NEG-M-30;Pantalón premium de corte moderno;Pantalones;Adidas;M;Negro;270000;55;399900;3
+Pantalón Z.N.E.;AD-PAN-BLA-M-30;Pantalón premium de corte moderno;Pantalones;Adidas;M;Blanco;270000;56;399900;3
+Pantalón Z.N.E.;AD-PAN-ROJ-M-30;Pantalón premium de corte moderno;Pantalones;Adidas;M;Rojo;270000;54;399900;3
+Pantalón Z.N.E.;AD-PAN-AZU-M-30;Pantalón premium de corte moderno;Pantalones;Adidas;M;Azul;270000;54;399900;3
+Pantalón Z.N.E.;AD-PAN-NEG-L-30;Pantalón premium de corte moderno;Pantalones;Adidas;L;Negro;270000;55;399900;3
+Pantalón Z.N.E.;AD-PAN-BLA-L-30;Pantalón premium de corte moderno;Pantalones;Adidas;L;Blanco;270000;56;399900;3
+Pantalón Z.N.E.;AD-PAN-ROJ-L-30;Pantalón premium de corte moderno;Pantalones;Adidas;L;Rojo;270000;54;399900;3
+Pantalón Z.N.E.;AD-PAN-AZU-L-30;Pantalón premium de corte moderno;Pantalones;Adidas;L;Azul;270000;54;399900;3
+Pantalón Z.N.E.;AD-PAN-NEG-XL-30;Pantalón premium de corte moderno;Pantalones;Adidas;XL;Negro;270000;58;399900;3
+Pantalón Z.N.E.;AD-PAN-BLA-XL-30;Pantalón premium de corte moderno;Pantalones;Adidas;XL;Blanco;270000;59;399900;3
+Pantalón Z.N.E.;AD-PAN-ROJ-XL-30;Pantalón premium de corte moderno;Pantalones;Adidas;XL;Rojo;270000;57;399900;3
+Pantalón Z.N.E.;AD-PAN-AZU-XL-30;Pantalón premium de corte moderno;Pantalones;Adidas;XL;Azul;270000;57;399900;3
+Pantalón Active Woven;PM-PAN-NEG-S-31;Pantalón deportivo ligero;Pantalones;Puma;S;Negro;155000;62;239900;3
+Pantalón Active Woven;PM-PAN-BLA-S-31;Pantalón deportivo ligero;Pantalones;Puma;S;Blanco;155000;63;239900;3
+Pantalón Active Woven;PM-PAN-ROJ-S-31;Pantalón deportivo ligero;Pantalones;Puma;S;Rojo;155000;61;239900;3
+Pantalón Active Woven;PM-PAN-AZU-S-31;Pantalón deportivo ligero;Pantalones;Puma;S;Azul;155000;61;239900;3
+Pantalón Active Woven;PM-PAN-NEG-M-31;Pantalón deportivo ligero;Pantalones;Puma;M;Negro;155000;62;239900;3
+Pantalón Active Woven;PM-PAN-BLA-M-31;Pantalón deportivo ligero;Pantalones;Puma;M;Blanco;155000;63;239900;3
+Pantalón Active Woven;PM-PAN-ROJ-M-31;Pantalón deportivo ligero;Pantalones;Puma;M;Rojo;155000;61;239900;3
+Pantalón Active Woven;PM-PAN-AZU-M-31;Pantalón deportivo ligero;Pantalones;Puma;M;Azul;155000;61;239900;3
+Pantalón Active Woven;PM-PAN-NEG-L-31;Pantalón deportivo ligero;Pantalones;Puma;L;Negro;155000;62;239900;3
+Pantalón Active Woven;PM-PAN-BLA-L-31;Pantalón deportivo ligero;Pantalones;Puma;L;Blanco;155000;63;239900;3
+Pantalón Active Woven;PM-PAN-ROJ-L-31;Pantalón deportivo ligero;Pantalones;Puma;L;Rojo;155000;61;239900;3
+Pantalón Active Woven;PM-PAN-AZU-L-31;Pantalón deportivo ligero;Pantalones;Puma;L;Azul;155000;61;239900;3
+Pantalón Active Woven;PM-PAN-NEG-XL-31;Pantalón deportivo ligero;Pantalones;Puma;XL;Negro;155000;65;239900;3
+Pantalón Active Woven;PM-PAN-BLA-XL-31;Pantalón deportivo ligero;Pantalones;Puma;XL;Blanco;155000;66;239900;3
+Pantalón Active Woven;PM-PAN-ROJ-XL-31;Pantalón deportivo ligero;Pantalones;Puma;XL;Rojo;155000;64;239900;3
+Pantalón Active Woven;PM-PAN-AZU-XL-31;Pantalón deportivo ligero;Pantalones;Puma;XL;Azul;155000;64;239900;3
+Pantalón Essentials;PM-PAN-NEG-S-32;Pantalón casual de algodón;Pantalones;Puma;S;Negro;160000;69;249900;3
+Pantalón Essentials;PM-PAN-BLA-S-32;Pantalón casual de algodón;Pantalones;Puma;S;Blanco;160000;70;249900;3
+Pantalón Essentials;PM-PAN-ROJ-S-32;Pantalón casual de algodón;Pantalones;Puma;S;Rojo;160000;68;249900;3
+Pantalón Essentials;PM-PAN-AZU-S-32;Pantalón casual de algodón;Pantalones;Puma;S;Azul;160000;68;249900;3
+Pantalón Essentials;PM-PAN-NEG-M-32;Pantalón casual de algodón;Pantalones;Puma;M;Negro;160000;69;249900;3
+Pantalón Essentials;PM-PAN-BLA-M-32;Pantalón casual de algodón;Pantalones;Puma;M;Blanco;160000;70;249900;3
+Pantalón Essentials;PM-PAN-ROJ-M-32;Pantalón casual de algodón;Pantalones;Puma;M;Rojo;160000;68;249900;3
+Pantalón Essentials;PM-PAN-AZU-M-32;Pantalón casual de algodón;Pantalones;Puma;M;Azul;160000;68;249900;3
+Pantalón Essentials;PM-PAN-NEG-L-32;Pantalón casual de algodón;Pantalones;Puma;L;Negro;160000;69;249900;3
+Pantalón Essentials;PM-PAN-BLA-L-32;Pantalón casual de algodón;Pantalones;Puma;L;Blanco;160000;70;249900;3
+Pantalón Essentials;PM-PAN-ROJ-L-32;Pantalón casual de algodón;Pantalones;Puma;L;Rojo;160000;68;249900;3
+Pantalón Essentials;PM-PAN-AZU-L-32;Pantalón casual de algodón;Pantalones;Puma;L;Azul;160000;68;249900;3
+Pantalón Essentials;PM-PAN-NEG-XL-32;Pantalón casual de algodón;Pantalones;Puma;XL;Negro;160000;72;249900;3
+Pantalón Essentials;PM-PAN-BLA-XL-32;Pantalón casual de algodón;Pantalones;Puma;XL;Blanco;160000;73;249900;3
+Pantalón Essentials;PM-PAN-ROJ-XL-32;Pantalón casual de algodón;Pantalones;Puma;XL;Rojo;160000;71;249900;3
+Pantalón Essentials;PM-PAN-AZU-XL-32;Pantalón casual de algodón;Pantalones;Puma;XL;Azul;160000;71;249900;3
+Pantalón Evostripe;PM-PAN-NEG-S-33;Pantalón deportivo de corte ergonómico;Pantalones;Puma;S;Negro;190000;76;289900;3
+Pantalón Evostripe;PM-PAN-BLA-S-33;Pantalón deportivo de corte ergonómico;Pantalones;Puma;S;Blanco;190000;77;289900;3
+Pantalón Evostripe;PM-PAN-ROJ-S-33;Pantalón deportivo de corte ergonómico;Pantalones;Puma;S;Rojo;190000;75;289900;3
+Pantalón Evostripe;PM-PAN-AZU-S-33;Pantalón deportivo de corte ergonómico;Pantalones;Puma;S;Azul;190000;75;289900;3
+Pantalón Evostripe;PM-PAN-NEG-M-33;Pantalón deportivo de corte ergonómico;Pantalones;Puma;M;Negro;190000;76;289900;3
+Pantalón Evostripe;PM-PAN-BLA-M-33;Pantalón deportivo de corte ergonómico;Pantalones;Puma;M;Blanco;190000;77;289900;3
+Pantalón Evostripe;PM-PAN-ROJ-M-33;Pantalón deportivo de corte ergonómico;Pantalones;Puma;M;Rojo;190000;75;289900;3
+Pantalón Evostripe;PM-PAN-AZU-M-33;Pantalón deportivo de corte ergonómico;Pantalones;Puma;M;Azul;190000;75;289900;3
+Pantalón Evostripe;PM-PAN-NEG-L-33;Pantalón deportivo de corte ergonómico;Pantalones;Puma;L;Negro;190000;76;289900;3
+Pantalón Evostripe;PM-PAN-BLA-L-33;Pantalón deportivo de corte ergonómico;Pantalones;Puma;L;Blanco;190000;77;289900;3
+Pantalón Evostripe;PM-PAN-ROJ-L-33;Pantalón deportivo de corte ergonómico;Pantalones;Puma;L;Rojo;190000;75;289900;3
+Pantalón Evostripe;PM-PAN-AZU-L-33;Pantalón deportivo de corte ergonómico;Pantalones;Puma;L;Azul;190000;75;289900;3
+Pantalón Evostripe;PM-PAN-NEG-XL-33;Pantalón deportivo de corte ergonómico;Pantalones;Puma;XL;Negro;190000;79;289900;3
+Pantalón Evostripe;PM-PAN-BLA-XL-33;Pantalón deportivo de corte ergonómico;Pantalones;Puma;XL;Blanco;190000;80;289900;3
+Pantalón Evostripe;PM-PAN-ROJ-XL-33;Pantalón deportivo de corte ergonómico;Pantalones;Puma;XL;Rojo;190000;78;289900;3
+Pantalón Evostripe;PM-PAN-AZU-XL-33;Pantalón deportivo de corte ergonómico;Pantalones;Puma;XL;Azul;190000;78;289900;3
+Pantalón teamLIGA;PM-PAN-NEG-S-34;Pantalón de entrenamiento deportivo;Pantalones;Puma;S;Negro;175000;22;269900;3
+Pantalón teamLIGA;PM-PAN-BLA-S-34;Pantalón de entrenamiento deportivo;Pantalones;Puma;S;Blanco;175000;23;269900;3
+Pantalón teamLIGA;PM-PAN-ROJ-S-34;Pantalón de entrenamiento deportivo;Pantalones;Puma;S;Rojo;175000;21;269900;3
+Pantalón teamLIGA;PM-PAN-AZU-S-34;Pantalón de entrenamiento deportivo;Pantalones;Puma;S;Azul;175000;21;269900;3
+Pantalón teamLIGA;PM-PAN-NEG-M-34;Pantalón de entrenamiento deportivo;Pantalones;Puma;M;Negro;175000;22;269900;3
+Pantalón teamLIGA;PM-PAN-BLA-M-34;Pantalón de entrenamiento deportivo;Pantalones;Puma;M;Blanco;175000;23;269900;3
+Pantalón teamLIGA;PM-PAN-ROJ-M-34;Pantalón de entrenamiento deportivo;Pantalones;Puma;M;Rojo;175000;21;269900;3
+Pantalón teamLIGA;PM-PAN-AZU-M-34;Pantalón de entrenamiento deportivo;Pantalones;Puma;M;Azul;175000;21;269900;3
+Pantalón teamLIGA;PM-PAN-NEG-L-34;Pantalón de entrenamiento deportivo;Pantalones;Puma;L;Negro;175000;22;269900;3
+Pantalón teamLIGA;PM-PAN-BLA-L-34;Pantalón de entrenamiento deportivo;Pantalones;Puma;L;Blanco;175000;23;269900;3
+Pantalón teamLIGA;PM-PAN-ROJ-L-34;Pantalón de entrenamiento deportivo;Pantalones;Puma;L;Rojo;175000;21;269900;3
+Pantalón teamLIGA;PM-PAN-AZU-L-34;Pantalón de entrenamiento deportivo;Pantalones;Puma;L;Azul;175000;21;269900;3
+Pantalón teamLIGA;PM-PAN-NEG-XL-34;Pantalón de entrenamiento deportivo;Pantalones;Puma;XL;Negro;175000;25;269900;3
+Pantalón teamLIGA;PM-PAN-BLA-XL-34;Pantalón de entrenamiento deportivo;Pantalones;Puma;XL;Blanco;175000;26;269900;3
+Pantalón teamLIGA;PM-PAN-ROJ-XL-34;Pantalón de entrenamiento deportivo;Pantalones;Puma;XL;Rojo;175000;24;269900;3
+Pantalón teamLIGA;PM-PAN-AZU-XL-34;Pantalón de entrenamiento deportivo;Pantalones;Puma;XL;Azul;175000;24;269900;3
+Pantalón Performance;PM-PAN-NEG-S-35;Pantalón técnico para actividad física;Pantalones;Puma;S;Negro;200000;29;299900;3
+Pantalón Performance;PM-PAN-BLA-S-35;Pantalón técnico para actividad física;Pantalones;Puma;S;Blanco;200000;30;299900;3
+Pantalón Performance;PM-PAN-ROJ-S-35;Pantalón técnico para actividad física;Pantalones;Puma;S;Rojo;200000;28;299900;3
+Pantalón Performance;PM-PAN-AZU-S-35;Pantalón técnico para actividad física;Pantalones;Puma;S;Azul;200000;28;299900;3
+Pantalón Performance;PM-PAN-NEG-M-35;Pantalón técnico para actividad física;Pantalones;Puma;M;Negro;200000;29;299900;3
+Pantalón Performance;PM-PAN-BLA-M-35;Pantalón técnico para actividad física;Pantalones;Puma;M;Blanco;200000;30;299900;3
+Pantalón Performance;PM-PAN-ROJ-M-35;Pantalón técnico para actividad física;Pantalones;Puma;M;Rojo;200000;28;299900;3
+Pantalón Performance;PM-PAN-AZU-M-35;Pantalón técnico para actividad física;Pantalones;Puma;M;Azul;200000;28;299900;3
+Pantalón Performance;PM-PAN-NEG-L-35;Pantalón técnico para actividad física;Pantalones;Puma;L;Negro;200000;29;299900;3
+Pantalón Performance;PM-PAN-BLA-L-35;Pantalón técnico para actividad física;Pantalones;Puma;L;Blanco;200000;30;299900;3
+Pantalón Performance;PM-PAN-ROJ-L-35;Pantalón técnico para actividad física;Pantalones;Puma;L;Rojo;200000;28;299900;3
+Pantalón Performance;PM-PAN-AZU-L-35;Pantalón técnico para actividad física;Pantalones;Puma;L;Azul;200000;28;299900;3
+Pantalón Performance;PM-PAN-NEG-XL-35;Pantalón técnico para actividad física;Pantalones;Puma;XL;Negro;200000;32;299900;3
+Pantalón Performance;PM-PAN-BLA-XL-35;Pantalón técnico para actividad física;Pantalones;Puma;XL;Blanco;200000;33;299900;3
+Pantalón Performance;PM-PAN-ROJ-XL-35;Pantalón técnico para actividad física;Pantalones;Puma;XL;Rojo;200000;31;299900;3
+Pantalón Performance;PM-PAN-AZU-XL-35;Pantalón técnico para actividad física;Pantalones;Puma;XL;Azul;200000;31;299900;3
+Jean 501 Original;LV-PAN-NEG-S-36;Jean clásico de cinco bolsillos;Pantalones;Levi's;S;Negro;190000;36;299900;3
+Jean 501 Original;LV-PAN-BLA-S-36;Jean clásico de cinco bolsillos;Pantalones;Levi's;S;Blanco;190000;37;299900;3
+Jean 501 Original;LV-PAN-ROJ-S-36;Jean clásico de cinco bolsillos;Pantalones;Levi's;S;Rojo;190000;35;299900;3
+Jean 501 Original;LV-PAN-AZU-S-36;Jean clásico de cinco bolsillos;Pantalones;Levi's;S;Azul;190000;35;299900;3
+Jean 501 Original;LV-PAN-NEG-M-36;Jean clásico de cinco bolsillos;Pantalones;Levi's;M;Negro;190000;36;299900;3
+Jean 501 Original;LV-PAN-BLA-M-36;Jean clásico de cinco bolsillos;Pantalones;Levi's;M;Blanco;190000;37;299900;3
+Jean 501 Original;LV-PAN-ROJ-M-36;Jean clásico de cinco bolsillos;Pantalones;Levi's;M;Rojo;190000;35;299900;3
+Jean 501 Original;LV-PAN-AZU-M-36;Jean clásico de cinco bolsillos;Pantalones;Levi's;M;Azul;190000;35;299900;3
+Jean 501 Original;LV-PAN-NEG-L-36;Jean clásico de cinco bolsillos;Pantalones;Levi's;L;Negro;190000;36;299900;3
+Jean 501 Original;LV-PAN-BLA-L-36;Jean clásico de cinco bolsillos;Pantalones;Levi's;L;Blanco;190000;37;299900;3
+Jean 501 Original;LV-PAN-ROJ-L-36;Jean clásico de cinco bolsillos;Pantalones;Levi's;L;Rojo;190000;35;299900;3
+Jean 501 Original;LV-PAN-AZU-L-36;Jean clásico de cinco bolsillos;Pantalones;Levi's;L;Azul;190000;35;299900;3
+Jean 501 Original;LV-PAN-NEG-XL-36;Jean clásico de cinco bolsillos;Pantalones;Levi's;XL;Negro;190000;39;299900;3
+Jean 501 Original;LV-PAN-BLA-XL-36;Jean clásico de cinco bolsillos;Pantalones;Levi's;XL;Blanco;190000;40;299900;3
+Jean 501 Original;LV-PAN-ROJ-XL-36;Jean clásico de cinco bolsillos;Pantalones;Levi's;XL;Rojo;190000;38;299900;3
+Jean 501 Original;LV-PAN-AZU-XL-36;Jean clásico de cinco bolsillos;Pantalones;Levi's;XL;Azul;190000;38;299900;3
+Jean 511 Slim;LV-PAN-NEG-S-37;Jean de corte slim;Pantalones;Levi's;S;Negro;200000;43;319900;3
+Jean 511 Slim;LV-PAN-BLA-S-37;Jean de corte slim;Pantalones;Levi's;S;Blanco;200000;44;319900;3
+Jean 511 Slim;LV-PAN-ROJ-S-37;Jean de corte slim;Pantalones;Levi's;S;Rojo;200000;42;319900;3
+Jean 511 Slim;LV-PAN-AZU-S-37;Jean de corte slim;Pantalones;Levi's;S;Azul;200000;42;319900;3
+Jean 511 Slim;LV-PAN-NEG-M-37;Jean de corte slim;Pantalones;Levi's;M;Negro;200000;43;319900;3
+Jean 511 Slim;LV-PAN-BLA-M-37;Jean de corte slim;Pantalones;Levi's;M;Blanco;200000;44;319900;3
+Jean 511 Slim;LV-PAN-ROJ-M-37;Jean de corte slim;Pantalones;Levi's;M;Rojo;200000;42;319900;3
+Jean 511 Slim;LV-PAN-AZU-M-37;Jean de corte slim;Pantalones;Levi's;M;Azul;200000;42;319900;3
+Jean 511 Slim;LV-PAN-NEG-L-37;Jean de corte slim;Pantalones;Levi's;L;Negro;200000;43;319900;3
+Jean 511 Slim;LV-PAN-BLA-L-37;Jean de corte slim;Pantalones;Levi's;L;Blanco;200000;44;319900;3
+Jean 511 Slim;LV-PAN-ROJ-L-37;Jean de corte slim;Pantalones;Levi's;L;Rojo;200000;42;319900;3
+Jean 511 Slim;LV-PAN-AZU-L-37;Jean de corte slim;Pantalones;Levi's;L;Azul;200000;42;319900;3
+Jean 511 Slim;LV-PAN-NEG-XL-37;Jean de corte slim;Pantalones;Levi's;XL;Negro;200000;46;319900;3
+Jean 511 Slim;LV-PAN-BLA-XL-37;Jean de corte slim;Pantalones;Levi's;XL;Blanco;200000;47;319900;3
+Jean 511 Slim;LV-PAN-ROJ-XL-37;Jean de corte slim;Pantalones;Levi's;XL;Rojo;200000;45;319900;3
+Jean 511 Slim;LV-PAN-AZU-XL-37;Jean de corte slim;Pantalones;Levi's;XL;Azul;200000;45;319900;3
+Jean 502 Taper;LV-PAN-NEG-S-38;Jean de pierna tapered;Pantalones;Levi's;S;Negro;210000;50;329900;3
+Jean 502 Taper;LV-PAN-BLA-S-38;Jean de pierna tapered;Pantalones;Levi's;S;Blanco;210000;51;329900;3
+Jean 502 Taper;LV-PAN-ROJ-S-38;Jean de pierna tapered;Pantalones;Levi's;S;Rojo;210000;49;329900;3
+Jean 502 Taper;LV-PAN-AZU-S-38;Jean de pierna tapered;Pantalones;Levi's;S;Azul;210000;49;329900;3
+Jean 502 Taper;LV-PAN-NEG-M-38;Jean de pierna tapered;Pantalones;Levi's;M;Negro;210000;50;329900;3
+Jean 502 Taper;LV-PAN-BLA-M-38;Jean de pierna tapered;Pantalones;Levi's;M;Blanco;210000;51;329900;3
+Jean 502 Taper;LV-PAN-ROJ-M-38;Jean de pierna tapered;Pantalones;Levi's;M;Rojo;210000;49;329900;3
+Jean 502 Taper;LV-PAN-AZU-M-38;Jean de pierna tapered;Pantalones;Levi's;M;Azul;210000;49;329900;3
+Jean 502 Taper;LV-PAN-NEG-L-38;Jean de pierna tapered;Pantalones;Levi's;L;Negro;210000;50;329900;3
+Jean 502 Taper;LV-PAN-BLA-L-38;Jean de pierna tapered;Pantalones;Levi's;L;Blanco;210000;51;329900;3
+Jean 502 Taper;LV-PAN-ROJ-L-38;Jean de pierna tapered;Pantalones;Levi's;L;Rojo;210000;49;329900;3
+Jean 502 Taper;LV-PAN-AZU-L-38;Jean de pierna tapered;Pantalones;Levi's;L;Azul;210000;49;329900;3
+Jean 502 Taper;LV-PAN-NEG-XL-38;Jean de pierna tapered;Pantalones;Levi's;XL;Negro;210000;53;329900;3
+Jean 502 Taper;LV-PAN-BLA-XL-38;Jean de pierna tapered;Pantalones;Levi's;XL;Blanco;210000;54;329900;3
+Jean 502 Taper;LV-PAN-ROJ-XL-38;Jean de pierna tapered;Pantalones;Levi's;XL;Rojo;210000;52;329900;3
+Jean 502 Taper;LV-PAN-AZU-XL-38;Jean de pierna tapered;Pantalones;Levi's;XL;Azul;210000;52;329900;3
+Jean 505 Regular;LV-PAN-NEG-S-39;Jean clásico de corte regular;Pantalones;Levi's;S;Negro;195000;57;309900;3
+Jean 505 Regular;LV-PAN-BLA-S-39;Jean clásico de corte regular;Pantalones;Levi's;S;Blanco;195000;58;309900;3
+Jean 505 Regular;LV-PAN-ROJ-S-39;Jean clásico de corte regular;Pantalones;Levi's;S;Rojo;195000;56;309900;3
+Jean 505 Regular;LV-PAN-AZU-S-39;Jean clásico de corte regular;Pantalones;Levi's;S;Azul;195000;56;309900;3
+Jean 505 Regular;LV-PAN-NEG-M-39;Jean clásico de corte regular;Pantalones;Levi's;M;Negro;195000;57;309900;3
+Jean 505 Regular;LV-PAN-BLA-M-39;Jean clásico de corte regular;Pantalones;Levi's;M;Blanco;195000;58;309900;3
+Jean 505 Regular;LV-PAN-ROJ-M-39;Jean clásico de corte regular;Pantalones;Levi's;M;Rojo;195000;56;309900;3
+Jean 505 Regular;LV-PAN-AZU-M-39;Jean clásico de corte regular;Pantalones;Levi's;M;Azul;195000;56;309900;3
+Jean 505 Regular;LV-PAN-NEG-L-39;Jean clásico de corte regular;Pantalones;Levi's;L;Negro;195000;57;309900;3
+Jean 505 Regular;LV-PAN-BLA-L-39;Jean clásico de corte regular;Pantalones;Levi's;L;Blanco;195000;58;309900;3
+Jean 505 Regular;LV-PAN-ROJ-L-39;Jean clásico de corte regular;Pantalones;Levi's;L;Rojo;195000;56;309900;3
+Jean 505 Regular;LV-PAN-AZU-L-39;Jean clásico de corte regular;Pantalones;Levi's;L;Azul;195000;56;309900;3
+Jean 505 Regular;LV-PAN-NEG-XL-39;Jean clásico de corte regular;Pantalones;Levi's;XL;Negro;195000;60;309900;3
+Jean 505 Regular;LV-PAN-BLA-XL-39;Jean clásico de corte regular;Pantalones;Levi's;XL;Blanco;195000;61;309900;3
+Jean 505 Regular;LV-PAN-ROJ-XL-39;Jean clásico de corte regular;Pantalones;Levi's;XL;Rojo;195000;59;309900;3
+Jean 505 Regular;LV-PAN-AZU-XL-39;Jean clásico de corte regular;Pantalones;Levi's;XL;Azul;195000;59;309900;3
+Jean 512 Slim Taper;LV-PAN-NEG-S-40;Jean slim con pierna tapered;Pantalones;Levi's;S;Negro;215000;64;339900;3
+Jean 512 Slim Taper;LV-PAN-BLA-S-40;Jean slim con pierna tapered;Pantalones;Levi's;S;Blanco;215000;65;339900;3
+Jean 512 Slim Taper;LV-PAN-ROJ-S-40;Jean slim con pierna tapered;Pantalones;Levi's;S;Rojo;215000;63;339900;3
+Jean 512 Slim Taper;LV-PAN-AZU-S-40;Jean slim con pierna tapered;Pantalones;Levi's;S;Azul;215000;63;339900;3
+Jean 512 Slim Taper;LV-PAN-NEG-M-40;Jean slim con pierna tapered;Pantalones;Levi's;M;Negro;215000;64;339900;3
+Jean 512 Slim Taper;LV-PAN-BLA-M-40;Jean slim con pierna tapered;Pantalones;Levi's;M;Blanco;215000;65;339900;3
+Jean 512 Slim Taper;LV-PAN-ROJ-M-40;Jean slim con pierna tapered;Pantalones;Levi's;M;Rojo;215000;63;339900;3
+Jean 512 Slim Taper;LV-PAN-AZU-M-40;Jean slim con pierna tapered;Pantalones;Levi's;M;Azul;215000;63;339900;3
+Jean 512 Slim Taper;LV-PAN-NEG-L-40;Jean slim con pierna tapered;Pantalones;Levi's;L;Negro;215000;64;339900;3
+Jean 512 Slim Taper;LV-PAN-BLA-L-40;Jean slim con pierna tapered;Pantalones;Levi's;L;Blanco;215000;65;339900;3
+Jean 512 Slim Taper;LV-PAN-ROJ-L-40;Jean slim con pierna tapered;Pantalones;Levi's;L;Rojo;215000;63;339900;3
+Jean 512 Slim Taper;LV-PAN-AZU-L-40;Jean slim con pierna tapered;Pantalones;Levi's;L;Azul;215000;63;339900;3
+Jean 512 Slim Taper;LV-PAN-NEG-XL-40;Jean slim con pierna tapered;Pantalones;Levi's;XL;Negro;215000;67;339900;3
+Jean 512 Slim Taper;LV-PAN-BLA-XL-40;Jean slim con pierna tapered;Pantalones;Levi's;XL;Blanco;215000;68;339900;3
+Jean 512 Slim Taper;LV-PAN-ROJ-XL-40;Jean slim con pierna tapered;Pantalones;Levi's;XL;Rojo;215000;66;339900;3
+Jean 512 Slim Taper;LV-PAN-AZU-XL-40;Jean slim con pierna tapered;Pantalones;Levi's;XL;Azul;215000;66;339900;3
+Zapatillas Revolution 7;NK-ZAP-NEG-S-41;Calzado deportivo para uso diario;Zapatos;Nike;S;Negro;230000;71;349900;3
+Zapatillas Revolution 7;NK-ZAP-BLA-S-41;Calzado deportivo para uso diario;Zapatos;Nike;S;Blanco;230000;72;349900;3
+Zapatillas Revolution 7;NK-ZAP-ROJ-S-41;Calzado deportivo para uso diario;Zapatos;Nike;S;Rojo;230000;70;349900;3
+Zapatillas Revolution 7;NK-ZAP-AZU-S-41;Calzado deportivo para uso diario;Zapatos;Nike;S;Azul;230000;70;349900;3
+Zapatillas Revolution 7;NK-ZAP-NEG-M-41;Calzado deportivo para uso diario;Zapatos;Nike;M;Negro;230000;71;349900;3
+Zapatillas Revolution 7;NK-ZAP-BLA-M-41;Calzado deportivo para uso diario;Zapatos;Nike;M;Blanco;230000;72;349900;3
+Zapatillas Revolution 7;NK-ZAP-ROJ-M-41;Calzado deportivo para uso diario;Zapatos;Nike;M;Rojo;230000;70;349900;3
+Zapatillas Revolution 7;NK-ZAP-AZU-M-41;Calzado deportivo para uso diario;Zapatos;Nike;M;Azul;230000;70;349900;3
+Zapatillas Revolution 7;NK-ZAP-NEG-L-41;Calzado deportivo para uso diario;Zapatos;Nike;L;Negro;230000;71;349900;3
+Zapatillas Revolution 7;NK-ZAP-BLA-L-41;Calzado deportivo para uso diario;Zapatos;Nike;L;Blanco;230000;72;349900;3
+Zapatillas Revolution 7;NK-ZAP-ROJ-L-41;Calzado deportivo para uso diario;Zapatos;Nike;L;Rojo;230000;70;349900;3
+Zapatillas Revolution 7;NK-ZAP-AZU-L-41;Calzado deportivo para uso diario;Zapatos;Nike;L;Azul;230000;70;349900;3
+Zapatillas Revolution 7;NK-ZAP-NEG-XL-41;Calzado deportivo para uso diario;Zapatos;Nike;XL;Negro;230000;74;349900;3
+Zapatillas Revolution 7;NK-ZAP-BLA-XL-41;Calzado deportivo para uso diario;Zapatos;Nike;XL;Blanco;230000;75;349900;3
+Zapatillas Revolution 7;NK-ZAP-ROJ-XL-41;Calzado deportivo para uso diario;Zapatos;Nike;XL;Rojo;230000;73;349900;3
+Zapatillas Revolution 7;NK-ZAP-AZU-XL-41;Calzado deportivo para uso diario;Zapatos;Nike;XL;Azul;230000;73;349900;3
+Zapatillas Air Max SC;NK-ZAP-NEG-S-42;Zapatillas casuales con amortiguación;Zapatos;Nike;S;Negro;300000;78;449900;3
+Zapatillas Air Max SC;NK-ZAP-BLA-S-42;Zapatillas casuales con amortiguación;Zapatos;Nike;S;Blanco;300000;79;449900;3
+Zapatillas Air Max SC;NK-ZAP-ROJ-S-42;Zapatillas casuales con amortiguación;Zapatos;Nike;S;Rojo;300000;77;449900;3
+Zapatillas Air Max SC;NK-ZAP-AZU-S-42;Zapatillas casuales con amortiguación;Zapatos;Nike;S;Azul;300000;77;449900;3
+Zapatillas Air Max SC;NK-ZAP-NEG-M-42;Zapatillas casuales con amortiguación;Zapatos;Nike;M;Negro;300000;78;449900;3
+Zapatillas Air Max SC;NK-ZAP-BLA-M-42;Zapatillas casuales con amortiguación;Zapatos;Nike;M;Blanco;300000;79;449900;3
+Zapatillas Air Max SC;NK-ZAP-ROJ-M-42;Zapatillas casuales con amortiguación;Zapatos;Nike;M;Rojo;300000;77;449900;3
+Zapatillas Air Max SC;NK-ZAP-AZU-M-42;Zapatillas casuales con amortiguación;Zapatos;Nike;M;Azul;300000;77;449900;3
+Zapatillas Air Max SC;NK-ZAP-NEG-L-42;Zapatillas casuales con amortiguación;Zapatos;Nike;L;Negro;300000;78;449900;3
+Zapatillas Air Max SC;NK-ZAP-BLA-L-42;Zapatillas casuales con amortiguación;Zapatos;Nike;L;Blanco;300000;79;449900;3
+Zapatillas Air Max SC;NK-ZAP-ROJ-L-42;Zapatillas casuales con amortiguación;Zapatos;Nike;L;Rojo;300000;77;449900;3
+Zapatillas Air Max SC;NK-ZAP-AZU-L-42;Zapatillas casuales con amortiguación;Zapatos;Nike;L;Azul;300000;77;449900;3
+Zapatillas Air Max SC;NK-ZAP-NEG-XL-42;Zapatillas casuales con amortiguación;Zapatos;Nike;XL;Negro;300000;20;449900;3
+Zapatillas Air Max SC;NK-ZAP-BLA-XL-42;Zapatillas casuales con amortiguación;Zapatos;Nike;XL;Blanco;300000;21;449900;3
+Zapatillas Air Max SC;NK-ZAP-ROJ-XL-42;Zapatillas casuales con amortiguación;Zapatos;Nike;XL;Rojo;300000;80;449900;3
+Zapatillas Air Max SC;NK-ZAP-AZU-XL-42;Zapatillas casuales con amortiguación;Zapatos;Nike;XL;Azul;300000;80;449900;3
+Zapatillas Court Vision;NK-ZAP-NEG-S-43;Calzado casual de estilo clásico;Zapatos;Nike;S;Negro;270000;24;399900;3
+Zapatillas Court Vision;NK-ZAP-BLA-S-43;Calzado casual de estilo clásico;Zapatos;Nike;S;Blanco;270000;25;399900;3
+Zapatillas Court Vision;NK-ZAP-ROJ-S-43;Calzado casual de estilo clásico;Zapatos;Nike;S;Rojo;270000;23;399900;3
+Zapatillas Court Vision;NK-ZAP-AZU-S-43;Calzado casual de estilo clásico;Zapatos;Nike;S;Azul;270000;23;399900;3
+Zapatillas Court Vision;NK-ZAP-NEG-M-43;Calzado casual de estilo clásico;Zapatos;Nike;M;Negro;270000;24;399900;3
+Zapatillas Court Vision;NK-ZAP-BLA-M-43;Calzado casual de estilo clásico;Zapatos;Nike;M;Blanco;270000;25;399900;3
+Zapatillas Court Vision;NK-ZAP-ROJ-M-43;Calzado casual de estilo clásico;Zapatos;Nike;M;Rojo;270000;23;399900;3
+Zapatillas Court Vision;NK-ZAP-AZU-M-43;Calzado casual de estilo clásico;Zapatos;Nike;M;Azul;270000;23;399900;3
+Zapatillas Court Vision;NK-ZAP-NEG-L-43;Calzado casual de estilo clásico;Zapatos;Nike;L;Negro;270000;24;399900;3
+Zapatillas Court Vision;NK-ZAP-BLA-L-43;Calzado casual de estilo clásico;Zapatos;Nike;L;Blanco;270000;25;399900;3
+Zapatillas Court Vision;NK-ZAP-ROJ-L-43;Calzado casual de estilo clásico;Zapatos;Nike;L;Rojo;270000;23;399900;3
+Zapatillas Court Vision;NK-ZAP-AZU-L-43;Calzado casual de estilo clásico;Zapatos;Nike;L;Azul;270000;23;399900;3
+Zapatillas Court Vision;NK-ZAP-NEG-XL-43;Calzado casual de estilo clásico;Zapatos;Nike;XL;Negro;270000;27;399900;3
+Zapatillas Court Vision;NK-ZAP-BLA-XL-43;Calzado casual de estilo clásico;Zapatos;Nike;XL;Blanco;270000;28;399900;3
+Zapatillas Court Vision;NK-ZAP-ROJ-XL-43;Calzado casual de estilo clásico;Zapatos;Nike;XL;Rojo;270000;26;399900;3
+Zapatillas Court Vision;NK-ZAP-AZU-XL-43;Calzado casual de estilo clásico;Zapatos;Nike;XL;Azul;270000;26;399900;3
+Zapatillas Downshifter;NK-ZAP-NEG-S-44;Calzado ligero para entrenamiento;Zapatos;Nike;S;Negro;235000;31;359900;3
+Zapatillas Downshifter;NK-ZAP-BLA-S-44;Calzado ligero para entrenamiento;Zapatos;Nike;S;Blanco;235000;32;359900;3
+Zapatillas Downshifter;NK-ZAP-ROJ-S-44;Calzado ligero para entrenamiento;Zapatos;Nike;S;Rojo;235000;30;359900;3
+Zapatillas Downshifter;NK-ZAP-AZU-S-44;Calzado ligero para entrenamiento;Zapatos;Nike;S;Azul;235000;30;359900;3
+Zapatillas Downshifter;NK-ZAP-NEG-M-44;Calzado ligero para entrenamiento;Zapatos;Nike;M;Negro;235000;31;359900;3
+Zapatillas Downshifter;NK-ZAP-BLA-M-44;Calzado ligero para entrenamiento;Zapatos;Nike;M;Blanco;235000;32;359900;3
+Zapatillas Downshifter;NK-ZAP-ROJ-M-44;Calzado ligero para entrenamiento;Zapatos;Nike;M;Rojo;235000;30;359900;3
+Zapatillas Downshifter;NK-ZAP-AZU-M-44;Calzado ligero para entrenamiento;Zapatos;Nike;M;Azul;235000;30;359900;3
+Zapatillas Downshifter;NK-ZAP-NEG-L-44;Calzado ligero para entrenamiento;Zapatos;Nike;L;Negro;235000;31;359900;3
+Zapatillas Downshifter;NK-ZAP-BLA-L-44;Calzado ligero para entrenamiento;Zapatos;Nike;L;Blanco;235000;32;359900;3
+Zapatillas Downshifter;NK-ZAP-ROJ-L-44;Calzado ligero para entrenamiento;Zapatos;Nike;L;Rojo;235000;30;359900;3
+Zapatillas Downshifter;NK-ZAP-AZU-L-44;Calzado ligero para entrenamiento;Zapatos;Nike;L;Azul;235000;30;359900;3
+Zapatillas Downshifter;NK-ZAP-NEG-XL-44;Calzado ligero para entrenamiento;Zapatos;Nike;XL;Negro;235000;34;359900;3
+Zapatillas Downshifter;NK-ZAP-BLA-XL-44;Calzado ligero para entrenamiento;Zapatos;Nike;XL;Blanco;235000;35;359900;3
+Zapatillas Downshifter;NK-ZAP-ROJ-XL-44;Calzado ligero para entrenamiento;Zapatos;Nike;XL;Rojo;235000;33;359900;3
+Zapatillas Downshifter;NK-ZAP-AZU-XL-44;Calzado ligero para entrenamiento;Zapatos;Nike;XL;Azul;235000;33;359900;3
+Zapatillas Pegasus;NK-ZAP-NEG-S-45;Calzado de running con amortiguación;Zapatos;Nike;S;Negro;390000;38;599900;3
+Zapatillas Pegasus;NK-ZAP-BLA-S-45;Calzado de running con amortiguación;Zapatos;Nike;S;Blanco;390000;39;599900;3
+Zapatillas Pegasus;NK-ZAP-ROJ-S-45;Calzado de running con amortiguación;Zapatos;Nike;S;Rojo;390000;37;599900;3
+Zapatillas Pegasus;NK-ZAP-AZU-S-45;Calzado de running con amortiguación;Zapatos;Nike;S;Azul;390000;37;599900;3
+Zapatillas Pegasus;NK-ZAP-NEG-M-45;Calzado de running con amortiguación;Zapatos;Nike;M;Negro;390000;38;599900;3
+Zapatillas Pegasus;NK-ZAP-BLA-M-45;Calzado de running con amortiguación;Zapatos;Nike;M;Blanco;390000;39;599900;3
+Zapatillas Pegasus;NK-ZAP-ROJ-M-45;Calzado de running con amortiguación;Zapatos;Nike;M;Rojo;390000;37;599900;3
+Zapatillas Pegasus;NK-ZAP-AZU-M-45;Calzado de running con amortiguación;Zapatos;Nike;M;Azul;390000;37;599900;3
+Zapatillas Pegasus;NK-ZAP-NEG-L-45;Calzado de running con amortiguación;Zapatos;Nike;L;Negro;390000;38;599900;3
+Zapatillas Pegasus;NK-ZAP-BLA-L-45;Calzado de running con amortiguación;Zapatos;Nike;L;Blanco;390000;39;599900;3
+Zapatillas Pegasus;NK-ZAP-ROJ-L-45;Calzado de running con amortiguación;Zapatos;Nike;L;Rojo;390000;37;599900;3
+Zapatillas Pegasus;NK-ZAP-AZU-L-45;Calzado de running con amortiguación;Zapatos;Nike;L;Azul;390000;37;599900;3
+Zapatillas Pegasus;NK-ZAP-NEG-XL-45;Calzado de running con amortiguación;Zapatos;Nike;XL;Negro;390000;41;599900;3
+Zapatillas Pegasus;NK-ZAP-BLA-XL-45;Calzado de running con amortiguación;Zapatos;Nike;XL;Blanco;390000;42;599900;3
+Zapatillas Pegasus;NK-ZAP-ROJ-XL-45;Calzado de running con amortiguación;Zapatos;Nike;XL;Rojo;390000;40;599900;3
+Zapatillas Pegasus;NK-ZAP-AZU-XL-45;Calzado de running con amortiguación;Zapatos;Nike;XL;Azul;390000;40;599900;3
+Zapatillas Runfalcon;AD-ZAP-NEG-S-46;Calzado deportivo para running;Zapatos;Adidas;S;Negro;220000;45;329900;3
+Zapatillas Runfalcon;AD-ZAP-BLA-S-46;Calzado deportivo para running;Zapatos;Adidas;S;Blanco;220000;46;329900;3
+Zapatillas Runfalcon;AD-ZAP-ROJ-S-46;Calzado deportivo para running;Zapatos;Adidas;S;Rojo;220000;44;329900;3
+Zapatillas Runfalcon;AD-ZAP-AZU-S-46;Calzado deportivo para running;Zapatos;Adidas;S;Azul;220000;44;329900;3
+Zapatillas Runfalcon;AD-ZAP-NEG-M-46;Calzado deportivo para running;Zapatos;Adidas;M;Negro;220000;45;329900;3
+Zapatillas Runfalcon;AD-ZAP-BLA-M-46;Calzado deportivo para running;Zapatos;Adidas;M;Blanco;220000;46;329900;3
+Zapatillas Runfalcon;AD-ZAP-ROJ-M-46;Calzado deportivo para running;Zapatos;Adidas;M;Rojo;220000;44;329900;3
+Zapatillas Runfalcon;AD-ZAP-AZU-M-46;Calzado deportivo para running;Zapatos;Adidas;M;Azul;220000;44;329900;3
+Zapatillas Runfalcon;AD-ZAP-NEG-L-46;Calzado deportivo para running;Zapatos;Adidas;L;Negro;220000;45;329900;3
+Zapatillas Runfalcon;AD-ZAP-BLA-L-46;Calzado deportivo para running;Zapatos;Adidas;L;Blanco;220000;46;329900;3
+Zapatillas Runfalcon;AD-ZAP-ROJ-L-46;Calzado deportivo para running;Zapatos;Adidas;L;Rojo;220000;44;329900;3
+Zapatillas Runfalcon;AD-ZAP-AZU-L-46;Calzado deportivo para running;Zapatos;Adidas;L;Azul;220000;44;329900;3
+Zapatillas Runfalcon;AD-ZAP-NEG-XL-46;Calzado deportivo para running;Zapatos;Adidas;XL;Negro;220000;48;329900;3
+Zapatillas Runfalcon;AD-ZAP-BLA-XL-46;Calzado deportivo para running;Zapatos;Adidas;XL;Blanco;220000;49;329900;3
+Zapatillas Runfalcon;AD-ZAP-ROJ-XL-46;Calzado deportivo para running;Zapatos;Adidas;XL;Rojo;220000;47;329900;3
+Zapatillas Runfalcon;AD-ZAP-AZU-XL-46;Calzado deportivo para running;Zapatos;Adidas;XL;Azul;220000;47;329900;3
+Zapatillas Grand Court;AD-ZAP-NEG-S-47;Calzado casual de inspiración clásica;Zapatos;Adidas;S;Negro;240000;52;359900;3
+Zapatillas Grand Court;AD-ZAP-BLA-S-47;Calzado casual de inspiración clásica;Zapatos;Adidas;S;Blanco;240000;53;359900;3
+Zapatillas Grand Court;AD-ZAP-ROJ-S-47;Calzado casual de inspiración clásica;Zapatos;Adidas;S;Rojo;240000;51;359900;3
+Zapatillas Grand Court;AD-ZAP-AZU-S-47;Calzado casual de inspiración clásica;Zapatos;Adidas;S;Azul;240000;51;359900;3
+Zapatillas Grand Court;AD-ZAP-NEG-M-47;Calzado casual de inspiración clásica;Zapatos;Adidas;M;Negro;240000;52;359900;3
+Zapatillas Grand Court;AD-ZAP-BLA-M-47;Calzado casual de inspiración clásica;Zapatos;Adidas;M;Blanco;240000;53;359900;3
+Zapatillas Grand Court;AD-ZAP-ROJ-M-47;Calzado casual de inspiración clásica;Zapatos;Adidas;M;Rojo;240000;51;359900;3
+Zapatillas Grand Court;AD-ZAP-AZU-M-47;Calzado casual de inspiración clásica;Zapatos;Adidas;M;Azul;240000;51;359900;3
+Zapatillas Grand Court;AD-ZAP-NEG-L-47;Calzado casual de inspiración clásica;Zapatos;Adidas;L;Negro;240000;52;359900;3
+Zapatillas Grand Court;AD-ZAP-BLA-L-47;Calzado casual de inspiración clásica;Zapatos;Adidas;L;Blanco;240000;53;359900;3
+Zapatillas Grand Court;AD-ZAP-ROJ-L-47;Calzado casual de inspiración clásica;Zapatos;Adidas;L;Rojo;240000;51;359900;3
+Zapatillas Grand Court;AD-ZAP-AZU-L-47;Calzado casual de inspiración clásica;Zapatos;Adidas;L;Azul;240000;51;359900;3
+Zapatillas Grand Court;AD-ZAP-NEG-XL-47;Calzado casual de inspiración clásica;Zapatos;Adidas;XL;Negro;240000;55;359900;3
+Zapatillas Grand Court;AD-ZAP-BLA-XL-47;Calzado casual de inspiración clásica;Zapatos;Adidas;XL;Blanco;240000;56;359900;3
+Zapatillas Grand Court;AD-ZAP-ROJ-XL-47;Calzado casual de inspiración clásica;Zapatos;Adidas;XL;Rojo;240000;54;359900;3
+Zapatillas Grand Court;AD-ZAP-AZU-XL-47;Calzado casual de inspiración clásica;Zapatos;Adidas;XL;Azul;240000;54;359900;3
+Zapatillas Duramo;AD-ZAP-NEG-S-48;Calzado ligero para entrenamiento;Zapatos;Adidas;S;Negro;230000;59;349900;3
+Zapatillas Duramo;AD-ZAP-BLA-S-48;Calzado ligero para entrenamiento;Zapatos;Adidas;S;Blanco;230000;60;349900;3
+Zapatillas Duramo;AD-ZAP-ROJ-S-48;Calzado ligero para entrenamiento;Zapatos;Adidas;S;Rojo;230000;58;349900;3
+Zapatillas Duramo;AD-ZAP-AZU-S-48;Calzado ligero para entrenamiento;Zapatos;Adidas;S;Azul;230000;58;349900;3
+Zapatillas Duramo;AD-ZAP-NEG-M-48;Calzado ligero para entrenamiento;Zapatos;Adidas;M;Negro;230000;59;349900;3
+Zapatillas Duramo;AD-ZAP-BLA-M-48;Calzado ligero para entrenamiento;Zapatos;Adidas;M;Blanco;230000;60;349900;3
+Zapatillas Duramo;AD-ZAP-ROJ-M-48;Calzado ligero para entrenamiento;Zapatos;Adidas;M;Rojo;230000;58;349900;3
+Zapatillas Duramo;AD-ZAP-AZU-M-48;Calzado ligero para entrenamiento;Zapatos;Adidas;M;Azul;230000;58;349900;3
+Zapatillas Duramo;AD-ZAP-NEG-L-48;Calzado ligero para entrenamiento;Zapatos;Adidas;L;Negro;230000;59;349900;3
+Zapatillas Duramo;AD-ZAP-BLA-L-48;Calzado ligero para entrenamiento;Zapatos;Adidas;L;Blanco;230000;60;349900;3
+Zapatillas Duramo;AD-ZAP-ROJ-L-48;Calzado ligero para entrenamiento;Zapatos;Adidas;L;Rojo;230000;58;349900;3
+Zapatillas Duramo;AD-ZAP-AZU-L-48;Calzado ligero para entrenamiento;Zapatos;Adidas;L;Azul;230000;58;349900;3
+Zapatillas Duramo;AD-ZAP-NEG-XL-48;Calzado ligero para entrenamiento;Zapatos;Adidas;XL;Negro;230000;62;349900;3
+Zapatillas Duramo;AD-ZAP-BLA-XL-48;Calzado ligero para entrenamiento;Zapatos;Adidas;XL;Blanco;230000;63;349900;3
+Zapatillas Duramo;AD-ZAP-ROJ-XL-48;Calzado ligero para entrenamiento;Zapatos;Adidas;XL;Rojo;230000;61;349900;3
+Zapatillas Duramo;AD-ZAP-AZU-XL-48;Calzado ligero para entrenamiento;Zapatos;Adidas;XL;Azul;230000;61;349900;3
+Zapatillas Galaxy;AD-ZAP-NEG-S-49;Calzado deportivo para uso diario;Zapatos;Adidas;S;Negro;215000;66;329900;3
+Zapatillas Galaxy;AD-ZAP-BLA-S-49;Calzado deportivo para uso diario;Zapatos;Adidas;S;Blanco;215000;67;329900;3
+Zapatillas Galaxy;AD-ZAP-ROJ-S-49;Calzado deportivo para uso diario;Zapatos;Adidas;S;Rojo;215000;65;329900;3
+Zapatillas Galaxy;AD-ZAP-AZU-S-49;Calzado deportivo para uso diario;Zapatos;Adidas;S;Azul;215000;65;329900;3
+Zapatillas Galaxy;AD-ZAP-NEG-M-49;Calzado deportivo para uso diario;Zapatos;Adidas;M;Negro;215000;66;329900;3
+Zapatillas Galaxy;AD-ZAP-BLA-M-49;Calzado deportivo para uso diario;Zapatos;Adidas;M;Blanco;215000;67;329900;3
+Zapatillas Galaxy;AD-ZAP-ROJ-M-49;Calzado deportivo para uso diario;Zapatos;Adidas;M;Rojo;215000;65;329900;3
+Zapatillas Galaxy;AD-ZAP-AZU-M-49;Calzado deportivo para uso diario;Zapatos;Adidas;M;Azul;215000;65;329900;3
+Zapatillas Galaxy;AD-ZAP-NEG-L-49;Calzado deportivo para uso diario;Zapatos;Adidas;L;Negro;215000;66;329900;3
+Zapatillas Galaxy;AD-ZAP-BLA-L-49;Calzado deportivo para uso diario;Zapatos;Adidas;L;Blanco;215000;67;329900;3
+Zapatillas Galaxy;AD-ZAP-ROJ-L-49;Calzado deportivo para uso diario;Zapatos;Adidas;L;Rojo;215000;65;329900;3
+Zapatillas Galaxy;AD-ZAP-AZU-L-49;Calzado deportivo para uso diario;Zapatos;Adidas;L;Azul;215000;65;329900;3
+Zapatillas Galaxy;AD-ZAP-NEG-XL-49;Calzado deportivo para uso diario;Zapatos;Adidas;XL;Negro;215000;69;329900;3
+Zapatillas Galaxy;AD-ZAP-BLA-XL-49;Calzado deportivo para uso diario;Zapatos;Adidas;XL;Blanco;215000;70;329900;3
+Zapatillas Galaxy;AD-ZAP-ROJ-XL-49;Calzado deportivo para uso diario;Zapatos;Adidas;XL;Rojo;215000;68;329900;3
+Zapatillas Galaxy;AD-ZAP-AZU-XL-49;Calzado deportivo para uso diario;Zapatos;Adidas;XL;Azul;215000;68;329900;3
+Zapatillas Ultraboost;AD-ZAP-NEG-S-50;Calzado premium de running;Zapatos;Adidas;S;Negro;430000;73;649900;3
+Zapatillas Ultraboost;AD-ZAP-BLA-S-50;Calzado premium de running;Zapatos;Adidas;S;Blanco;430000;74;649900;3
+Zapatillas Ultraboost;AD-ZAP-ROJ-S-50;Calzado premium de running;Zapatos;Adidas;S;Rojo;430000;72;649900;3
+Zapatillas Ultraboost;AD-ZAP-AZU-S-50;Calzado premium de running;Zapatos;Adidas;S;Azul;430000;72;649900;3
+Zapatillas Ultraboost;AD-ZAP-NEG-M-50;Calzado premium de running;Zapatos;Adidas;M;Negro;430000;73;649900;3
+Zapatillas Ultraboost;AD-ZAP-BLA-M-50;Calzado premium de running;Zapatos;Adidas;M;Blanco;430000;74;649900;3
+Zapatillas Ultraboost;AD-ZAP-ROJ-M-50;Calzado premium de running;Zapatos;Adidas;M;Rojo;430000;72;649900;3
+Zapatillas Ultraboost;AD-ZAP-AZU-M-50;Calzado premium de running;Zapatos;Adidas;M;Azul;430000;72;649900;3
+Zapatillas Ultraboost;AD-ZAP-NEG-L-50;Calzado premium de running;Zapatos;Adidas;L;Negro;430000;73;649900;3
+Zapatillas Ultraboost;AD-ZAP-BLA-L-50;Calzado premium de running;Zapatos;Adidas;L;Blanco;430000;74;649900;3
+Zapatillas Ultraboost;AD-ZAP-ROJ-L-50;Calzado premium de running;Zapatos;Adidas;L;Rojo;430000;72;649900;3
+Zapatillas Ultraboost;AD-ZAP-AZU-L-50;Calzado premium de running;Zapatos;Adidas;L;Azul;430000;72;649900;3
+Zapatillas Ultraboost;AD-ZAP-NEG-XL-50;Calzado premium de running;Zapatos;Adidas;XL;Negro;430000;76;649900;3
+Zapatillas Ultraboost;AD-ZAP-BLA-XL-50;Calzado premium de running;Zapatos;Adidas;XL;Blanco;430000;77;649900;3
+Zapatillas Ultraboost;AD-ZAP-ROJ-XL-50;Calzado premium de running;Zapatos;Adidas;XL;Rojo;430000;75;649900;3
+Zapatillas Ultraboost;AD-ZAP-AZU-XL-50;Calzado premium de running;Zapatos;Adidas;XL;Azul;430000;75;649900;3

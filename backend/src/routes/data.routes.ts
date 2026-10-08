@@ -14,6 +14,9 @@ import {
   downloadCashiersBalanceReport,
   downloadLowStockReport,
   downloadSalesRankingReport,
+  downloadUsersReport,
+  downloadPurchasesReport,
+  downloadClientsReport,
 } from '../controllers/data.controller';
 import { authMiddleware, roleMiddleware } from '../middlewares/auth.middleware';
 
@@ -175,5 +178,29 @@ router.get('/reports/low-stock', downloadLowStockReport);
  *       - bearerAuth: []
  */
 router.get('/reports/sales-ranking', downloadSalesRankingReport);
+
+/**
+ * @swagger
+ * /data/reports/users:
+ *   get:
+ *     summary: Reporte de Empleados / Usuarios (CSV)
+ *     description: Exporta la lista de empleados o usuarios del sistema.
+ *     security:
+ *       - bearerAuth: []
+ */
+router.get('/reports/users', downloadUsersReport);
+
+/**
+ * @swagger
+ * /data/reports/purchases:
+ *   get:
+ *     summary: Reporte de Compras a Proveedores (CSV)
+ *     description: Exporta el historial de compras realizadas a proveedores.
+ *     security:
+ *       - bearerAuth: []
+ */
+router.get('/reports/purchases', downloadPurchasesReport);
+
+router.get('/reports/clients', downloadClientsReport);
 
 export default router;

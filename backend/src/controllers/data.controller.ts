@@ -41,12 +41,20 @@ export const importProducts = async (req: CustomRequest, res: Response) => {
     if (data.length === 0)
       return res.status(400).json({ status: 'error', message: 'El archivo está vacío.' });
 
+    // Helper para leer cabeceras en español o inglés
+    const getField = (row: any, keys: string[]) => {
+      for (const key of keys) {
+        if (row[key] !== undefined && row[key] !== '') return row[key].toString().trim();
+      }
+      return '';
+    };
+
     const [dbCategories, dbBrands, dbSizes, dbColors, dbProducts, dbVariants] = await Promise.all([
       prisma.category.findMany(),
       prisma.brand.findMany(),
       prisma.size.findMany(),
       prisma.color.findMany(),
-      prisma.product.findMany(),
+      prisma.product.findMany({ include: { brand: true } }),
       prisma.productVariant.findMany(),
     ]);
 
@@ -54,7 +62,11 @@ export const importProducts = async (req: CustomRequest, res: Response) => {
     const brandsMap = new Map(dbBrands.map((b) => [b.name.toLowerCase(), b]));
     const sizesMap = new Map(dbSizes.map((s) => [s.name.toLowerCase(), s]));
     const colorsMap = new Map(dbColors.map((c) => [c.name.toLowerCase(), c]));
-    const productsMap = new Map(dbProducts.map((p) => [p.sku, p]));
+
+    // ✅ MAPA AGRUPADO POR NOMBRE Y MARCA
+    const productsMap = new Map(
+      dbProducts.map((p) => [`${p.name.toLowerCase()}-${p.brand.name.toLowerCase()}`, p])
+    );
     const variantsMapDB = new Map(
       dbVariants.map((v) => [`${v.productId}|${v.sizeId}|${v.colorId}`, v])
     );
@@ -65,10 +77,10 @@ export const importProducts = async (req: CustomRequest, res: Response) => {
     const newColors = new Map();
 
     data.forEach((row) => {
-      const catName = row.categoria?.toString().trim() || 'Sin Categoría';
-      const brandName = row.marca?.toString().trim() || 'Sin Marca';
-      const sizeName = row.talla?.toString().trim() || 'Única';
-      const colorName = row.color?.toString().trim() || 'Único';
+      const catName = getField(row, ['categoria', 'category']) || 'Sin Categoría';
+      const brandName = getField(row, ['marca', 'brand']) || 'Sin Marca';
+      const sizeName = getField(row, ['talla', 'size']) || 'Única';
+      const colorName = getField(row, ['color']) || 'Único';
 
       if (!categoriesMap.has(catName.toLowerCase()))
         newCats.set(catName.toLowerCase(), { name: catName, isActive: true });
@@ -113,46 +125,40 @@ export const importProducts = async (req: CustomRequest, res: Response) => {
     updatedSizes.forEach((s) => sizesMap.set(s.name.toLowerCase(), s));
     updatedColors.forEach((c) => colorsMap.set(c.name.toLowerCase(), c));
 
-    const productsToCreate: {
-      name: string;
-      sku: string;
-      description: string | null;
-      cost: number;
-      price: number;
-      categoryId: string;
-      brandId: string;
-    }[] = [];
-    const seenSkus = new Set<string>();
+    const productsToCreate: any[] = [];
+    const seenProducts = new Set<string>();
 
     data.forEach((row, index) => {
-      const sku = row.sku?.toString().trim();
-      const name = row.nombre?.toString().trim();
+      const sku = getField(row, ['sku', 'variant_sku', 'codigo']);
+      const name = getField(row, ['nombre', 'name']);
 
       if (!sku || !name) {
         console.warn(`Fila ${index + 2} omitida por falta de SKU o Nombre.`);
         return;
       }
 
-      if (!productsMap.has(sku) && !seenSkus.has(sku)) {
-        seenSkus.add(sku);
-        const cat = categoriesMap.get(
-          (row.categoria?.toString().trim() || 'Sin Categoría').toLowerCase()
-        );
-        const brand = brandsMap.get((row.marca?.toString().trim() || 'Sin Marca').toLowerCase());
+      const brandName = (getField(row, ['marca', 'brand']) || 'Sin Marca').toLowerCase();
+      const productKey = `${name.toLowerCase()}-${brandName}`;
 
-        if (!cat) console.warn(`Categoría no encontrada para SKU ${sku}: '${row.categoria}'`);
-        if (!brand) console.warn(`Marca no encontrada para SKU ${sku}: '${row.marca}'`);
+      // ✅ SI EL PRODUCTO PADRE NO EXISTE, LO CREAMOS
+      if (!productsMap.has(productKey) && !seenProducts.has(productKey)) {
+        seenProducts.add(productKey);
+        const cat = categoriesMap.get(
+          (getField(row, ['categoria', 'category']) || 'Sin Categoría').toLowerCase()
+        );
+        const brand = brandsMap.get(brandName);
 
         if (cat && brand) {
-          productsToCreate.push({
+          const newProductData = {
             name,
-            sku,
-            description: row.descripcion?.toString().trim() || null,
-            cost: parseNumeric(row.costo),
-            price: parseNumeric(row.precio),
+            sku: `BASE-${sku.substring(0, 10)}`, // SKU genérico para el producto base
+            description: getField(row, ['descripcion', 'description']) || null,
+            cost: parseNumeric(getField(row, ['costo', 'cost'])),
+            price: parseNumeric(getField(row, ['precio', 'price'])),
             categoryId: cat.id,
             brandId: brand.id,
-          });
+          };
+          productsToCreate.push(newProductData);
         }
       }
     });
@@ -161,25 +167,28 @@ export const importProducts = async (req: CustomRequest, res: Response) => {
       await prisma.product.createMany({ data: productsToCreate, skipDuplicates: true });
     }
 
-    const updatedProducts = await prisma.product.findMany();
-    const finalProductsMap = new Map(updatedProducts.map((p) => [p.sku, p]));
+    const updatedProducts = await prisma.product.findMany({ include: { brand: true } });
+    updatedProducts.forEach((p) => {
+      productsMap.set(`${p.name.toLowerCase()}-${p.brand.name.toLowerCase()}`, p);
+    });
 
-    const variantsMap = new Map<
-      string,
-      { productId: string; sizeId: string; colorId: string; stock: number; minStock: number }
-    >();
+    const variantsMap = new Map<string, any>();
 
     data.forEach((row, index) => {
-      const sku = row.sku?.toString().trim();
-      if (!sku) return;
+      const sku = getField(row, ['sku', 'variant_sku', 'codigo']);
+      const name = getField(row, ['nombre', 'name']);
+      if (!sku || !name) return;
 
-      const product = finalProductsMap.get(sku);
-      const sizeName = (row.talla?.toString().trim() || 'Única').toLowerCase();
-      const colorName = (row.color?.toString().trim() || 'Único').toLowerCase();
+      const brandName = (getField(row, ['marca', 'brand']) || 'Sin Marca').toLowerCase();
+      const productKey = `${name.toLowerCase()}-${brandName}`;
+      const product = productsMap.get(productKey);
+
+      const sizeName = (getField(row, ['talla', 'size']) || 'Única').toLowerCase();
+      const colorName = (getField(row, ['color']) || 'Único').toLowerCase();
       const size = sizesMap.get(sizeName);
       const color = colorsMap.get(colorName);
-      const stock = parseNumeric(row.stock);
-      const minStock = parseNumeric(row.stock_minimo) || 5; // ✅ Lee el mínimo, si no, usa 5
+      const stock = parseNumeric(getField(row, ['stock']));
+      const minStock = parseNumeric(getField(row, ['stock_minimo', 'minimo'])) || 5;
 
       if (!product || !size || !color) {
         console.warn(`Fila ${index + 2} omitida: variante incompleta.`);
@@ -196,6 +205,7 @@ export const importProducts = async (req: CustomRequest, res: Response) => {
           productId: product.id,
           sizeId: size.id,
           colorId: color.id,
+          sku: sku, // ✅ AQUÍ METEMOS EL SKU REAL EN LA VARIANTE
           stock,
           minStock,
         });
@@ -213,9 +223,9 @@ export const importProducts = async (req: CustomRequest, res: Response) => {
           id: existingVariant.id,
           stock: variantData.stock,
           minStock: variantData.minStock,
+          sku: variantData.sku, // ✅ ACTUALIZAR SKU TAMBIÉN SI EXISTÍA
         });
       } else {
-        // ✅ Ya no forzamos minStock a 5 aquí, lo toma de variantData
         variantsToCreate.push({
           ...variantData,
         });
@@ -227,8 +237,6 @@ export const importProducts = async (req: CustomRequest, res: Response) => {
     if (variantsToCreate.length > 0) {
       for (const v of variantsToCreate) {
         const newVariant = await prisma.productVariant.create({ data: v });
-
-        // ✅ REGISTRO EN KARDEX PARA VARIANTES NUEVAS
         await prisma.inventoryMovement.create({
           data: {
             productVariantId: newVariant.id,
@@ -244,7 +252,6 @@ export const importProducts = async (req: CustomRequest, res: Response) => {
     if (variantsToUpdate.length > 0) {
       for (let i = 0; i < variantsToUpdate.length; i += 50) {
         const chunk = variantsToUpdate.slice(i, i + 50);
-
         await prisma.$transaction(async (tx) => {
           for (const variant of chunk) {
             const dbVariant = await tx.productVariant.findUnique({ where: { id: variant.id } });
@@ -256,7 +263,8 @@ export const importProducts = async (req: CustomRequest, res: Response) => {
               where: { id: variant.id },
               data: {
                 stock: variant.stock,
-                minStock: variant.minStock, // ✅ Actualizamos el mínimo también
+                minStock: variant.minStock,
+                sku: variant.sku,
               },
             });
 
@@ -276,7 +284,6 @@ export const importProducts = async (req: CustomRequest, res: Response) => {
       }
     }
 
-    // ✅ Log general en la bitácora del sistema
     await logAction(
       userId,
       'IMPORT_EXCEL',
@@ -455,6 +462,7 @@ export const downloadAuditLogReport = async (req: CustomRequest, res: Response) 
       Usuario: l.user?.name || 'Sistema',
       Accion: l.action,
       Modulo: l.entity,
+      IP: l.ipAddress || 'N/A',
       Detalles: l.details || 'N/A',
     }));
 
@@ -952,5 +960,148 @@ export const downloadSalesRankingReport = async (req: CustomRequest, res: Respon
     return res
       .status(500)
       .json({ status: 'error', message: 'Error al generar el ranking de ventas' });
+  }
+};
+
+// 14. REPORTE DE EMPLEADOS / USUARIOS (CSV)
+export const downloadUsersReport = async (req: CustomRequest, res: Response) => {
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        name: true,
+        email: true,
+        role: true,
+        isActive: true,
+        balance: true,
+        createdAt: true,
+      },
+      orderBy: { name: 'asc' },
+    });
+
+    const rows = users.map((u) => ({
+      Nombre: u.name,
+      Email: u.email,
+      Rol: u.role,
+      Estado: u.isActive ? 'Activo' : 'Inactivo',
+      Descuadre_Pendiente: u.balance,
+      Fecha_Registro: new Date(u.createdAt).toLocaleDateString('es-ES'),
+    }));
+
+    if (rows.length === 0)
+      return res.status(400).json({ status: 'error', message: 'No hay usuarios' });
+
+    const headers = Object.keys(rows[0]);
+    const csv = [
+      headers.join(','),
+      ...rows.map((row) =>
+        headers.map((f) => JSON.stringify(row[f as keyof typeof row])).join(',')
+      ),
+    ].join('\n');
+
+    await logAction(
+      req.user?.id,
+      'EXPORT_USERS_CSV',
+      'Data',
+      undefined,
+      `Reporte de empleados descargado.`
+    );
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="lista_empleados.csv"');
+    return res.status(200).send('\ufeff' + csv);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ status: 'error', message: 'Error al generar reporte de usuarios' });
+  }
+};
+
+// 15. REPORTE DE COMPRAS A PROVEEDORES (CSV)
+export const downloadPurchasesReport = async (req: CustomRequest, res: Response) => {
+  try {
+    const purchases = await prisma.purchase.findMany({
+      include: { vendor: true, user: { select: { name: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const rows = purchases.map((p) => ({
+      Fecha: new Date(p.createdAt).toLocaleString('es-ES'),
+      Proveedor: p.vendor.name,
+      Registrado_Por: p.user.name,
+      Total_Compra: p.totalAmount,
+    }));
+
+    if (rows.length === 0)
+      return res.status(400).json({ status: 'error', message: 'No hay compras registradas' });
+
+    const headers = Object.keys(rows[0]);
+    const csv = [
+      headers.join(','),
+      ...rows.map((row) =>
+        headers.map((f) => JSON.stringify(row[f as keyof typeof row])).join(',')
+      ),
+    ].join('\n');
+
+    await logAction(
+      req.user?.id,
+      'EXPORT_PURCHASES_CSV',
+      'Data',
+      undefined,
+      `Reporte de compras descargado.`
+    );
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="reporte_compras.csv"');
+    return res.status(200).send('\ufeff' + csv);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ status: 'error', message: 'Error al generar reporte de compras' });
+  }
+};
+
+// 16. REPORTE GENERAL DE CLIENTES (CSV)
+export const downloadClientsReport = async (req: CustomRequest, res: Response) => {
+  try {
+    const clients = await prisma.client.findMany({
+      orderBy: { name: 'asc' },
+    });
+
+    const rows = clients.map((c) => ({
+      Nombre: c.name,
+      Documento: c.document || 'N/A',
+      Telefono: c.phone || 'N/A',
+      Email: c.email || 'N/A',
+      Direccion: c.address || 'N/A',
+      Saldo_Favor_o_Deuda: c.balance, // Positivo si le debes, negativo si te debe
+      Fecha_Registro: new Date(c.createdAt).toLocaleDateString('es-ES'),
+    }));
+
+    if (rows.length === 0)
+      return res.status(400).json({ status: 'error', message: 'No hay clientes registrados' });
+
+    const headers = Object.keys(rows[0]);
+    const csv = [
+      headers.join(','),
+      ...rows.map((row) =>
+        headers.map((f) => JSON.stringify(row[f as keyof typeof row])).join(',')
+      ),
+    ].join('\n');
+
+    await logAction(
+      req.user?.id,
+      'EXPORT_CLIENTS_CSV',
+      'Data',
+      undefined,
+      `El usuario exportó el directorio general de clientes.`
+    );
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="lista_clientes.csv"');
+    return res.status(200).send('\ufeff' + csv);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ status: 'error', message: 'Error al generar directorio de clientes' });
   }
 };

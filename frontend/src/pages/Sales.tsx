@@ -1,3 +1,4 @@
+import axios from '../api/axios';
 import { useState, useMemo, useEffect } from 'react';
 import { useSales, Sale } from '../hooks/useSales';
 import SaleDetailModal from '../components/SaleDetailModal';
@@ -6,10 +7,13 @@ import Loader from '../components/Loader';
 import { formatCurrency } from '../utils/format';
 import { playSound } from '../utils/sound';
 import { Filter, Download, Eye, Search } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { useAuth } from '../hooks/useAuth';
 
 export default function Sales() {
   const { sales, loading, fetchSales, filters, setFilters, downloadReport } = useSales();
   const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
+  const { user } = useAuth();
 
   const [searchInput, setSearchInput] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -38,9 +42,45 @@ export default function Sales() {
   };
 
   const handleDownload = async () => {
-    const success = await downloadReport();
-    if (success) playSound('success');
-    else playSound('error');
+    try {
+      // Usamos el mismo endpoint que usa el Centro de Datos
+      const response = await axios.get('/data/reports/sales', { responseType: 'blob' });
+
+      // ✅ Si el backend devolvió un JSON de error, lo leemos del Blob
+      if (response.data.type && response.data.type.includes('application/json')) {
+        const text = await response.data.text();
+        const errorData = JSON.parse(text);
+        toast.error(errorData.message || 'Error al generar el reporte');
+        playSound('error');
+        return;
+      }
+
+      // ✅ Si es un archivo válido, lo descargamos
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'reporte_ventas.csv');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      toast.success('Reporte descargado correctamente');
+      playSound('success');
+    } catch (error: any) {
+      // ✅ Capturamos errores de red (400 o 500) que Axios convierte en Blob
+      if (error.response && error.response.data instanceof Blob) {
+        const text = await error.response.data.text();
+        try {
+          const errorJson = JSON.parse(text);
+          toast.error(errorJson.message || 'Error al descargar');
+        } catch (e) {
+          toast.error('Error al leer el error del servidor');
+        }
+      } else {
+        toast.error('Error de conexión al descargar');
+      }
+      playSound('error');
+    }
   };
 
   return (
@@ -52,12 +92,15 @@ export default function Sales() {
             Busca y audita transacciones por cliente, fecha o folio.
           </p>
         </div>
-        <button
-          onClick={handleDownload}
-          className="flex items-center space-x-2 px-4 py-2 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 text-white text-sm font-semibold rounded-lg transition-colors"
-        >
-          <Download size={16} /> <span>Exportar CSV</span>
-        </button>
+        {/* ✅ CONDICIÓN: Solo Admin y Manager ven el botón */}
+        {(user?.role === 'ADMIN' || user?.role === 'MANAGER') && (
+          <button
+            onClick={handleDownload}
+            className="flex items-center space-x-2 px-4 py-2 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 text-white text-sm font-semibold rounded-lg transition-colors"
+          >
+            <Download size={16} /> <span>Exportar CSV</span>
+          </button>
+        )}
       </div>
 
       {/* Filtros */}
